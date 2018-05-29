@@ -628,48 +628,48 @@ class TestEnv(object):
         # If a target does not already exist or if we want to recreate the
         # target every time
         if self.target is None or not int(os.getenv('LISA_TARGET_SINGLETON',0)):
-        if platform_type.lower() == 'linux':
-            self._log.debug('Setup LINUX target...')
+            if platform_type.lower() == 'linux':
+                self._log.debug('Setup LINUX target...')
                 if "host" not in connection_settings:
-                raise ValueError('Missing "host" param in Linux target conf')
+                    raise ValueError('Missing "host" param in Linux target conf')
 
-            self.target = devlib.LinuxTarget(
-                    platform = platform,
+                self.target = devlib.LinuxTarget(
+                        platform = platform,
                         connection_settings = connection_settings,
-                    working_directory = self.workdir,
-                    load_default_modules = False,
+                        working_directory = self.workdir,
+                        load_default_modules = False,
                         modules = modules)
-        elif platform_type.lower() == 'android':
-            self._log.debug('Setup ANDROID target...')
-            self.target = devlib.AndroidTarget(
-                    platform = platform,
+            elif platform_type.lower() == 'android':
+                self._log.debug('Setup ANDROID target...')
+                self.target = devlib.AndroidTarget(
+                        platform = platform,
                         connection_settings = connection_settings,
-                    working_directory = self.workdir,
-                    load_default_modules = False,
+                        working_directory = self.workdir,
+                        load_default_modules = False,
                         modules = modules)
-        elif platform_type.lower() == 'host':
-            self._log.debug('Setup HOST target...')
-            self.target = devlib.LocalLinuxTarget(
-                    platform = platform,
-                    working_directory = '/tmp/devlib-target',
-                    executables_directory = '/tmp/devlib-target/bin',
-                    load_default_modules = False,
+            elif platform_type.lower() == 'host':
+                self._log.debug('Setup HOST target...')
+                self.target = devlib.LocalLinuxTarget(
+                        platform = platform,
+                        working_directory = '/tmp/devlib-target',
+                        executables_directory = '/tmp/devlib-target/bin',
+                        load_default_modules = False,
                         modules = modules,
-                    connection_settings = {'unrooted': True})
-        else:
-            raise ValueError('Config error: not supported [platform] type {}'\
-                    .format(platform_type))
+                        connection_settings = {'unrooted': True})
+            else:
+                raise ValueError('Config error: not supported [platform] type {}'\
+                        .format(platform_type))
 
-        self._log.debug('Checking target connection...')
-        self._log.debug('Target info:')
-        self._log.debug('      ABI: %s', self.target.abi)
-        self._log.debug('     CPUs: %s', self.target.cpuinfo)
-        self._log.debug(' Clusters: %s', self.target.core_clusters)
+            self._log.debug('Checking target connection...')
+            self._log.debug('Target info:')
+            self._log.debug('      ABI: %s', self.target.abi)
+            self._log.debug('     CPUs: %s', self.target.cpuinfo)
+            self._log.debug(' Clusters: %s', self.target.core_clusters)
 
-        self._log.info('Initializing target workdir:')
-        self._log.info('   %s', self.target.working_directory)
+            self._log.info('Initializing target workdir:')
+            self._log.info('   %s', self.target.working_directory)
 
-        self.target.setup()
+            self.target.setup()
             self._target_state['installed_tools'] = set()
 
             # Store the target in the class attribute so they will be available
@@ -696,11 +696,11 @@ class TestEnv(object):
                 self._log.info('Using energy model already fetched from target')
                 self.nrg_model = target_em
             else:
-            try:
-                self._log.info('Attempting to read energy model from target')
-                self.nrg_model = EnergyModel.from_target(self.target)
-            except (TargetError, RuntimeError, ValueError) as e:
-                self._log.error("Couldn't read target energy model: %s", e)
+                try:
+                    self._log.info('Attempting to read energy model from target')
+                    self.nrg_model = EnergyModel.from_target(self.target)
+                except (TargetError, RuntimeError, ValueError) as e:
+                    self._log.error("Couldn't read target energy model: %s", e)
 
         self._target_state['nrg_model'] = self.nrg_model
 
