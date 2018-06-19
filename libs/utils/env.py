@@ -635,16 +635,33 @@ class TestEnv(ShareState):
         self.__installed_tools.update(tools)
 
     def ftrace_conf(self, conf):
+        """
+        Setup an Ftrace instrument
+
+        :param conf: The Ftrace configuration
+        :type conf: dict(dict(str))
+        """
+        # Merge with setup from target config
+        target_conf = self.conf.get('ftrace', {})
+
+        for item in ['events', 'functions']:
+            conf[item] = sorted(
+                set(target_conf.get(item, [])) |
+                set(conf.get(item, []))
+        )
+
+        conf['buffsize'] = max(
+            conf.get('buffsize', 0),
+            target_conf.get('buffsize', FTRACE_BUFSIZE_DEFAULT)
+        )
+
         self._init_ftrace(True, conf)
 
     def _init_ftrace(self, force=False, conf=None):
-
         if not force and self.ftrace is not None:
             return
 
         ftrace = conf or self.conf.get('ftrace')
-        if ftrace is None:
-            return
 
         events = ftrace.get('events', FTRACE_EVENTS_DEFAULT)
         functions = ftrace.get('functions', None)
@@ -654,6 +671,10 @@ class TestEnv(ShareState):
         # do not create the FtraceCollector
         if not (events or functions):
             return
+
+        # Ensure we have trace-cmd on the target
+        if 'trace-cmd' not in self.__installed_tools:
+            self.install_tools(['trace-cmd'])
 
         self.ftrace = devlib.FtraceCollector(
             self.target,
@@ -676,7 +697,6 @@ class TestEnv(ShareState):
         return
 
     def _init_energy(self, force):
-
         # Initialize energy probe to board default
         self.emeter = EnergyMeter.getInstance(self.target, self.conf, force)
 
