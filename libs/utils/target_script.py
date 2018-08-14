@@ -76,7 +76,7 @@ class TargetScript(object):
 
         return getattr(super, name)
 
-    def push(self):
+    def push(self, local_dir):
         """
         Push a script to the target
 
@@ -94,7 +94,7 @@ class TargetScript(object):
         actions = str.join('\n', actions)
 
         # Create script locally
-        self._local_path = os.path.join(self._env.res_dir, self._script_name)
+        self._local_path = os.path.join(local_dir, self._script_name)
         with open(self._local_path, 'w') as script:
             script.write(actions)
 

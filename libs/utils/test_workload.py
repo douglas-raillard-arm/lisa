@@ -254,30 +254,117 @@ class OneSmallTask(SyntheticWorkload):
 ################################################################################
 
 import sys
+import random
+import json
+import os.path
+
 from target_script import TargetScript
 from devlib.module.hotplug import HotplugModule
+from devlib.exception import TimeoutError
+
+class HotplugTestBundle(TestBundle):
+    def __init__(self, res_dir, target_alive):
+        super(HotplugTestBundle, self).__init__(res_dir)
+        self.target_alive = target_alive
+
+    def test_system_alive(self):
+        return ResultBundle(self.target_alive)
 
 class CpuHotplugTorture(TestableWorkload):
 
-    def run(self, max_duration_s=10):
+    def run(self, seed=None, nr_operations=100,
+            sleep_min_ms=10, sleep_max_ms=100, duration_s=10,
+            max_cpus_off=sys.maxint, max_duration_s=10):
+
+        if not seed:
+            random.seed()
+            seed = random.randint(0, sys.maxint)
+
+        hotpluggable_cpus = filter(
+            lambda cpu: self.target.file_exists(self._cpuhp_path(cpu)),
+            self.target.list_online_cpus()
+        )
+
+        sequence = self._random_cpuhp_seq(
+            seed, nr_operations, hotpluggable_cpus, max_cpus_off
+        )
+
+        script = self._random_cpuhp_script(
+            sequence, sleep_min_ms, sleep_max_ms, duration_s
+        )
+        script.push(self.res_dir)
+
+        target_alive = True
+        timeout = duration_s + 60
+
+        try:
+            script.run(as_root=True, timeout=timeout)
+            self.target.hotplug.online_all()
+        except TimeoutError:
+            #msg = 'Target not responding after {} seconds ...'
+            #cls._log.info(msg.format(timeout))
+            target_alive = False
+
+        #return HotplugTestBundle(self.res_dir, target_alive)
+
+    def create_test_bundle(self):
         pass
 
     def _cpuhp_path(self, cpu):
         cpu = 'cpu{}'.format(cpu)
         return self.target.path.join(HotplugModule.base_path, cpu, 'online')
 
-    def _random_cpuhp_script(self, seed=None, nr_operations=100, sleep_min_ms=10,
-                          sleep_max_ms=100, max_cpus_off=sys.maxint):
+    def _random_cpuhp_seq(self, seed, nr_operations,
+                          hotpluggable_cpus, max_cpus_off):
         """
+        Yield a consistent random sequence of CPU hotplug operations
+
         :param seed: Seed of the RNG
-        :param nr_operations: Number of oeprations in the sequence
-        :param sleep_min_ms: Min sleep duration between hotplugs
-        :param sleep_max_ms: Max sleep duration between hotplugs
+        :param nr_operations: Number of operations in the sequence
             <= 0 will encode 'no sleep'
         :param max_cpus_off: Max number of CPUs plugged-off
+
+        "Consistent" means that a CPU will be plugged-in only if it was
+        plugged-off before (and vice versa). Moreover the state of the CPUs
+        once the sequence has completed should the same as it was before.
+
+        The actual length of the sequence might differ from the requested one
+        by 1 because it's easier to implement and it shouldn't be an issue for
+        most test cases.
         """
+        cur_on_cpus = hotpluggable_cpus[:]
+        cur_off_cpus = []
+        i = 0
+        while i < nr_operations - len(cur_off_cpus):
+            if len(cur_on_cpus)<=1 or len(cur_off_cpus)>=max_cpus_off:
+                # Force plug IN when only 1 CPU is on or too many are off
+                plug_way = 1
+            elif not cur_off_cpus:
+                # Force plug OFF if all CPUs are on
+                plug_way = 0 # Plug OFF
+            else:
+                plug_way = random.randint(0,1)
+
+            src = cur_off_cpus if plug_way else cur_on_cpus
+            dst = cur_on_cpus if plug_way else cur_off_cpus
+            cpu = random.choice(src)
+            src.remove(cpu)
+            dst.append(cpu)
+            i += 1
+            yield cpu, plug_way
+
+        # Re-plug offline cpus to come back to original state
+        for cpu in cur_off_cpus:
+            yield cpu, 1
+
+    def _random_cpuhp_script(self, sequence, sleep_min_ms, sleep_max_ms, timeout_s):
+        """
+        :param sleep_min_ms: Min sleep duration between hotplugs
+        :param sleep_max_ms: Max sleep duration between hotplugs
+        """
+
         shift = '    '
-        script = TargetScript(cls.te, 'random_cpuhp.sh')
+        script = TargetScript(self.te, 'random_cpuhp.sh')
 
         # Record configuration
         # script.append('# File generated automatically')
@@ -289,9 +376,9 @@ class CpuHotplugTorture(TestableWorkload):
 
         script.append('while true')
         script.append('do')
-        for cpu, plug_way in self._random_cpuhp_seq():
+        for cpu, plug_way in sequence:
             # Write in sysfs entry
-            cmd = 'echo {} > {}'.format(plug_way, cls._cpuhp_path(cpu))
+            cmd = 'echo {} > {}'.format(plug_way, self._cpuhp_path(cpu))
             script.append(shift + cmd)
             # Sleep if necessary
             if sleep_max_ms > 0:
@@ -305,44 +392,6 @@ class CpuHotplugTorture(TestableWorkload):
         script.append('kill -9 $LOOP_PID')
 
         return script
-
-    def _random_cpuhp_seq(self):
-        """
-        Yield a consitent random sequence of CPU hotplug operations
-
-        "Consistent" means that a CPU will be plugged-in only if it was
-        plugged-off before (and vice versa). Moreover the state of the CPUs
-        once the sequence has completed should the same as it was before. The
-        length of the sequence (that is the number of plug operations) is
-        defined in the hp_stress member of the class. The actual length of the
-        sequence might differ from the requested one by 1 because it's easier
-        to implement and it shouldn't be an issue for most test cases.
-        """
-        cur_on_cpus = cls.hotpluggable_cpus[:]
-        cur_off_cpus = []
-        max_cpus_off = cls.hp_stress['max_cpus_off']
-        i = 0
-        while i < cls.hp_stress['sequence_len'] - len(cur_off_cpus):
-            if len(cur_on_cpus)<=1 or len(cur_off_cpus)>=max_cpus_off:
-                # Force plug IN when only 1 CPU is on or too many are off
-                plug_way = 1
-            elif not cur_off_cpus:
-                # Force plug OFF if all CPUs are on
-                plug_way = 0 # Plug OFF
-            else:
-                plug_way = random.randint(0,1)
-            src = cur_off_cpus if plug_way else cur_on_cpus
-            dst = cur_on_cpus if plug_way else cur_off_cpus
-            cpu = random.choice(src)
-            src.remove(cpu)
-            dst.append(cpu)
-            i += 1
-            yield cpu, plug_way
-
-        # Re-plug offline cpus to come back to original state
-        for cpu in cur_off_cpus:
-            yield cpu, 1
-
 
 ################################################################################
 ################################################################################
