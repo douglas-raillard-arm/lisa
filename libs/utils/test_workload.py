@@ -81,73 +81,128 @@ class ResultBundle(object):
     def add_metric(self, metric):
         self.metrics.append(metric)
 
+import shutil
+
 class TestBundle(object):
+    """
+    Description of a Lisa test bundle
+
+    :meth:`from_target` will use :meth:`from_disk` to create the actual
+    instance, which guarantees that there is no discrepancy between the target
+    and disk methods. If it makes no sense for the use-case to save any kind of
+    state on the disk (e.g. the end result of the target execution is just a
+    boolean value), that can be overriden.
+    """
 
     def __init__(self, res_dir):
         self.res_dir = res_dir
 
-
-class LisaWorkload(object):
-    """
-    A class meant to describe "workloads" to execute on a target
-    """
-    def __init__(self, te, res_dir=None):
-        self.te = te
-        self.target = te.target
-        # Logger stuff ?
-
-        # If no res dir is given, ask TestEnv for one
-        self.res_dir = res_dir or te.get_res_dir()
-
-    def run(self):
+    @classmethod
+    def _from_target(cls, te, res_dir):
         """
-        The main method of the :class:`LisaWorkload` class
+        Internals of the target factory method.
+
+        TODO: Please give me a proper name
         """
         raise NotImplementedError()
 
-class TestableWorkload(LisaWorkload):
-    """
-    A Workload that will generate some :class:`TestBundle`
-    """
-    @property
-    def test_bundle(self):
-        if not self._test_bundle:
-            raise RuntimeError(
-                "No test bundle generated, call run() first"
-            )
-        return self._test_bundle
-
-    def __init__(self, te, res_dir=None):
-        super(TestableWorkload, self).__init__(te, res_dir)
-        self._test_bundle = None
-
-    def create_test_bundle(self):
+    @classmethod
+    def from_target(cls, te, res_dir=None, **kwargs):
         """
-        Serialize the workload artefacts into a TestBundle
+        Factory method to create a bundle using a live target
 
-        :returns: a :class:`TestBundle`
+        This is mostly boiler-plate code around :meth:`_from_target`
         """
-        raise NotImplementedError(
-            "Testable workloads require an implementation of this method"
-        )
+        if not res_dir:
+            res_dir = te.get_res_dir()
 
-    def collect_test(self):
-        self.run()
-        self._test_bundle = self.create_test_bundle()
-        return self._test_bundle
+        # Logger stuff?
 
+        cls._from_target(te, res_dir, **kwargs)
+        return cls.from_disk(res_dir)
+
+    @classmethod
+    def from_disk(cls, res_dir):
+        """
+        Factory method to create the bundle from a disk location
+        """
+        raise NotImplementedError()
+
+class TransientTestBundle(TestBundle):
+    """
+    A TestBundle that cannot be saved to the disk, or for which it does not make
+    sense to do so.
+    """
+
+    def __init__(self):
+        raise RuntimeError("yadda yadda resbundle")
+
+    @classmethod
+    def from_target(cls, te, res_dir=None, **kwargs):
+        """
+        """
+        if not res_dir:
+            res_dir = te.get_res_dir()
+
+        # Logger stuff?
+
+        return cls._from_target(te, res_dir, **kwargs)
+
+    @classmethod
+    def from_disk(cls, res_dir):
+        raise RuntimeError("{} can't be saved to disk".format(cls.__name__))
+
+
+from bart.common.Utils import area_under_curve
+#from energy_model import save_em_yaml, load_em_yaml
 class GenericTestBundle(TestBundle):
     """
     Yadda yadda, EAS placement and energy test cases
     """
 
-    energy_est_threshold_pct = 5
-    """Allowed margin for estimated vs optimal task placement energy cost"""
+    ftrace_conf = {
+        "events" : ["sched_switch"],
+    }
 
     def __init__(self, res_dir):
         super(GenericTestBundle, self).__init__(res_dir)
 
-    def test_slack(self, out_dir=None, negative_slack_allowed_pct=15):
+        #self.nrg_model = load_em_yaml(res_dir)
+
+        with open(os.path.join(res_dir, "{}.json".format(self.__class__.__name__)), "r") as fh:
+            self.rtapp_params = json.load(fh)
+
+    @classmethod
+    def create_rtapp_params(cls, te):
+        """
+        :returns: dict
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    def _from_target(cls, te, res_dir):
+        rtapp_params = cls.create_rtapp_params(te)
+
+        wload = RTA(te.target, cls.__name__, te.calibration())
+        wload.conf(kind='profile', params=rtapp_params,
+                   run_dir=Executor.get_run_dir(te.target))
+
+        trace_path = os.path.join(res_dir, "trace.dat")
+        te.ftrace_conf(cls.ftrace_conf)
+
+        with te.record_ftrace(trace_path):
+            with te.freeze_userspace():
+                wload.run(out_dir=res_dir)
+
+        # Serialize the energy model to the res_dir
+
+        return cls.from_disk(res_dir)
+
+    @classmethod
+    def from_disk(cls, res_dir):
+        return cls(res_dir)
+
+    def test_slack(self, negative_slack_allowed_pct=15):
         """
         Assert that the RTApp workload was given enough performance
 
@@ -186,7 +241,80 @@ class GenericTestBundle(TestBundle):
 
         return res
 
-    def test_task_placement(self, out_dir=None, energy_est_threshold_pct=5):
+    def get_task_utils_df(self):
+        """
+        Get a DataFrame with the *expected* utilization of each task over time
+
+        :returns: A Pandas DataFrame with a column for each task, showing how
+                  the utilization of that task varies over time
+        """
+        util_scale = self.nrg_model.capacity_scale
+
+        transitions = {}
+        def add_transition(time, task, util):
+            if time not in transitions:
+                transitions[time] = {task: util}
+            else:
+                transitions[time][task] = util
+
+        # First we'll build a dict D {time: {task_name: util}} where D[t][n] is
+        # the expected utilization of task n from time t.
+        for task, params in self.rtapp_params.iteritems():
+            time = self.get_start_time(experiment) + params['delay']
+            add_transition(time, task, 0)
+            for _ in range(params.get('loops', 1)):
+                for phase in params['phases']:
+                    util = (phase.duty_cycle_pct * util_scale / 100.)
+                    add_transition(time, task, util)
+                    time += phase.duration_s
+            add_transition(time, task, 0)
+
+        index = sorted(transitions.keys())
+        df = pd.DataFrame([transitions[k] for k in index], index=index)
+        return df.fillna(method='ffill')
+
+    def get_expected_power_df(self):
+        """
+        Estimate *optimal* power usage over time
+
+        Examine a trace and use :meth:get_optimal_placements and
+        :meth:EnergyModel.estimate_from_cpu_util to get a DataFrame showing the
+        estimated power usage over time under ideal EAS behaviour.
+
+        :meth:get_optimal_placements returns several optimal placements. They
+        are usually equivalent, but can be drastically different in some cases.
+        Currently only one of those placements is used (the first in the list).
+
+        :returns: A Pandas DataFrame with a column each node in the energy model
+                  (keyed with a tuple of the CPUs contained by that node) and a
+                  "power" column with the sum of other columns. Shows the
+                  estimated *optimal* power over time.
+        """
+        task_utils_df = self.get_task_utils_df(experiment)
+
+        data = []
+        index = []
+
+        def exp_power(row):
+            task_utils = row.to_dict()
+            expected_utils = nrg_model.get_optimal_placements(task_utils)[0]
+            power = nrg_model.estimate_from_cpu_util(expected_utils)
+            columns = power.keys()
+
+            # Assemble a dataframe to plot the expected utilization
+            data.append(expected_utils)
+            index.append(row.name)
+
+            return pd.Series([power[c] for c in columns], index=columns)
+
+        res_df = self._sort_power_df_columns(
+            task_utils_df.apply(exp_power, axis=1))
+
+        self.plot_expected_util(experiment, pd.DataFrame(data, index=index))
+
+        return res_df
+
+    def test_task_placement(self, energy_est_threshold_pct=5):
         """
         Test that task placement was energy-efficient
 
@@ -199,47 +327,28 @@ class GenericTestBundle(TestBundle):
         workload. Assert that the observed power does not exceed the optimal
         power by more than :attr:energy_est_threshold_pct percents.
         """
-        raise NotImplementedError("lol 2bad nice try")
+        exp_power = self.get_expected_power_df(experiment)
+        est_power = self.get_power_df(experiment)
 
-class SyntheticWorkload(TestableWorkload):
-    """
-    Description of a synthetic test
+        exp_energy = area_under_curve(exp_power.sum(axis=1), method='rect')
+        est_energy = area_under_curve(est_power.sum(axis=1), method='rect')
 
-    Synthetic tests are based on rt-app workloads that attempt to stress a
-    specific scheduler behaviour. The resulting trace can then be post-processed
-    and used as scheduler unit tests.
-    """
-
-    ftrace_conf = {
-        "events" : ["sched_switch"],
-    }
-
-    def run(self, rtapp_params):
-        self.rtapp_params = rtapp_params
-
-        self.te.ftrace_conf(self.ftrace_conf)
-
-        self.wload = RTA(self.target, self.__class__.__name__, self.te.calibration())
-        self.wload.conf(kind='profile', params=rtapp_params,
-                        run_dir=Executor.get_run_dir(self.target))
-
-        trace_path = os.path.join(self.res_dir, "trace.dat")
-
-        with self.te.record_ftrace(trace_path):
-            with self.te.freeze_userspace():
-                self.wload.run(out_dir=self.res_dir)
-
-    def create_test_bundle(self):
-        return GenericTestBundle(self.res_dir)
-
+        msg = 'Estimated {} bogo-Joules to run workload, expected {}'.format(
+            est_energy, exp_energy)
+        threshold = exp_energy * (1 + (energy_est_threshold_pct / 100.))
+        self.assertLess(est_energy, threshold, msg=msg)
 
 from wlgen.rta import Periodic
 
-class OneSmallTask(SyntheticWorkload):
+class OneSmallTask(GenericTestBundle):
+    """
+    A single 'small' (fits in a LITTLE) task
+    """
 
-    def run(self):
+    @classmethod
+    def create_rtapp_params(cls, te):
         # 50% of the smallest CPU's capacity
-        duty = int((min(self.target.sched.get_capacities().values()) / 1024.) * 50)
+        duty = int((min(te.target.sched.get_capacities().values()) / 1024.) * 50)
 
         rtapp_params = {}
         rtapp_params["small"] = Periodic(
@@ -248,7 +357,7 @@ class OneSmallTask(SyntheticWorkload):
             period_ms=16
         ).get()
 
-        super(OneSmallTask, self).run(rtapp_params)
+        return rtapp_params
 
 ################################################################################
 ################################################################################
@@ -262,59 +371,15 @@ from target_script import TargetScript
 from devlib.module.hotplug import HotplugModule
 from devlib.exception import TimeoutError
 
-class HotplugTestBundle(TestBundle):
-    def __init__(self, res_dir, target_alive):
-        super(HotplugTestBundle, self).__init__(res_dir)
-        self.target_alive = target_alive
+class HotplugTestBundle(TransientTestBundle):
 
-    def test_system_alive(self):
-        return ResultBundle(self.target_alive)
-
-class CpuHotplugTorture(TestableWorkload):
-
-    def run(self, seed=None, nr_operations=100,
-            sleep_min_ms=10, sleep_max_ms=100, duration_s=10,
-            max_cpus_off=sys.maxint, max_duration_s=10):
-
-        if not seed:
-            random.seed()
-            seed = random.randint(0, sys.maxint)
-
-        hotpluggable_cpus = filter(
-            lambda cpu: self.target.file_exists(self._cpuhp_path(cpu)),
-            self.target.list_online_cpus()
-        )
-
-        sequence = self._random_cpuhp_seq(
-            seed, nr_operations, hotpluggable_cpus, max_cpus_off
-        )
-
-        script = self._random_cpuhp_script(
-            sequence, sleep_min_ms, sleep_max_ms, duration_s
-        )
-        script.push(self.res_dir)
-
-        target_alive = True
-        timeout = duration_s + 60
-
-        try:
-            script.run(as_root=True, timeout=timeout)
-            self.target.hotplug.online_all()
-        except TimeoutError:
-            #msg = 'Target not responding after {} seconds ...'
-            #cls._log.info(msg.format(timeout))
-            target_alive = False
-
-        #return HotplugTestBundle(self.res_dir, target_alive)
-
-    def create_test_bundle(self):
-        pass
-
-    def _cpuhp_path(self, cpu):
+    @classmethod
+    def _cpuhp_path(cls, te, cpu):
         cpu = 'cpu{}'.format(cpu)
-        return self.target.path.join(HotplugModule.base_path, cpu, 'online')
+        return te.target.path.join(HotplugModule.base_path, cpu, 'online')
 
-    def _random_cpuhp_seq(self, seed, nr_operations,
+    @classmethod
+    def _random_cpuhp_seq(cls, seed, nr_operations,
                           hotpluggable_cpus, max_cpus_off):
         """
         Yield a consistent random sequence of CPU hotplug operations
@@ -357,14 +422,15 @@ class CpuHotplugTorture(TestableWorkload):
         for cpu in cur_off_cpus:
             yield cpu, 1
 
-    def _random_cpuhp_script(self, sequence, sleep_min_ms, sleep_max_ms, timeout_s):
+    @classmethod
+    def _random_cpuhp_script(cls, te, sequence, sleep_min_ms, sleep_max_ms, timeout_s):
         """
         :param sleep_min_ms: Min sleep duration between hotplugs
         :param sleep_max_ms: Max sleep duration between hotplugs
         """
 
         shift = '    '
-        script = TargetScript(self.te, 'random_cpuhp.sh')
+        script = TargetScript(te, 'random_cpuhp.sh')
 
         # Record configuration
         # script.append('# File generated automatically')
@@ -378,7 +444,7 @@ class CpuHotplugTorture(TestableWorkload):
         script.append('do')
         for cpu, plug_way in sequence:
             # Write in sysfs entry
-            cmd = 'echo {} > {}'.format(plug_way, self._cpuhp_path(cpu))
+            cmd = 'echo {} > {}'.format(plug_way, cls._cpuhp_path(te, cpu))
             script.append(shift + cmd)
             # Sleep if necessary
             if sleep_max_ms > 0:
@@ -393,73 +459,109 @@ class CpuHotplugTorture(TestableWorkload):
 
         return script
 
+    @classmethod
+    def _from_target(cls, te,res_dir=None, seed=None, nr_operations=100,
+            sleep_min_ms=10, sleep_max_ms=100, duration_s=10,
+            max_cpus_off=sys.maxint, max_duration_s=10):
+
+        if not seed:
+            random.seed()
+            seed = random.randint(0, sys.maxint)
+
+        hotpluggable_cpus = filter(
+            lambda cpu: te.target.file_exists(cls._cpuhp_path(te, cpu)),
+            te.target.list_online_cpus()
+        )
+
+        sequence = cls._random_cpuhp_seq(
+            seed, nr_operations, hotpluggable_cpus, max_cpus_off
+        )
+
+        script = cls._random_cpuhp_script(
+            te, sequence, sleep_min_ms, sleep_max_ms, duration_s
+        )
+        script.push(res_dir)
+
+        target_alive = True
+        timeout = duration_s + 60
+
+        try:
+            script.run(as_root=True, timeout=timeout)
+            te.target.hotplug.online_all()
+        except TimeoutError:
+            #msg = 'Target not responding after {} seconds ...'
+            #cls._log.info(msg.format(timeout))
+            target_alive = False
+
+        return ResultBundle(target_alive)
+
 ################################################################################
 ################################################################################
 
-class AndroidWorkload(LisaWorkload):
+# class AndroidWorkload(LisaWorkload):
 
-    def _setup_wload(self):
-        self.target.set_auto_brightness(0)
-        self.target.set_brightness(0)
+#     def _setup_wload(self):
+#         self.target.set_auto_brightness(0)
+#         self.target.set_brightness(0)
 
-        self.target.ensure_screen_is_on()
-        self.target.swipe_to_unlock()
+#         self.target.ensure_screen_is_on()
+#         self.target.swipe_to_unlock()
 
-        self.target.set_auto_rotation(0)
-        self.target.set_rotation(1)
+#         self.target.set_auto_rotation(0)
+#         self.target.set_rotation(1)
 
-    def _run_wload(self):
-        pass
+#     def _run_wload(self):
+#         pass
 
-    def _teardown_wload(self):
-        self.target.set_auto_rotation(1)
-        self.target.set_auto_brightness(1)
+#     def _teardown_wload(self):
+#         self.target.set_auto_rotation(1)
+#         self.target.set_auto_brightness(1)
 
-    def run(self, trace_tool):
-        if trace_tool == "ftrace":
-            pass
-        elif trace_tool == "systrace":
-            pass
+#     def run(self, trace_tool):
+#         if trace_tool == "ftrace":
+#             pass
+#         elif trace_tool == "systrace":
+#             pass
 
-        self._setup_wload()
+#         self._setup_wload()
 
-        with self.te.record_ftrace():
-            self._run_wload()
+#         with self.te.record_ftrace():
+#             self._run_wload()
 
-        self._teardown_wload()
+#         self._teardown_wload()
 
-from target_script import TargetScript
-from devlib.target import AndroidTarget
+# from target_script import TargetScript
+# from devlib.target import AndroidTarget
 
-class GmapsWorkload(AndroidWorkload):
+# class GmapsWorkload(AndroidWorkload):
 
-    def _setup_wload(self):
-        super(GmapsWorkload, self)._setup_wload()
+#     def _setup_wload(self):
+#         super(GmapsWorkload, self)._setup_wload()
 
-        self.script = TargetScript(self.te, "gmaps_swiper.sh")
+#         self.script = TargetScript(self.te, "gmaps_swiper.sh")
 
-        for i in range(self.swipe_count):
-            # Swipe right
-            self.script.input_swipe_pct(40, 50, 60, 60)
-            #AndroidTarget.input_swipe_pct(self.script, 40, 50, 60, 60)
-            AndroidTarget.sleep(self.script, 1)
-            # Swipe down
-            AndroidTarget.input_swipe_pct(self.script, 50, 60, 50, 40)
-            AndroidTarget.sleep(self.script, 1)
-            # Swipe left
-            AndroidTarget.input_swipe_pct(self.script, 60, 50, 40, 50)
-            AndroidTarget.sleep(self.script, 1)
-            # Swipe up
-            AndroidTarget.input_swipe_pct(self.script, 50, 40, 50, 60)
-            AndroidTarget.sleep(self.script, 1)
+#         for i in range(self.swipe_count):
+#             # Swipe right
+#             self.script.input_swipe_pct(40, 50, 60, 60)
+#             #AndroidTarget.input_swipe_pct(self.script, 40, 50, 60, 60)
+#             AndroidTarget.sleep(self.script, 1)
+#             # Swipe down
+#             AndroidTarget.input_swipe_pct(self.script, 50, 60, 50, 40)
+#             AndroidTarget.sleep(self.script, 1)
+#             # Swipe left
+#             AndroidTarget.input_swipe_pct(self.script, 60, 50, 40, 50)
+#             AndroidTarget.sleep(self.script, 1)
+#             # Swipe up
+#             AndroidTarget.input_swipe_pct(self.script, 50, 40, 50, 60)
+#             AndroidTarget.sleep(self.script, 1)
 
-        # Push script to the target
-        self.script.push()
+#         # Push script to the target
+#         self.script.push()
 
-    def _run_wload(self):
-        self.script.run()
+#     def _run_wload(self):
+#         self.script.run()
 
-    def run(self, swipe_count=10):
-        self.swipe_count = swipe_count
+#     def run(self, swipe_count=10):
+#         self.swipe_count = swipe_count
 
-        super(GmapsWorkload, self).run("ftrace")
+#         super(GmapsWorkload, self).run("ftrace")
