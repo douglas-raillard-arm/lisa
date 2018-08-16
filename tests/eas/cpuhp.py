@@ -22,7 +22,7 @@ import json
 import sys
 
 from env import TestEnv
-from test import LisaTest, experiment_test
+from utils.lisa_test import LisaTest, experiment_test
 from target_script import TargetScript
 from devlib.module.hotplug import HotplugModule
 from devlib.exception import TimeoutError
@@ -50,7 +50,7 @@ class _CpuHotplugTest(LisaTest):
             'min_ms' : 10,              # Min sleep duration between hotplugs
             'max_ms' : 100,             # Max sleep duration between hotplugs
         },                              #   max_ms <= 0 will encode 'no sleep'
-        'max_cpus_off' : sys.maxint,    # Max number of CPUs plugged-off
+        'max_cpus_off' : sys.maxsize,    # Max number of CPUs plugged-off
     }
 
     @classmethod
@@ -66,7 +66,7 @@ class _CpuHotplugTest(LisaTest):
         # Choose a random seed explicitly if not given
         if cls.hp_stress.get('seed') is None:
             random.seed()
-            cls.hp_stress['seed'] = random.randint(0, sys.maxint)
+            cls.hp_stress['seed'] = random.randint(0, sys.maxsize)
         random.seed(cls.hp_stress['seed'])
         cls._log.info('Random sequence of CPU Hotplug generated with: ')
         cls._log.info(cls.hp_stress)
@@ -75,9 +75,7 @@ class _CpuHotplugTest(LisaTest):
 
         # Play with (online) hotpluggable CPUs only
         cls.target.hotplug.online_all()
-        cls.hotpluggable_cpus = filter(
-                lambda cpu: cls.target.file_exists(cls._cpuhp_path(cpu)),
-                cls.target.list_online_cpus())
+        cls.hotpluggable_cpus = [cpu for cpu in cls.target.list_online_cpus() if cls.target.file_exists(cls._cpuhp_path(cpu))]
         if not cls.hotpluggable_cpus:
             raise RuntimeError('Cannot find any hotpluggable CPU online')
         cls._log.info('Hotpluggable CPUs found on target: ')
@@ -212,7 +210,7 @@ class _Torture(_CpuHotplugTest):
             'min_ms' : -1,
             'max_ms' : -1, # No sleep time between hotplug
         },
-        'max_cpus_off' : sys.maxint,
+        'max_cpus_off' : sys.maxsize,
     }
 
     @classmethod

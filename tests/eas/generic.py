@@ -24,13 +24,13 @@ import pylab as pl
 
 from math import isnan
 
-from test import LisaTest, experiment_test
+from utils.lisa_test import LisaTest, experiment_test
 from unittest import SkipTest
 from trace import Trace
 
 from bart.common.Utils import area_under_curve
-from energy_model import EnergyModel, EnergyModelCapacityError
-from perf_analysis import PerfAnalysis
+from utils.energy_model import EnergyModel, EnergyModelCapacityError
+from utils.perf_analysis import PerfAnalysis
 
 WORKLOAD_PERIOD_MS =  16
 SET_IS_BIG_LITTLE = True
@@ -142,7 +142,7 @@ class _EnergyModelTest(LisaTest):
 
         # First we'll build a dict D {time: {task_name: util}} where D[t][n] is
         # the expected utilization of task n from time t.
-        for task, params in experiment.wload.params['profile'].iteritems():
+        for task, params in experiment.wload.params['profile'].items():
             time = self.get_start_time(experiment) + params['delay']
             add_transition(time, task, 0)
             for _ in range(params.get('loops', 1)):
@@ -168,7 +168,7 @@ class _EnergyModelTest(LisaTest):
         :returns: A Pandas DataFrame with a column for each task, showing the
                   CPU that the task was "on" at each moment in time
         """
-        tasks = experiment.wload.tasks.keys()
+        tasks = list(experiment.wload.tasks.keys())
         trace = self.get_trace(experiment)
 
         df = trace.ftrace.sched_switch.data_frame[['next_comm', '__cpu']]
@@ -205,7 +205,7 @@ class _EnergyModelTest(LisaTest):
         task_cpu_df = self.get_task_cpu_df(experiment)
         task_utils_df = self.get_task_utils_df(experiment)
 
-        tasks = experiment.wload.tasks.keys()
+        tasks = list(experiment.wload.tasks.keys())
 
         # Create a combined DataFrame with the utilization of a task and the CPU
         # it was running on at each moment. Looks like:
@@ -228,7 +228,7 @@ class _EnergyModelTest(LisaTest):
                 if not isnan(cpu):
                     cpu_utils[int(cpu)] += util
             power = nrg_model.estimate_from_cpu_util(cpu_utils)
-            columns = power.keys()
+            columns = list(power.keys())
             return pd.Series([power[c] for c in columns], index=columns)
         return self._sort_power_df_columns(df.apply(est_power, axis=1))
 
@@ -260,7 +260,7 @@ class _EnergyModelTest(LisaTest):
             task_utils = row.to_dict()
             expected_utils = nrg_model.get_optimal_placements(task_utils)[0]
             power = nrg_model.estimate_from_cpu_util(expected_utils)
-            columns = power.keys()
+            columns = list(power.keys())
 
             # Assemble a dataframe to plot the expected utilization
             data.append(expected_utils)
@@ -313,7 +313,7 @@ class _EnergyModelTest(LisaTest):
             # Grey-out areas where utilization == 0
             ffill = False
             prev = 0.0
-            for time, util in tdf.iteritems():
+            for time, util in tdf.items():
                 if ffill:
                     ax[cpu].axvspan(prev, time, facecolor='gray', alpha=0.1, linewidth=0.0)
                     ffill = False

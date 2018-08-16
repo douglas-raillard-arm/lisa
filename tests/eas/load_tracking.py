@@ -27,7 +27,7 @@ from bart.sched import pelt
 from devlib.utils.misc import memoized
 from env import TestEnv
 from executor import Executor
-from test import LisaTest, experiment_test
+from utils.lisa_test import LisaTest, experiment_test
 from time import sleep
 from trace import Trace
 from trappy.stats.grammar import Parser
@@ -107,7 +107,7 @@ class _LoadTrackingBase(LisaTest):
         Assumes an RT-App workload with a single task with a single phase
         """
         # Find duty cycle of the experiment's workload task
-        [task] = experiment.wload.tasks.keys()
+        [task] = list(experiment.wload.tasks.keys())
         sched_assert = self.get_sched_assert(experiment, task)
         duty_cycle_pct = sched_assert.getDutyCycle(self.get_window(experiment))
 
@@ -127,7 +127,7 @@ class _LoadTrackingBase(LisaTest):
 
         # Scale the relative CPU/freq capacity into the range 0..1
         scale = max(self._get_cpu_capacity(self.te, cpu)
-                    for cpu in range(self.te.target.number_of_cpus))
+                    for cpu in list(range(self.te.target.number_of_cpus)))
         scaling_factor = float(cpu_capacity) / scale
 
         return UTIL_SCALE * (duty_cycle_pct / 100.) * scaling_factor
@@ -146,7 +146,7 @@ class _LoadTrackingBase(LisaTest):
         :returns: :class:`pandas.DataFrame` with a column for each signal for
                   the experiment's workload task
         """
-        [task] = experiment.wload.tasks.keys()
+        [task] = list(experiment.wload.tasks.keys())
         trace = self.get_trace(experiment)
 
         # There are two different scheduler trace events that expose the load
@@ -171,7 +171,7 @@ class _LoadTrackingBase(LisaTest):
         df = getattr(trace.ftrace, event).data_frame
         df = df[df['comm'] == task][signal_fields]
         df = select_window(df, self.get_window(experiment))
-        return df.rename(columns=dict(zip(signal_fields, signals)))
+        return df.rename(columns=dict(list(zip(signal_fields, signals))))
 
     def get_signal_mean(self, experiment, signal,
                         ignore_first_s=UTIL_AVG_CONVERGENCE_TIME):
@@ -234,7 +234,7 @@ class FreqInvarianceTest(_LoadTrackingBase):
     @classmethod
     def _getExperimentsConf(cls, test_env):
         # Run on one of the CPUs with highest capacity
-        cpu = max(range(test_env.target.number_of_cpus),
+        cpu = max(list(range(test_env.target.number_of_cpus)),
                   key=lambda c: cls._get_cpu_capacity(test_env, c))
 
         wloads = {
@@ -270,7 +270,7 @@ class FreqInvarianceTest(_LoadTrackingBase):
         signal_mean = self.get_signal_mean(experiment, signal_name)
 
         error_margin = exp_util * (ERROR_MARGIN_PCT / 100.)
-        [freq] = experiment.conf['cpufreq']['freqs'].values()
+        [freq] = list(experiment.conf['cpufreq']['freqs'].values())
 
         msg = 'Saw {} around {}, expected {} at freq {}'.format(
             signal_name, signal_mean, exp_util, freq)
@@ -607,7 +607,7 @@ class _CPUMigrationBase(LisaTest):
 
         :returns: the task that is in the workload at the given index
         """
-        task_name = tasks.keys()[index]
+        task_name = list(tasks.keys())[index]
         return tasks[task_name]
 
     def _get_phases_names(self, task):
@@ -618,7 +618,7 @@ class _CPUMigrationBase(LisaTest):
 
         :returns: a list of the names of the phases
         """
-        return task['phases'].keys()
+        return list(task['phases'].keys())
 
     def _get_duration_s(self, task, phase):
         """
@@ -736,7 +736,7 @@ class _CPUMigrationBase(LisaTest):
         expected = {}
         for cpu in cpus:
             expected_val = 0
-            for task in tasks.iteritems():
+            for task in tasks.items():
                 [phase_cpu] = self._get_cpus(task[1], phase)
                 if phase_cpu == cpu:
                     duty_cycle = self._get_duty_cycle(task[1], phase)
@@ -758,7 +758,7 @@ class _CPUMigrationBase(LisaTest):
 
         # Filter the event related to the tasks
         sw_df = trace.data_frame.trace_event('sched_switch')
-        sw_df = sw_df[sw_df.next_comm.isin(self.tasks_desc.keys())]
+        sw_df = sw_df[sw_df.next_comm.isin(list(self.tasks_desc.keys()))]
 
         util_df = trace.data_frame.trace_event('sched_load_cfs_rq')
         phases = self._get_phases_names(self._get_one_task(self.tasks_desc, 0))
@@ -770,7 +770,7 @@ class _CPUMigrationBase(LisaTest):
         msg = 'Saw util {} on cpu {}, expected {} during phase {}'
         for phase in phases:
             # Get all the cpus where tasks are running during this phase
-            for task in self.tasks_desc.iteritems():
+            for task in self.tasks_desc.items():
                 cpus.update(self._get_cpus(task[1], phase))
 
             # Get the mean utilization per CPU

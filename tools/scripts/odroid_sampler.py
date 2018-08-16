@@ -70,7 +70,7 @@ def parseOptions():
         opts, args = getopt.getopt(sys.argv[1:], "p:s:", ["period=", "samples="])
     except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err)
+        print(str(err))
         usage()
         sys.exit(2)
     output = None

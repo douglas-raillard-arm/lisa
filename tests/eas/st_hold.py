@@ -13,14 +13,14 @@
 # limitations under the License.
 #
 
-from __future__ import division
+
 
 import os
 import logging
 import unittest
 
 from env import TestEnv
-from test import LisaTest
+from utils.lisa_test import LisaTest
 from trappy import FTrace
 from wlgen import Periodic, RTA
 from bart.common.Utils import area_under_curve

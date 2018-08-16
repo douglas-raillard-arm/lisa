@@ -20,7 +20,7 @@ import os
 
 from wlgen import PerfMessaging, PerfPipe
 
-from test_wlgen import WlgenSelfBase
+from .test_wlgen import WlgenSelfBase
 
 class PerfBenchBase(WlgenSelfBase):
     """Base class for common testing of PerfBench workloads"""

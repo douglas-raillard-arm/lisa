@@ -18,7 +18,7 @@
 import logging
 import os
 
-from test import LisaTest
+from utils.lisa_test import LisaTest
 
 TESTS_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 TESTS_CONF = os.path.join(TESTS_DIRECTORY, "rfc.config")

@@ -15,7 +15,7 @@
 
 from bart.common.Utils import select_window
 
-from test import LisaTest, experiment_test
+from utils.lisa_test import LisaTest, experiment_test
 
 WORKLOAD_DURATION_S = 5
 

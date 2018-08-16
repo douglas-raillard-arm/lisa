@@ -30,7 +30,8 @@ import json
 
 # Configure logging
 import logging
-reload(logging)
+import imp
+imp.reload(logging)
 logging.basicConfig(
     format='%(asctime)-9s %(levelname)-8s: %(message)s',
     level=logging.DEBUG,

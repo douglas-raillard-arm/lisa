@@ -157,7 +157,7 @@ class RTA(Workload):
         #   Setting a governor & tunables for a cpu will set them for all cpus
         #   in the same clock domain, so only restoring them for one cpu
         #   per domain is enough to restore them all.
-        for cpu, (governor, tunables) in old_governors.iteritems():
+        for cpu, (governor, tunables) in old_governors.items():
             target.cpufreq.set_governor(cpu, governor)
             target.cpufreq.set_governor_tunables(cpu, **tunables)
 
@@ -184,7 +184,7 @@ class RTA(Workload):
         if destdir is None:
             return
         self._log.debug('Pulling logfiles to [%s]...', destdir)
-        for task in self.tasks.keys():
+        for task in list(self.tasks.keys()):
             logfile = self.target.path.join(self.run_dir,
                                             '*{}*.log'.format(task))
             self.target.pull(logfile, destdir)
@@ -206,7 +206,7 @@ class RTA(Workload):
             else:
                 return min(self.pload.values())
         else:
-            cpus = self.cpus or range(self.target.number_of_cpus)
+            cpus = self.cpus or list(range(self.target.number_of_cpus))
 
             target_cpu = cpus[-1]
             if 'bl'in self.target.modules:
@@ -238,7 +238,7 @@ class RTA(Workload):
         }
 
         # Check for inline config
-        if not isinstance(self.params['custom'], basestring):
+        if not isinstance(self.params['custom'], str):
             if isinstance(self.params['custom'], dict):
                 # Inline config present, turn it into a file repr
                 tmp_json = json.dumps(self.params['custom'],
@@ -256,7 +256,7 @@ class RTA(Workload):
         for line in ifile:
             if '__DURATION__' in line and self.duration is None:
                 raise ValueError('Workload duration not specified')
-            for src, target in replacements.iteritems():
+            for src, target in replacements.items():
                 line = line.replace(src, target)
             ofile.write(line)
 
@@ -274,7 +274,7 @@ class RTA(Workload):
     def _confProfile(self):
 
         # Sanity check for task names
-        for task in self.params['profile'].keys():
+        for task in list(self.params['profile'].keys()):
             if len(task) > 15:
                 # rt-app uses pthread_setname_np(3) which limits the task name
                 # to 16 characters including the terminal '\0'.
@@ -337,7 +337,7 @@ class RTA(Workload):
             else:
                 task_conf.update(task.sched)
                 task_conf['policy'] = 'SCHED_' + policy
-                sched_descr = 'sched: {0:s}'.format(task['sched'])
+                sched_descr = 'sched: {}'.format(task['sched'])
 
             # Initialize task phases
             task_conf['phases'] = OrderedDict()
@@ -346,9 +346,9 @@ class RTA(Workload):
             self._log.info('task [%s], %s', tid, sched_descr)
 
             if task.delay_s:
-                task_conf['delay'] = int(task['delay'] * 1e6)
-                self._log.info(' | start delay: %.6f [s]',
-                               task['delay'])
+                    task_conf['delay'] = int(task['delay'] * 1e6)
+                    self._log.info(' | start delay: %.6f [s]',
+                            task['delay'])
 
             if not task.loops:
                 task['loops'] = 1
@@ -514,7 +514,7 @@ class RTA(Workload):
 
         self.rta_cmd  = self.target.executables_directory + '/rt-app'
         self.rta_conf = self.run_dir + '/' + self.json
-        self.command = '{0:s} {1:s} 2>&1'.format(self.rta_cmd, self.rta_conf)
+        self.command = '{0} {1} 2>&1'.format(self.rta_cmd, self.rta_conf)
 
 class RTATask(object):
     """
@@ -577,7 +577,7 @@ class Ramp(RTATask):
                  period_ms=100, delay_s=0, loops=1, sched=None, cpus=None):
         super(Ramp, self).__init__(delay_s, loops, sched)
 
-        if start_pct not in range(0,101) or end_pct not in range(0,101):
+        if start_pct not in list(range(0,101)) or end_pct not in list(range(0,101)):
             raise ValueError('start_pct and end_pct must be in [0..100] range')
 
         if start_pct >= end_pct:
@@ -590,7 +590,7 @@ class Ramp(RTATask):
             delta_adj = +1
 
         phases = []
-        steps = range(start_pct, end_pct+delta_adj, delta_pct)
+        steps = list(range(start_pct, end_pct+delta_adj, delta_pct))
         for load in steps:
             if load == 0:
                 phase = Phase(time_s, 0, 0, cpus)
@@ -669,7 +669,7 @@ class Pulse(RTATask):
         if end_pct >= start_pct:
             raise ValueError('end_pct must be lower than start_pct')
 
-        if end_pct not in range(0,101) or start_pct not in range(0,101):
+        if end_pct not in list(range(0,101)) or start_pct not in list(range(0,101)):
             raise ValueError('end_pct and start_pct must be in [0..100] range')
         if end_pct >= start_pct:
             raise ValueError('end_pct must be lower than start_pct')

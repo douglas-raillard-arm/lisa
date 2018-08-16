@@ -18,7 +18,7 @@
 import logging
 import os
 
-from test import LisaTest
+from utils.lisa_test import LisaTest
 
 import trappy
 from bart.common.Analyzer import Analyzer
@@ -71,7 +71,7 @@ class STune(LisaTest):
         for tc in self.confs:
             conf_id = tc["tag"]
 
-            wload_id = self.wloads.keys()[0]
+            wload_id = list(self.wloads.keys())[0]
             run_dir = os.path.join(self.te.res_dir,
                                    "rtapp:{}:{}".format(conf_id, wload_id),
                                    "1")
@@ -81,7 +81,7 @@ class STune(LisaTest):
                                    events=ftrace_events)
 
             first_task_params = self.wloads[wload_id]["conf"]["params"]
-            first_task_name = first_task_params.keys()[0]
+            first_task_name = list(first_task_params.keys())[0]
             rta_task_name = "task_{}".format(first_task_name)
 
             # Avoid the first period as the task starts with a very

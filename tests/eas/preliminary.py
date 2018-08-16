@@ -19,12 +19,12 @@ import json
 import time
 import re
 import pandas
-import StringIO
+import io
 
 from unittest import SkipTest
 
 from env import TestEnv
-from test import LisaTest
+from utils.lisa_test import LisaTest
 
 """
 Goal
@@ -204,11 +204,11 @@ class TestSchedutilTunables(BasicCheckTest):
         fail_cpus = []
 
         while cpus:
-            cpu = iter(cpus).next()
+            cpu = next(iter(cpus))
             domain = tuple(self.target.cpufreq.get_related_cpus(cpu))
 
             tunables = self.target.cpufreq.get_governor_tunables(cpu)
-            for name, value in tunables.iteritems():
+            for name, value in tunables.items():
                 if name.endswith('rate_limit_us'):
                     if int(value) > self.MAX_RATE_LIMIT_US:
                         fail_cpus += domain
@@ -281,7 +281,7 @@ class TestSchedDomainFlags(BasicCheckTest):
             self.target.write_value(self._get_cpu_cap_path(cpu), cap)
 
     def _test_asym_cpucapacity(self, caps, expect_asym):
-        top_sd_flags = self.iter_cpu_sd_flags(0).next()
+        top_sd_flags = next(self.iter_cpu_sd_flags(0))
         if expect_asym:
             self.assertTrue(
                 top_sd_flags & self.SD_ASYM_CPUCAPACITY,
@@ -320,7 +320,7 @@ class TestSchedDomainFlags(BasicCheckTest):
             test_caps = [1024 for _ in range(self.target.number_of_cpus)]
         else:
             # Make the (currently symmetrical) system look asymmetrical
-            test_caps = range(self.target.number_of_cpus)
+            test_caps = list(range(self.target.number_of_cpus))
 
         # Use a try..finally so that we leave the cpu_capacity files as we found
         # them, even if the test fails (i.e. we raise an AssertionError).

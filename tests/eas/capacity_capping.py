@@ -96,9 +96,9 @@ class CapacityCappingTest(unittest.TestCase):
 
         trace = trappy.FTrace(cls.trace_file)
         cls.sa = SchedMultiAssert(trace, cls.env.topology,
-                                  execnames=cls.params.keys())
+                                  execnames=list(cls.params.keys()))
         times = cls.sa.getStartTime()
-        cls.wload_start_time = min(t["starttime"] for t in times.itervalues())
+        cls.wload_start_time = min(t["starttime"] for t in iter(times.values()))
 
     @classmethod
     def populate_params(cls):
@@ -160,7 +160,7 @@ class CapacityCappingTest(unittest.TestCase):
         residency_dict = self.sa.getResidency("cluster", cpus, window=window,
                                               percent=True)
 
-        for pid, task_res in residency_dict.iteritems():
+        for pid, task_res in residency_dict.items():
             msg = "Pid {} ran in {} cpus only {:.2f}% percent of the time when the system was {} (expected {:.2f}%)" \
                 .format(pid, cpus_name, task_res["residency"],
                         phase_description, EXPECTED_BUSY_TIME_PCT)

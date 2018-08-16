@@ -96,7 +96,7 @@ class Workload(object):
         self._log.info('Setup new workload %s', self.name)
 
     def __callback(self, step, **kwords):
-        if step not in self.steps.keys():
+        if step not in list(self.steps.keys()):
             raise ValueError('Callbacks for [%s] step not supported', step)
         if self.steps[step] is None:
             return

@@ -66,9 +66,9 @@ class SchedEntity(object):
     def print_hieararchy(self, level=0):
         """In-order visualization of the tree"""
         if level > 0:
-            print " " * (level) + "|--" + self.name
+            print(" " * (level) + "|--" + self.name)
         else:
-            print self.name
+            print(self.name)
 
         for child in self.children:
             child.visit(level + 1)
@@ -126,7 +126,7 @@ class Task(SchedEntity):
                      duration_s=duration_s).get()
         self.wload = RTA(test_env.target, name, test_env.calibration())
         if num_tasks > 1:
-            conf_params = {name + "_{}".format(i): t for i in xrange(num_tasks)}
+            conf_params = {name + "_{}".format(i): t for i in range(num_tasks)}
         else:
             conf_params = {name: t}
         self.wload.conf(kind=kind,

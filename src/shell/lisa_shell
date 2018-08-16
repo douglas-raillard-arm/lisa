@@ -350,7 +350,7 @@ if [ -n "$LISA_RESULTS_DIR" ]; then
   # same tree to run multiple tests on different boards at the same time.
   local xunit_options=(--with-xunit --xunit-file="$LISA_RESULTS_DIR/results.xml")
 fi
-nosetests -v --nocapture --nologcapture    \
+/usr/bin/nosetests -v --nocapture --nologcapture    \
           --logging-config=logging.conf    \
           "${xunit_options[@]}"            \
           "$@"
