@@ -1,6 +1,8 @@
 import os
 from executor import Executor
 
+from serialize import YAMLSerializable
+
 from perf_analysis import PerfAnalysis
 from wlgen.rta import RTA
 
@@ -83,7 +85,7 @@ class ResultBundle(object):
 
 import shutil
 
-class TestBundle(object):
+class TestBundle(YAMLSerializable):
     """
     Description of a Lisa test bundle
 
@@ -111,50 +113,47 @@ class TestBundle(object):
         """
         Factory method to create a bundle using a live target
 
-        This is mostly boiler-plate code around :meth:`_from_target`
+        This is mostly boiler-plate code around :meth:`_from_target`,
+        have a look at that method for additionnal optionnal parameters.
         """
         if not res_dir:
             res_dir = te.get_res_dir()
 
         # Logger stuff?
 
-        cls._from_target(te, res_dir, **kwargs)
-        return cls.from_disk(res_dir)
+        bundle = cls._from_target(te, res_dir, **kwargs)
+
+        # We've created the bundle from the target, and have all of
+        # the information we need to execute the test code. However,
+        # we enforce the use of the offline reloading path to ensure
+        # it does not get broken.
+        bundle.to_path(res_dir)
+        return cls.from_path(res_dir)
 
     @classmethod
-    def from_disk(cls, res_dir):
-        """
-        Factory method to create the bundle from a disk location
-        """
-        raise NotImplementedError()
-
-class TransientTestBundle(TestBundle):
-    """
-    A TestBundle that cannot be saved to the disk, or for which it does not make
-    sense to do so.
-    """
-
-    def __init__(self):
-        raise RuntimeError("yadda yadda resbundle")
+    def _filepath(cls, res_dir):
+        return os.path.join(res_dir, "{}.yaml".format(cls.__name__))
 
     @classmethod
-    def from_target(cls, te, res_dir=None, **kwargs):
+    def from_path(cls, res_dir):
         """
+        See :meth:`YAMLSerializable.from_path`
         """
-        if not res_dir:
-            res_dir = te.get_res_dir()
+        bundle = YAMLSerializable.from_path(cls._filepath(res_dir))
+        # We need to update the res_dir to the one we were given
+        bundle.res_dir = res_dir
 
-        # Logger stuff?
+        return bundle
 
-        return cls._from_target(te, res_dir, **kwargs)
-
-    @classmethod
-    def from_disk(cls, res_dir):
-        raise RuntimeError("{} can't be saved to disk".format(cls.__name__))
-
+    def to_path(self, res_dir):
+        """
+        See :meth:`YAMLSerializable.to_path`
+        """
+        super(TestBundle, self).to_path(self._filepath(res_dir))
 
 from bart.common.Utils import area_under_curve
-#from energy_model import save_em_yaml, load_em_yaml
+from trace import Trace
+from energy_model import EnergyModel
 class GenericTestBundle(TestBundle):
     """
     Yadda yadda, EAS placement and energy test cases
@@ -164,13 +163,21 @@ class GenericTestBundle(TestBundle):
         "events" : ["sched_switch"],
     }
 
-    def __init__(self, res_dir):
+    @property
+    def trace(self):
+        if not self._trace:
+            self._trace = Trace(self.res_dir, events=self.ftrace_conf["events"])
+
+        return self._trace
+
+    def __init__(self, res_dir, nrg_model, rtapp_params):
         super(GenericTestBundle, self).__init__(res_dir)
 
-        #self.nrg_model = load_em_yaml(res_dir)
-
-        with open(os.path.join(res_dir, "{}.json".format(self.__class__.__name__)), "r") as fh:
-            self.rtapp_params = json.load(fh)
+        # self.trace = Trace(res_dir, events=self.ftrace_conf["events"])
+        #EnergyModel.from_path(os.path.join(res_dir, "nrg_model.yaml"))
+        self._trace = None
+        self.nrg_model = nrg_model
+        self.rtapp_params = rtapp_params
 
     @classmethod
     def create_rtapp_params(cls, te):
@@ -183,7 +190,7 @@ class GenericTestBundle(TestBundle):
     def _from_target(cls, te, res_dir):
         rtapp_params = cls.create_rtapp_params(te)
 
-        wload = RTA(te.target, cls.__name__, te.calibration())
+        wload = RTA(te.target, "rta_{}".format(cls.__name__.lower()), te.calibration())
         wload.conf(kind='profile', params=rtapp_params,
                    run_dir=Executor.get_run_dir(te.target))
 
@@ -194,13 +201,7 @@ class GenericTestBundle(TestBundle):
             with te.freeze_userspace():
                 wload.run(out_dir=res_dir)
 
-        # Serialize the energy model to the res_dir
-
-        return cls.from_disk(res_dir)
-
-    @classmethod
-    def from_disk(cls, res_dir):
-        return cls(res_dir)
+        return cls(res_dir, te.nrg_model, rtapp_params)
 
     def test_slack(self, negative_slack_allowed_pct=15):
         """
@@ -259,8 +260,8 @@ class GenericTestBundle(TestBundle):
 
         # First we'll build a dict D {time: {task_name: util}} where D[t][n] is
         # the expected utilization of task n from time t.
-        for task, params in self.rtapp_params.iteritems():
-            time = self.get_start_time(experiment) + params['delay']
+        for task, params in self.rtapp_params["tasks"].iteritems():
+            time = self.get_start_time(experiment) + params.get('delay', 0)
             add_transition(time, task, 0)
             for _ in range(params.get('loops', 1)):
                 for phase in params['phases']:
@@ -290,7 +291,7 @@ class GenericTestBundle(TestBundle):
                   "power" column with the sum of other columns. Shows the
                   estimated *optimal* power over time.
         """
-        task_utils_df = self.get_task_utils_df(experiment)
+        task_utils_df = self.get_task_utils_df()
 
         data = []
         index = []
@@ -345,17 +346,19 @@ class OneSmallTask(GenericTestBundle):
     A single 'small' (fits in a LITTLE) task
     """
 
+    task_name = "small"
+
     @classmethod
     def create_rtapp_params(cls, te):
         # 50% of the smallest CPU's capacity
         duty = int((min(te.target.sched.get_capacities().values()) / 1024.) * 50)
 
         rtapp_params = {}
-        rtapp_params["small"] = Periodic(
+        rtapp_params[cls.task_name] = Periodic(
             duty_cycle_pct=duty,
             duration_s=1,
             period_ms=16
-        ).get()
+        )
 
         return rtapp_params
 
@@ -371,12 +374,14 @@ from target_script import TargetScript
 from devlib.module.hotplug import HotplugModule
 from devlib.exception import TimeoutError
 
-class HotplugTestBundle(TransientTestBundle):
+class HotplugTestBundle(TestBundle):
 
-    @classmethod
-    def _cpuhp_path(cls, te, cpu):
-        cpu = 'cpu{}'.format(cpu)
-        return te.target.path.join(HotplugModule.base_path, cpu, 'online')
+    # /!\ TODO /!\ target alive AND hotplug state coherent
+
+    def __init__(self, target_alive, hotpluggable_cpus, live_cpus):
+        self.target_alive = target_alive
+        self.hotpluggable_cpus = hotpluggable_cpus
+        self.live_cpus = live_cpus
 
     @classmethod
     def _random_cpuhp_seq(cls, seed, nr_operations,
@@ -439,12 +444,11 @@ class HotplugTestBundle(TransientTestBundle):
         # script.append('# Hotpluggable CPUs:')
         # script.append('# {}'.format(cls.hotpluggable_cpus))
 
-
         script.append('while true')
         script.append('do')
         for cpu, plug_way in sequence:
             # Write in sysfs entry
-            cmd = 'echo {} > {}'.format(plug_way, cls._cpuhp_path(te, cpu))
+            cmd = 'echo {} > {}'.format(plug_way, HotplugModule._cpu_path(te.target, cpu))
             script.append(shift + cmd)
             # Sleep if necessary
             if sleep_max_ms > 0:
@@ -460,18 +464,16 @@ class HotplugTestBundle(TransientTestBundle):
         return script
 
     @classmethod
-    def _from_target(cls, te,res_dir=None, seed=None, nr_operations=100,
+    def _from_target(cls, te, res_dir=None, seed=None, nr_operations=100,
             sleep_min_ms=10, sleep_max_ms=100, duration_s=10,
-            max_cpus_off=sys.maxint, max_duration_s=10):
+            max_cpus_off=sys.maxint):
 
         if not seed:
             random.seed()
             seed = random.randint(0, sys.maxint)
 
-        hotpluggable_cpus = filter(
-            lambda cpu: te.target.file_exists(cls._cpuhp_path(te, cpu)),
-            te.target.list_online_cpus()
-        )
+        te.target.hotplug.online_all()
+        hotpluggable_cpus = te.target.hotplug.list_hotpluggable_cpus()
 
         sequence = cls._random_cpuhp_seq(
             seed, nr_operations, hotpluggable_cpus, max_cpus_off
@@ -493,7 +495,21 @@ class HotplugTestBundle(TransientTestBundle):
             #cls._log.info(msg.format(timeout))
             target_alive = False
 
-        return ResultBundle(target_alive)
+        live_cpus = te.target.list_online_cpus() if target_alive else []
+
+        return cls(target_alive, hotpluggable_cpus, live_cpus)
+
+    def test_target_alive(self):
+        """
+        Test that the hotplugs didn't leave the target in an unusable state
+        """
+        return self.target_alive
+
+    def test_cpus_alive(self):
+        """
+        Test that all CPUs came back online after the hotplug operations
+        """
+        return self.hotpluggable_cpus == self.live_cpus
 
 ################################################################################
 ################################################################################
