@@ -398,7 +398,9 @@ fi
 
 # Make sure an absolute path is used so relative paths will not be relocated
 # under $LISA_HOME/results/
-LISA_RESULTS_BASE=$(readlink -f "$LISA_RESULTS_BASE")
+# Comment-out this line for LAVA, since it fails inside the container for
+# unknown reasons
+# LISA_RESULTS_BASE=$(readlink -f "$LISA_RESULTS_BASE")
 
 # Execute in a sub-shell
 (
