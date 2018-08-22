@@ -762,7 +762,7 @@ class HotplugTestBundle(TestBundle):
         # Make sure to stop the hotplug stress after timeout_s seconds
         script.append('LOOP_PID=$!')
         script.append('sleep {}'.format(timeout_s))
-        script.append('kill -9 $LOOP_PID')
+        script.append('[ $(ps -q $LOOP_PID | wc -l) -gt 1 ] && kill -9 $LOOP_PID')
 
         return script
 
