@@ -140,6 +140,14 @@ class LisaTest(unittest.TestCase):
             self.get_trace(experiment).ftrace, self.te.topology, execname=task)
 
     @memoized
+    def get_sched_assert_pid(self, experiment, pid):
+        """
+        Return a SchedAssert over the task provided
+        """
+        return SchedAssert(
+            self.get_trace(experiment).ftrace, self.te.topology, pid=pid)
+
+    @memoized
     def get_multi_assert(self, experiment, task_filter=""):
         """
         Return a SchedMultiAssert over the tasks whose names contain task_filter
