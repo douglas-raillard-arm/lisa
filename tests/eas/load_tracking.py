@@ -20,6 +20,7 @@ import pandas as pd
 import logging
 import re
 import json
+import operator
 from collections import OrderedDict
 
 from bart.common.Utils import select_window, area_under_curve
@@ -39,6 +40,16 @@ UTIL_SCALE = 1024
 UTIL_AVG_CONVERGENCE_TIME = 0.3
 # Allowed margin between expected and observed util_avg value
 ERROR_MARGIN_PCT = 15
+# Allowed error margin % for migration tests
+MIGRATION_ERROR_MARGIN_PCT = 2
+# When running migration tests intererence from kthreads could skew the results
+# which we try to detect. This threshold defines the acceptable percentage of
+# intererence that we know won't skew the results enough.
+# Sadly it's hard to make the kthreads completely quite or prevent from running
+# randomly on the CPUs we are running the tests on, and these tests are very
+# sensitive to this kind of 'creep' because of the tight error margin we would
+# like to keep.
+MIGRATION_ALLOWED_INTERFERENCE_PCT = 0.5
 # PELT half-life value in ms
 HALF_LIFE_MS = 32
 
@@ -555,7 +566,7 @@ class _CPUMigrationBase(LisaTest):
     }
 
     # Allowed error margin
-    allowed_util_margin = UTIL_SCALE * 0.02
+    allowed_util_margin = UTIL_SCALE * (MIGRATION_ERROR_MARGIN_PCT / 100.)
 
     # Dictionary that contains the description of the tasks
     tasks_desc = {}
@@ -692,7 +703,7 @@ class _CPUMigrationBase(LisaTest):
                              start + phase_duration_s)
         return window
 
-    def _get_util_mean(self, start, end, df, cpus):
+    def _get_util_mean(self, experiment, phase, start, end, df, cpus):
         """
         Compute the mean utilization per CPU given a time interval
         :param start: start of the time interval
@@ -713,7 +724,26 @@ class _CPUMigrationBase(LisaTest):
         util_mean = {}
         df = df[start:end]
         for cpu in cpus:
-            util = df[(df.cpu == cpu) & (df.path == '/')].util
+            util = df[(df.cpu == cpu) & (df.path == '/')]
+            for task in util['__comm'].unique():
+                if task != "<idle>" and not task in self.tasks_desc.keys():
+
+                    # The same task might appear under several pids, calculate
+                    # the total percentage of time for this task
+                    pids = util[(util['__comm'] == task)]['__pid'].unique()
+                    creep_time = 0
+                    for pid in pids:
+                        sched_assert = self.get_sched_assert_pid(experiment, pid)
+                        creep_time += sched_assert.getRuntime(window=(start, end), percent=True)
+
+                    # Make sure that any other processes that creeped into the
+                    # cpu we are testing on are insignificant
+                    msg = "task {} creeped into CPU{} for {}% during {}".format(task, cpu, creep_time, phase)
+                    msg.format(task, cpu, creep_time, phase)
+                    print msg
+                    #self.assertFalse(creep_time > MIGRATION_ALLOWED_INTERFERENCE_PCT, msg)
+
+            util = util.util
             util_mean[cpu] = area_under_curve(util) / (end - start)
         return util_mean
 
@@ -774,7 +804,8 @@ class _CPUMigrationBase(LisaTest):
                 cpus.update(self._get_cpus(task[1], phase))
 
             # Get the mean utilization per CPU
-            util_mean = self._get_util_mean(window[phase][0], window[phase][1],
+            util_mean = self._get_util_mean(experiment, phase,
+                                            window[phase][0], window[phase][1],
                                             util_df, cpus)
             # Get the expected utilization per CPU
             expected = self._get_util_expected(self.tasks_desc, cpus, phase)
@@ -946,7 +977,7 @@ class _PELTTaskGroupsTest(LisaTest):
         'modules': ['cpufreq', 'cgroups'],
     }
     # Allowed error margin
-    allowed_util_margin = 0.02
+    allowed_util_margin = (MIGRATION_ERROR_MARGIN_PCT / 100.)
 
     @classmethod
     def runExperiments(cls):
