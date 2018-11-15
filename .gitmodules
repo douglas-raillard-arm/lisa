@@ -1,6 +1,6 @@
 [submodule "libs/devlib"]
 	path = libs/devlib
-	url = https://github.com/ARM-Software/devlib.git
+	url = https://github.com/douglas-raillard-arm/devlib.git
 [submodule "libs/trappy"]
 	path = libs/trappy
 	url = https://github.com/ARM-Software/trappy.git
