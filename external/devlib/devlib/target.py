@@ -704,6 +704,10 @@ class Target(object):
 
         result = {}
 
+        print('%' * 40)
+        print(output)
+        print('$' * 40)
+
         # Unpack the archive in memory
         tar_gz = base64.b64decode(output)
         tar_gz_bytes = io.BytesIO(tar_gz)
