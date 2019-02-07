@@ -62,7 +62,6 @@ import types
 import urllib.parse
 import urllib.request
 import uuid
-import xml.etree.ElementTree as ET
 
 import ruamel.yaml
 
@@ -1723,6 +1722,65 @@ class LISATestStepResult(StepResult):
         self.xunit = xunit
         self.results_path = results_path
         self.db = db
+
+    _db = None
+    @property
+    @functools.lru_cache(maxsize=None, typed=True)
+    def db(self):
+        db = self.__dict__.get('db') or self._db
+        if db:
+            return db
+        elif self.xunit:
+            import xml.etree.ElementTree as ET
+            from lisa.tests.base import CannotCreateError, Result, ResultBundle
+            from lisa.exekall_customize import LISAAdaptor
+            from exekall.utils import NoValue
+            from exekall.engine import ValueDB, FrozenExprVal, FrozenExprValSeq
+
+            froz_val_seq_list = []
+
+            root = ET.fromstring(self.xunit)
+            for et_testsuite in root.findall('testsuite'):
+                for et_testcase in et_testsuite.findall('testcase'):
+                    id_ = et_testcase.attrib['name']
+
+                    res_bundle = NoValue
+                    excep = NoValue
+                    if et_testcase.find('passed') is not None:
+                        res_bundle = ResultBundle(Result.PASSED)
+                    elif et_testcase.find('failure') is not None:
+                        res_bundle = ResultBundle(Result.FAILED)
+                    elif et_testcase.find('error') is not None:
+                        excep = ValueError('foo')
+                    else:
+                        continue
+
+                    froz_val = FrozenExprVal(
+                        param_map={},
+                        value=res_bundle,
+                        excep=excep,
+                        uuid=uuid.uuid4().hex,
+                        callable_qualname='foo.qual',
+                        callable_name='foo',
+                        recorded_id_map=IDMap(id_),
+                    )
+                    froz_val_seq = FrozenExprValSeq([froz_val], {})
+                    froz_val_seq_list.append(froz_val_seq)
+
+            db = ValueDB(froz_val_seq_list, adaptor_cls=LISAAdaptor)
+            return db
+        else:
+            return None
+
+    @db.setter
+    def db(self, db):
+        self._db = db
+
+class IDMap(dict):
+    def __init__(self, id_):
+        self._id = id_
+    def __missing__(self, key):
+        return self._id
 
 def is_excep_ignored(excep, ignored_except_set):
     # If the type is missing, assume a generic Exception
