@@ -1727,13 +1727,15 @@ class LISATestStepResult(StepResult):
     @property
     @functools.lru_cache(maxsize=None, typed=True)
     def db(self):
+        from lisa.exekall_customize import LISAAdaptor
         db = self.__dict__.get('db') or self._db
         if db:
+            if not db.adaptor_cls:
+                db.adaptor_cls = LISAAdaptor
             return db
         elif self.xunit:
             import xml.etree.ElementTree as ET
             from lisa.tests.base import CannotCreateError, Result, ResultBundle
-            from lisa.exekall_customize import LISAAdaptor
             from exekall.utils import NoValue
             from exekall.engine import ValueDB, FrozenExprVal, FrozenExprValSeq
 
