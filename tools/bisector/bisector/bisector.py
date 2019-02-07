@@ -2392,7 +2392,9 @@ class ExekallLISATestStep(ShellStep):
                 db_list.append(existing_db)
 
             merged_db = ValueDB.merge(db_list)
-            merged_db.to_path(export_db)
+            # Optimizing is not really needed since we won't reuse that DB a
+            # lot, and it takes quite some time to optimize the pickle output.
+            merged_db.to_path(export_db, optimize=False)
 
         return out
 
@@ -5637,8 +5639,6 @@ BISECTOR_LOGGER = logging.getLogger('BISECTOR')
 BISECTOR_FORMATTER = logging.Formatter('[%(name)s][%(asctime)s] %(levelname)s  %(message)s')
 
 def main(argv=sys.argv[1:]):
-
-
     BISECTOR_LOGGER.setLevel(logging.DEBUG)
 
     console_handler = logging.StreamHandler()
