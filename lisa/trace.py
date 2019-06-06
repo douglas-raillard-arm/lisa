@@ -34,7 +34,7 @@ import inspect
 from functools import reduce, wraps
 from collections.abc import Sequence
 
-from lisa.utils import Loggable, HideExekallID, memoized, deduplicate
+from lisa.utils import Loggable, HideExekallID, memoized, deduplicate, LISA_HOME
 from lisa.platforms.platinfo import PlatformInfo
 from lisa.conf import SimpleMultiSrcConf, KeyDesc, TopLevelKeyDesc, StrList, Configurable
 import devlib
@@ -154,13 +154,14 @@ class TraceView(Loggable, TraceBase):
         t_min = window[0]
         t_max = window[1]
 
-        trace_classes = [cls for cls in self.base_trace.ftrace.trace_classes
-                         if not cls.data_frame.empty]
+        #  trace_classes = [cls for cls in self.base_trace.ftrace.trace_classes
+                         #  if not cls.data_frame.empty]
+
 
         if t_min is not None:
             start = self.base_trace.end
-            for trace_class in trace_classes:
-                df = trace_class.data_frame[t_min:]
+            for event in self.trace.ftrace.events:
+                df = self.trace.df_events(event)[t_min:]
                 if not df.empty:
                     start = min(start, df.index[0])
             t_min = start
@@ -169,8 +170,8 @@ class TraceView(Loggable, TraceBase):
 
         if t_max is not None:
             end = self.base_trace.start
-            for trace_class in trace_classes:
-                df = trace_class.data_frame[:t_max]
+            for event in self.trace.ftrace.events:
+                df = self.trace.df_events(event)[t_max:]
                 if not df.empty:
                     end = max(end, df.index[-1])
             t_max = end
@@ -214,6 +215,34 @@ class TraceView(Loggable, TraceBase):
             end = min(end, window[1])
 
         return self.base_trace.get_view((start, end))
+
+class PerfTrace(Loggable):
+    def __init__(self, path, events=[], normalize_time=True):
+        self.trace_path = path
+        self.events = events
+
+        import subprocess
+        import tempfile
+        perf_script_path = os.path.join(LISA_HOME, 'tools', 'parse_trace_perf_script.py')
+        with tempfile.NamedTemporaryFile() as json_file:
+            cmd = ['perf', 'script', '-s', perf_script_path]
+            if normalize_time:
+                cmd.append('--reltime')
+            cmd.extend([path, json_file.name])
+
+            subprocess.call(cmd)
+            json_file.flush()
+            entries = json.load(json_file)
+
+        self.entries = entries
+        self.normalized_time = normalize_time
+
+    def get_duration(self):
+        end = max(
+            entry['common_ns']
+            for entry in self.entries
+        )
+        return end
 
 class Trace(Loggable, TraceBase):
     """
@@ -372,14 +401,21 @@ class Trace(Loggable, TraceBase):
             raise ValueError("Unknown trace format {}".format(trace_format))
 
         # Make sure event names are not unicode strings
-        self.ftrace = trace_class(path, scope="custom", events=self.events,
-                                  normalize_time=self.normalize_time)
+        #  self.ftrace = trace_class(path, scope="custom", events=self.events,
+                                  #  normalize_time=self.normalize_time)
+        self.ftrace = PerfTrace(path, events=self.events)
 
         # Load Functions profiling data
-        has_function_stats = self._loadFunctionsStats(path)
+        #  has_function_stats = self._loadFunctionsStats(path)
+        has_function_stats = False
 
         # Check for events available on the parsed trace
-        self._check_available_events()
+        #  self._check_available_events()
+
+        self.available_events = {
+            entry['common_event']
+            for entry in self.ftrace.entries
+        }
         if not self.available_events:
             if has_function_stats:
                 logger.info('Trace contains only functions stats')
@@ -401,22 +437,6 @@ class Trace(Loggable, TraceBase):
         self._sanitize_SchedOverutilized()
         self._sanitize_CpuFrequency()
         self._sanitize_ThermalPowerCpu()
-
-    def _check_available_events(self, key=""):
-        """
-        Internal method used to build a list of available events.
-
-        :param key: key to be used for TRAPpy filtering
-        :type key: str
-        """
-        logger = self.get_logger()
-        for val in self.ftrace.get_filters(key):
-            obj = getattr(self.ftrace, val)
-            if not obj.data_frame.empty:
-                self.available_events.append(val)
-        logger.debug('Events found on trace:')
-        for evt in self.available_events:
-            logger.debug(' - %s', evt)
 
     def _load_tasks_names(self):
         """
@@ -602,7 +622,12 @@ class Trace(Loggable, TraceBase):
         :type event: str
         """
         try:
-            return getattr(self.ftrace, event).data_frame
+            #  return getattr(self.ftrace, event).data_frame
+            return pd.DataFrame(
+                entry
+                for entry in self.ftrace.entries
+                if entry['common_event'] == event
+            )
         except AttributeError:
             raise ValueError('Event [{}] not supported. '
                              'Supported events are: {}'
@@ -767,7 +792,8 @@ class Trace(Loggable, TraceBase):
             return
 
         # df = self.df_events('sched_overutilized')
-        df = getattr(self.ftrace, "sched_overutilized").data_frame
+        #  df = getattr(self.ftrace, "sched_overutilized").data_frame
+        df = self.df_events('sched_overutilized')
         self.add_events_deltas(df, 'len')
 
         # Build a stat on trace overutilization
@@ -840,7 +866,10 @@ class Trace(Loggable, TraceBase):
         # frequency events to report
         if len(df) == 0:
             # Register devlib injected events as 'cpu_frequency' events
-            setattr(self.ftrace.cpu_frequency, 'data_frame', devlib_freq)
+            #  setattr(self.ftrace.cpu_frequency, 'data_frame', devlib_freq)
+            self.ftrace.entries.append(devlib_freq.to_dict('records'))
+            self.ftrace.entries = sorted(self.ftrace.entries, key=lambda entry: entry['common_ns'])
+
             df = devlib_freq
             self.available_events.append('cpu_frequency')
 
@@ -885,7 +914,8 @@ class Trace(Loggable, TraceBase):
 
                 df.sort_index(inplace=True)
 
-            setattr(self.ftrace.cpu_frequency, 'data_frame', df)
+            self.ftrace.entries.append(df.to_dict('records'))
+            self.ftrace.entries = sorted(self.ftrace.entries, key=lambda entry: entry['common_ns'])
 
         # Frequency Coherency Check
         for cpus in domains:
