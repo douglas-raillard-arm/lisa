@@ -1,0 +1,1277 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Contributor’s guide &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Workflows" href="workflows/index.html" />
+    <link rel="prev" title="Transitioning from LISA legacy" href="transition_guide.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lisa_shell/man/man.html">LISA shell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transition_guide.html">Transitioning from LISA legacy</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributor’s guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#contribution-rules">Contribution rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#subtrees">Subtrees</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#updating-the-subtrees">Updating the subtrees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#submitting-your-subtree-changes">Submitting your subtree changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#validating-your-changes">Validating your changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing-self-tests">Writing self-tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api">API</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-tests.utils">Utilities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#implemented-tests">Implemented tests</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflows/index.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="target.html">Target</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workloads.html">Workloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="energy_analysis.html">Energy analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc_utilities.html">Miscellaneous utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bisector/index.html">Bisector Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exekall/index.html">Exekall Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Contributor’s guide</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/contributors_guide.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="contributor-s-guide">
+<h1>Contributor’s guide<a class="headerlink" href="#contributor-s-guide" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="contribution-rules">
+<h2>Contribution rules<a class="headerlink" href="#contribution-rules" title="Permalink to this headline">¶</a></h2>
+<p>See <a class="reference external" href="https://github.com/ARM-software/lisa/blob/master/CONTRIBUTING.md">this document</a>.</p>
+</div>
+<div class="section" id="subtrees">
+<h2>Subtrees<a class="headerlink" href="#subtrees" title="Permalink to this headline">¶</a></h2>
+<p>are available as subtrees under <code class="docutils literal notranslate"><span class="pre">$repo/external</span></code>.</p>
+<div class="section" id="updating-the-subtrees">
+<h3>Updating the subtrees<a class="headerlink" href="#updating-the-subtrees" title="Permalink to this headline">¶</a></h3>
+<p>If you got a Pull Request merged in e.g. <code class="xref py py-mod docutils literal notranslate"><span class="pre">devlib</span></code> and want to use some of
+the features you introduced in LISA, you’ll need to update the subtrees. There is
+a handy LISA shell command available for that:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lisa</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">subtrees</span>
+</pre></div>
+</div>
+<p>This will update every subtree in the repository with the right incantation, and
+the result can be pushed straight away to LISA as a Pull Request (or included in
+a broader Pull Request).</p>
+</div>
+<div class="section" id="submitting-your-subtree-changes">
+<h3>Submitting your subtree changes<a class="headerlink" href="#submitting-your-subtree-changes" title="Permalink to this headline">¶</a></h3>
+<p>Our changes to subtrees are often developped conjointly with LISA, so we write our
+modifications directly in the subtrees. You can commit these changes in the LISA
+repository, then shape those modifications into a git history ready to be pushed
+using <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">subtree</span> <span class="pre">split</span></code>. Assuming you want to split a devlib change and have
+a devlib remote set up in your repository, you’d have to issue the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ensure refs are up to date</span>
+<span class="n">git</span> <span class="n">fetch</span> <span class="n">devlib</span>
+<span class="c1"># Do the split</span>
+<span class="n">git</span> <span class="n">subtree</span> <span class="n">split</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=</span><span class="n">external</span><span class="o">/</span><span class="n">devlib</span> <span class="o">-</span><span class="n">b</span> <span class="n">my</span><span class="o">-</span><span class="n">devlib</span><span class="o">-</span><span class="n">feature</span>
+</pre></div>
+</div>
+<p>This will give you a <code class="docutils literal notranslate"><span class="pre">my-devlib-feature</span></code> branch ready to be pushed. To make
+things easier, we recommend setting up a remote to your devlib fork:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">remote</span> <span class="n">add</span> <span class="n">devlib</span><span class="o">-</span><span class="n">me</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">me</span><span class="o">/</span><span class="n">devlib</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>You can then push this branch to your devlib fork like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span> <span class="o">-</span><span class="n">u</span> <span class="n">devlib</span><span class="o">-</span><span class="n">me</span> <span class="n">my</span><span class="o">-</span><span class="n">devlib</span><span class="o">-</span><span class="n">feature</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="validating-your-changes">
+<h2>Validating your changes<a class="headerlink" href="#validating-your-changes" title="Permalink to this headline">¶</a></h2>
+<p>To ensure everything behaves as expected at all times, LISA comes with some
+self-tests, which is a mix of unit and behavioural tests.</p>
+<p>From the root of LISA, you can run those tests like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">nose</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># You can also target specific test modules</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">nose</span> <span class="n">tests</span><span class="o">/</span><span class="n">test_test_bundle</span><span class="o">.</span><span class="n">py</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Or even specific test classes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">nose</span> <span class="n">tests</span><span class="o">/</span><span class="n">test_test_bundle</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="n">BundleCheck</span>
+</pre></div>
+</div>
+<div class="section" id="writing-self-tests">
+<h3>Writing self-tests<a class="headerlink" href="#writing-self-tests" title="Permalink to this headline">¶</a></h3>
+<p>You should strive to validate as much of your code as possible through
+self-tests. It’s a nice way to showcase that your code works, and also how it
+works. On top of that, it makes sure that later changes won’t break it.</p>
+<p>It’s possible to write tests that require a live target - see
+<a class="reference internal" href="#tests.utils.create_local_target" title="tests.utils.create_local_target"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_local_target()</span></code></a>. However, as these tests
+are meant to be run by Travis as part of our pull-request validation, they have
+to be designed to work on a target with limited privilege.</p>
+</div>
+<div class="section" id="api">
+<h3>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="module-tests.utils">
+<span id="utilities"></span><h4>Utilities<a class="headerlink" href="#module-tests.utils" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="tests.utils.create_local_target">
+<code class="sig-prename descclassname">tests.utils.</code><code class="sig-name descname">create_local_target</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.utils.create_local_target" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A localhost <a class="reference internal" href="target.html#lisa.target.Target" title="lisa.target.Target"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.target.Target</span></code></a> instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.utils.StorageTestCase">
+<em class="property">class </em><code class="sig-prename descclassname">tests.utils.</code><code class="sig-name descname">StorageTestCase</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.utils.StorageTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>A base class for tests that also provides a directory</p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="method">
+<dt id="tests.utils.StorageTestCase.setUp">
+<code class="sig-name descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.utils.StorageTestCase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook method for setting up the test fixture before exercising it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.utils.StorageTestCase.tearDown">
+<code class="sig-name descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.utils.StorageTestCase.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook method for deconstructing the test fixture after testing it.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="tests.utils.nullcontext">
+<code class="sig-prename descclassname">tests.utils.</code><code class="sig-name descname">nullcontext</code><span class="sig-paren">(</span><em class="sig-param">enter_result=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.utils.nullcontext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport of Python 3.7 contextlib.nullcontext</p>
+</dd></dl>
+
+</div>
+<div class="section" id="implemented-tests">
+<h4>Implemented tests<a class="headerlink" href="#implemented-tests" title="Permalink to this headline">¶</a></h4>
+<span class="target" id="module-tests.test_test_bundle"></span><dl class="class">
+<dt id="tests.test_test_bundle.DummyTestBundle">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_test_bundle.</code><code class="sig-name descname">DummyTestBundle</code><span class="sig-paren">(</span><em class="sig-param">res_dir</em>, <em class="sig-param">shell_output</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_test_bundle.DummyTestBundle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="kernel_tests.html#lisa.tests.base.TestBundle" title="lisa.tests.base.TestBundle"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.tests.base.TestBundle</span></code></a></p>
+<p>A dummy bundle that only does some simple target interaction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_test_bundle.DummyTestBundle.test_output" title="tests.test_test_bundle.DummyTestBundle.test_output"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_output()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_test_bundle.DummyTestBundle.test_output">
+<code class="sig-name descname">test_output</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_test_bundle.DummyTestBundle.test_output" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_test_bundle.BundleCheck">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_test_bundle.</code><code class="sig-name descname">BundleCheck</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_test_bundle.BundleCheck" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.utils.StorageTestCase" title="tests.utils.StorageTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.utils.StorageTestCase</span></code></a></p>
+<p>A test class that verifies some <a class="reference internal" href="kernel_tests.html#lisa.tests.base.TestBundle" title="lisa.tests.base.TestBundle"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.tests.base.TestBundle</span></code></a>
+base behaviours.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_test_bundle.BundleCheck.test_init" title="tests.test_test_bundle.BundleCheck.test_init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_init()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_test_bundle.BundleCheck.test_serialization" title="tests.test_test_bundle.BundleCheck.test_serialization"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_serialization()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_test_bundle.BundleCheck.test_target_init" title="tests.test_test_bundle.BundleCheck.test_target_init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_target_init()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_test_bundle.BundleCheck.test_init" title="tests.test_test_bundle.BundleCheck.test_init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_init()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_test_bundle.BundleCheck.test_serialization" title="tests.test_test_bundle.BundleCheck.test_serialization"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_serialization()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_test_bundle.BundleCheck.test_target_init" title="tests.test_test_bundle.BundleCheck.test_target_init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_target_init()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_test_bundle.BundleCheck.setUp">
+<code class="sig-name descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_test_bundle.BundleCheck.setUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook method for setting up the test fixture before exercising it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_test_bundle.BundleCheck.test_init">
+<code class="sig-name descname">test_init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_test_bundle.BundleCheck.test_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that creating a dummy bundle works</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_test_bundle.BundleCheck.test_target_init">
+<code class="sig-name descname">test_target_init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_test_bundle.BundleCheck.test_target_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that creating a bundle from a target works</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_test_bundle.BundleCheck.test_serialization">
+<code class="sig-name descname">test_serialization</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_test_bundle.BundleCheck.test_serialization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that bundle serialization works correctly</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-tests.test_energy_model"></span><dl class="function">
+<dt id="tests.test_energy_model.little_cpu_node">
+<code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">little_cpu_node</code><span class="sig-paren">(</span><em class="sig-param">cpu</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.little_cpu_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="tests.test_energy_model.big_cpu_node">
+<code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">big_cpu_node</code><span class="sig-paren">(</span><em class="sig-param">cpu</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.big_cpu_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestInvalid">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestInvalid</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestInvalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Test the sanity checks in EnerygModel setup</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestInvalid.test_overlapping_freq_doms" title="tests.test_energy_model.TestInvalid.test_overlapping_freq_doms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_overlapping_freq_doms()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestInvalid.test_overlapping_freq_doms" title="tests.test_energy_model.TestInvalid.test_overlapping_freq_doms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_overlapping_freq_doms()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestInvalid.test_overlapping_freq_doms">
+<code class="sig-name descname">test_overlapping_freq_doms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestInvalid.test_overlapping_freq_doms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can’t build an EM with energy nodes overlapping freq domains</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestOptimalPlacement">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestOptimalPlacement</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestOptimalPlacement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestOptimalPlacement.test_capacity_margin_single" title="tests.test_energy_model.TestOptimalPlacement.test_capacity_margin_single"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_capacity_margin_single()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestOptimalPlacement.test_overutilized_many" title="tests.test_energy_model.TestOptimalPlacement.test_overutilized_many"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_overutilized_many()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestOptimalPlacement.test_overutilized_single" title="tests.test_energy_model.TestOptimalPlacement.test_overutilized_single"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_overutilized_single()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestOptimalPlacement.test_packing" title="tests.test_energy_model.TestOptimalPlacement.test_packing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_packing()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestOptimalPlacement.test_single_big" title="tests.test_energy_model.TestOptimalPlacement.test_single_big"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_single_big()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestOptimalPlacement.test_single_small" title="tests.test_energy_model.TestOptimalPlacement.test_single_small"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_single_small()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestOptimalPlacement.assertPlacementListEqual">
+<code class="sig-name descname">assertPlacementListEqual</code><span class="sig-paren">(</span><em class="sig-param">l1</em>, <em class="sig-param">l2</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestOptimalPlacement.assertPlacementListEqual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that a pair of lists of lists contain the same lists in any order</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestOptimalPlacement.test_single_small">
+<code class="sig-name descname">test_single_small</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestOptimalPlacement.test_single_small" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestOptimalPlacement.test_single_big">
+<code class="sig-name descname">test_single_big</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestOptimalPlacement.test_single_big" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestOptimalPlacement.test_packing">
+<code class="sig-name descname">test_packing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestOptimalPlacement.test_packing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestOptimalPlacement.test_overutilized_single">
+<code class="sig-name descname">test_overutilized_single</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestOptimalPlacement.test_overutilized_single" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestOptimalPlacement.test_capacity_margin_single">
+<code class="sig-name descname">test_capacity_margin_single</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestOptimalPlacement.test_capacity_margin_single" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestOptimalPlacement.test_overutilized_many">
+<code class="sig-name descname">test_overutilized_many</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestOptimalPlacement.test_overutilized_many" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestBiggestCpus">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestBiggestCpus</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestBiggestCpus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestBiggestCpus.test_biggest_cpus" title="tests.test_energy_model.TestBiggestCpus.test_biggest_cpus"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_biggest_cpus()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestBiggestCpus.test_biggest_cpus">
+<code class="sig-name descname">test_biggest_cpus</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestBiggestCpus.test_biggest_cpus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestLittlestCpus">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestLittlestCpus</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestLittlestCpus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestLittlestCpus.test_littlest_cpus" title="tests.test_energy_model.TestLittlestCpus.test_littlest_cpus"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_littlest_cpus()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestLittlestCpus.test_littlest_cpus">
+<code class="sig-name descname">test_littlest_cpus</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestLittlestCpus.test_littlest_cpus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestMaxCap">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestMaxCap</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestMaxCap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestMaxCap.test_max_cap" title="tests.test_energy_model.TestMaxCap.test_max_cap"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_max_cap()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestMaxCap.test_max_cap">
+<code class="sig-name descname">test_max_cap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestMaxCap.test_max_cap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestEnergyEst">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestEnergyEst</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestEnergyEst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestEnergyEst.test_all_idle" title="tests.test_energy_model.TestEnergyEst.test_all_idle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_all_idle()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestEnergyEst.test_all_overutilized" title="tests.test_energy_model.TestEnergyEst.test_all_overutilized"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_all_overutilized()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestEnergyEst.test_one_little_half_lowest" title="tests.test_energy_model.TestEnergyEst.test_one_little_half_lowest"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_one_little_half_lowest()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestEnergyEst.test_all_overutilized">
+<code class="sig-name descname">test_all_overutilized</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestEnergyEst.test_all_overutilized" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestEnergyEst.test_all_idle">
+<code class="sig-name descname">test_all_idle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestEnergyEst.test_all_idle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestEnergyEst.test_one_little_half_lowest">
+<code class="sig-name descname">test_one_little_half_lowest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestEnergyEst.test_one_little_half_lowest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestIdleStates">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestIdleStates</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestIdleStates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestIdleStates.test_all_cpus_used" title="tests.test_energy_model.TestIdleStates.test_all_cpus_used"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_all_cpus_used()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestIdleStates.test_one_cpu_per_cluster" title="tests.test_energy_model.TestIdleStates.test_one_cpu_per_cluster"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_one_cpu_per_cluster()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestIdleStates.test_single_cpu_used" title="tests.test_energy_model.TestIdleStates.test_single_cpu_used"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_single_cpu_used()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestIdleStates.test_zero_util_deepest" title="tests.test_energy_model.TestIdleStates.test_zero_util_deepest"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_zero_util_deepest()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestIdleStates.test_zero_util_deepest">
+<code class="sig-name descname">test_zero_util_deepest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestIdleStates.test_zero_util_deepest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestIdleStates.test_single_cpu_used">
+<code class="sig-name descname">test_single_cpu_used</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestIdleStates.test_single_cpu_used" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestIdleStates.test_all_cpus_used">
+<code class="sig-name descname">test_all_cpus_used</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestIdleStates.test_all_cpus_used" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestIdleStates.test_one_cpu_per_cluster">
+<code class="sig-name descname">test_one_cpu_per_cluster</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestIdleStates.test_one_cpu_per_cluster" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestFreqs">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestFreqs</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestFreqs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestFreqs.test_freq_domains" title="tests.test_energy_model.TestFreqs.test_freq_domains"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_freq_domains()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestFreqs.test_high_util_fastest" title="tests.test_energy_model.TestFreqs.test_high_util_fastest"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_high_util_fastest()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestFreqs.test_middle_freq" title="tests.test_energy_model.TestFreqs.test_middle_freq"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_middle_freq()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestFreqs.test_zero_util_slowest" title="tests.test_energy_model.TestFreqs.test_zero_util_slowest"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_zero_util_slowest()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestFreqs.test_zero_util_slowest">
+<code class="sig-name descname">test_zero_util_slowest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestFreqs.test_zero_util_slowest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestFreqs.test_high_util_fastest">
+<code class="sig-name descname">test_high_util_fastest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestFreqs.test_high_util_fastest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestFreqs.test_freq_domains">
+<code class="sig-name descname">test_freq_domains</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestFreqs.test_freq_domains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_energy_model.TestFreqs.test_middle_freq">
+<code class="sig-name descname">test_middle_freq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestFreqs.test_middle_freq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestNames">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestNames</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestNames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Test that the default names for CPU nodes get set</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestNames.test_names" title="tests.test_energy_model.TestNames.test_names"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_names()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestNames.test_names" title="tests.test_energy_model.TestNames.test_names"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_names()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestNames.test_names">
+<code class="sig-name descname">test_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestNames.test_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestCpuGroups">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestCpuGroups</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestCpuGroups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Test the cpu_groups property</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestCpuGroups.test_cpu_groups" title="tests.test_energy_model.TestCpuGroups.test_cpu_groups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_cpu_groups()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestCpuGroups.test_cpu_groups" title="tests.test_energy_model.TestCpuGroups.test_cpu_groups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_cpu_groups()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestCpuGroups.test_cpu_groups">
+<code class="sig-name descname">test_cpu_groups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestCpuGroups.test_cpu_groups" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestGetCpuCapacity">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestGetCpuCapacity</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestGetCpuCapacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Test the get_cpu_capacity method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestGetCpuCapacity.test_get_cpu_capacity" title="tests.test_energy_model.TestGetCpuCapacity.test_get_cpu_capacity"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_get_cpu_capacity()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestGetCpuCapacity.test_get_cpu_capacity" title="tests.test_energy_model.TestGetCpuCapacity.test_get_cpu_capacity"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_get_cpu_capacity()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestGetCpuCapacity.test_get_cpu_capacity">
+<code class="sig-name descname">test_get_cpu_capacity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestGetCpuCapacity.test_get_cpu_capacity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestEstimateFromTrace">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestEstimateFromTrace</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestEstimateFromTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/unittest.html#unittest.TestCase" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.TestCase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestEstimateFromTrace.test_estimate_from_trace" title="tests.test_energy_model.TestEstimateFromTrace.test_estimate_from_trace"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_estimate_from_trace()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestEstimateFromTrace.test_estimate_from_trace">
+<code class="sig-name descname">test_estimate_from_trace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestEstimateFromTrace.test_estimate_from_trace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_energy_model.TestSerialization">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_energy_model.</code><code class="sig-name descname">TestSerialization</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestSerialization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.utils.StorageTestCase" title="tests.utils.StorageTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.utils.StorageTestCase</span></code></a></p>
+<p>A test class that verifies the Energy Model’s serialization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestSerialization.test_serialization" title="tests.test_energy_model.TestSerialization.test_serialization"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_serialization()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_energy_model.TestSerialization.test_serialization" title="tests.test_energy_model.TestSerialization.test_serialization"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_serialization()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_energy_model.TestSerialization.test_serialization">
+<code class="sig-name descname">test_serialization</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_energy_model.TestSerialization.test_serialization" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-tests.test_trace"></span><dl class="class">
+<dt id="tests.test_trace.TraceTestCase">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_trace.</code><code class="sig-name descname">TraceTestCase</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TraceTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.utils.StorageTestCase" title="tests.utils.StorageTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.utils.StorageTestCase</span></code></a></p>
+<dl class="attribute">
+<dt id="tests.test_trace.TraceTestCase.traces_dir">
+<code class="sig-name descname">traces_dir</code><em class="property"> = '/home/dourai01/Data/Git/lisa/repo/tests/assets'</em><a class="headerlink" href="#tests.test_trace.TraceTestCase.traces_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="tests.test_trace.TraceTestCase.events">
+<code class="sig-name descname">events</code><em class="property"> = ['sched_switch', 'sched_wakeup', 'sched_overutilized', 'cpu_idle', 'sched_load_avg_task', 'sched_load_se']</em><a class="headerlink" href="#tests.test_trace.TraceTestCase.events" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="tests.test_trace.TraceTestCase.FLOAT_PLACES">
+<code class="sig-name descname">FLOAT_PLACES</code><em class="property"> = 6</em><a class="headerlink" href="#tests.test_trace.TraceTestCase.FLOAT_PLACES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TraceTestCase.assertAlmostEqual">
+<code class="sig-name descname">assertAlmostEqual</code><span class="sig-paren">(</span><em class="sig-param">first</em>, <em class="sig-param">second</em>, <em class="sig-param">places=6</em>, <em class="sig-param">msg=None</em>, <em class="sig-param">delta=None</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TraceTestCase.assertAlmostEqual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fail if the two objects are unequal as determined by their
+difference rounded to the given number of decimal places
+(default 7) and comparing to zero, or by comparing that the
+difference between the two objects is more than the given
+delta.</p>
+<p>Note that decimal places (from zero) are usually not the same
+as significant digits (measured from the most significant digit).</p>
+<p>If the two objects compare equal then they will automatically
+compare almost equal.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TraceTestCase.make_trace">
+<code class="sig-name descname">make_trace</code><span class="sig-paren">(</span><em class="sig-param">in_data</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TraceTestCase.make_trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a trace from an embedded string of textual trace data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TraceTestCase.get_trace">
+<code class="sig-name descname">get_trace</code><span class="sig-paren">(</span><em class="sig-param">trace_name</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TraceTestCase.get_trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a trace from a separate provided trace file</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_trace.TestTrace">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_trace.</code><code class="sig-name descname">TestTrace</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.test_trace.TraceTestCase" title="tests.test_trace.TraceTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.test_trace.TraceTestCase</span></code></a></p>
+<p>Smoke tests for LISA’s Trace class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_deriving_cpus_count" title="tests.test_trace.TestTrace.test_deriving_cpus_count"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_deriving_cpus_count()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_df_cpus_wakeups" title="tests.test_trace.TestTrace.test_df_cpus_wakeups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_df_cpus_wakeups()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_df_tasks_states" title="tests.test_trace.TestTrace.test_df_tasks_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_df_tasks_states()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_get_task_by_name" title="tests.test_trace.TestTrace.test_get_task_by_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_get_task_by_name()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_get_task_by_pid" title="tests.test_trace.TestTrace.test_get_task_by_pid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_get_task_by_pid()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_get_tasks" title="tests.test_trace.TestTrace.test_get_tasks"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_get_tasks()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_overutilized_time" title="tests.test_trace.TestTrace.test_overutilized_time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_overutilized_time()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_plot_cpu_idle_state_residency" title="tests.test_trace.TestTrace.test_plot_cpu_idle_state_residency"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_plot_cpu_idle_state_residency()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_sched_load_avg_signals" title="tests.test_trace.TestTrace.test_sched_load_avg_signals"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_sched_load_avg_signals()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_sched_load_signals" title="tests.test_trace.TestTrace.test_sched_load_signals"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_sched_load_signals()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_setTaskName" title="tests.test_trace.TestTrace.test_setTaskName"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_setTaskName()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_squash_df" title="tests.test_trace.TestTrace.test_squash_df"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_squash_df()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_time_range" title="tests.test_trace.TestTrace.test_time_range"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_time_range()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_get_task_by_name">
+<code class="sig-name descname">test_get_task_by_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_get_task_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>TestTrace: get_task_by_name() returns the list of PIDs for all tasks with the specified name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_get_task_by_pid">
+<code class="sig-name descname">test_get_task_by_pid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_get_task_by_pid" title="Permalink to this definition">¶</a></dt>
+<dd><p>TestTrace: get_task_by_pid() returns the name of the task with the specified PID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_get_tasks">
+<code class="sig-name descname">test_get_tasks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_get_tasks" title="Permalink to this definition">¶</a></dt>
+<dd><p>TestTrace: get_tasks() returns a dictionary mapping PIDs to a single task name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_setTaskName">
+<code class="sig-name descname">test_setTaskName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_setTaskName" title="Permalink to this definition">¶</a></dt>
+<dd><p>TestTrace: getTaskBy{Pid,Name}() properly track tasks renaming</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_time_range">
+<code class="sig-name descname">test_time_range</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_time_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>TestTrace: time_range is the duration of the trace</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_squash_df">
+<code class="sig-name descname">test_squash_df</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_squash_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>TestTrace: df_squash() behaves as expected</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_overutilized_time">
+<code class="sig-name descname">test_overutilized_time</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_overutilized_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>TestTrace: overutilized_time is the total time spent while system was overutilized</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_plot_cpu_idle_state_residency">
+<code class="sig-name descname">test_plot_cpu_idle_state_residency</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_plot_cpu_idle_state_residency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that plot_cpu_idle_state_residency doesn’t crash</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_deriving_cpus_count">
+<code class="sig-name descname">test_deriving_cpus_count</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_deriving_cpus_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that Trace derives cpus_count if it isn’t provided</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_df_cpus_wakeups">
+<code class="sig-name descname">test_df_cpus_wakeups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_df_cpus_wakeups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test the cpu_wakeups DataFrame getter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_sched_load_signals">
+<code class="sig-name descname">test_sched_load_signals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_sched_load_signals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test parsing sched_load_se events from EAS upstream integration</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_sched_load_avg_signals">
+<code class="sig-name descname">test_sched_load_avg_signals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_sched_load_avg_signals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test parsing sched_load_avg_task events from EAS1.2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.df_peripheral_clock_effective_rate">
+<code class="sig-name descname">df_peripheral_clock_effective_rate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.df_peripheral_clock_effective_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>TestTrace: getPeripheralClockInfo() returns proper effective rate info.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTrace.test_df_tasks_states">
+<code class="sig-name descname">test_df_tasks_states</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTrace.test_df_tasks_states" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_trace.TestTraceView">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_trace.</code><code class="sig-name descname">TestTraceView</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTraceView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.test_trace.TraceTestCase" title="tests.test_trace.TraceTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.test_trace.TraceTestCase</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_trace.TestTraceView.test_full_slice" title="tests.test_trace.TestTraceView.test_full_slice"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_full_slice()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTraceView.test_lower_slice" title="tests.test_trace.TestTraceView.test_lower_slice"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_lower_slice()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTraceView.test_time_range" title="tests.test_trace.TestTraceView.test_time_range"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_time_range()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTraceView.test_time_range_subscript" title="tests.test_trace.TestTraceView.test_time_range_subscript"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_time_range_subscript()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTraceView.test_upper_slice" title="tests.test_trace.TestTraceView.test_upper_slice"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_upper_slice()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_trace.TestTraceView.test_lower_slice">
+<code class="sig-name descname">test_lower_slice</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTraceView.test_lower_slice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTraceView.test_upper_slice">
+<code class="sig-name descname">test_upper_slice</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTraceView.test_upper_slice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTraceView.test_full_slice">
+<code class="sig-name descname">test_full_slice</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTraceView.test_full_slice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTraceView.test_time_range">
+<code class="sig-name descname">test_time_range</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTraceView.test_time_range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_trace.TestTraceView.test_time_range_subscript">
+<code class="sig-name descname">test_time_range_subscript</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTraceView.test_time_range_subscript" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_trace.TestNestedTraceView">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_trace.</code><code class="sig-name descname">TestNestedTraceView</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestNestedTraceView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.test_trace.TestTraceView" title="tests.test_trace.TestTraceView"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.test_trace.TestTraceView</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_trace.TestTraceView.test_full_slice" title="tests.test_trace.TestTraceView.test_full_slice"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_full_slice()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTraceView.test_lower_slice" title="tests.test_trace.TestTraceView.test_lower_slice"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_lower_slice()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTraceView.test_time_range" title="tests.test_trace.TestTraceView.test_time_range"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_time_range()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTraceView.test_time_range_subscript" title="tests.test_trace.TestTraceView.test_time_range_subscript"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_time_range_subscript()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTraceView.test_upper_slice" title="tests.test_trace.TestTraceView.test_upper_slice"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_upper_slice()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_trace.TestTraceNoClusterData">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_trace.</code><code class="sig-name descname">TestTraceNoClusterData</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTraceNoClusterData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.test_trace.TestTrace" title="tests.test_trace.TestTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.test_trace.TestTrace</span></code></a></p>
+<p>Test Trace without cluster data</p>
+<p>Inherits from TestTrace, so all the tests are run again but with
+no cluster info the platform dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_deriving_cpus_count" title="tests.test_trace.TestTrace.test_deriving_cpus_count"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_deriving_cpus_count()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_df_cpus_wakeups" title="tests.test_trace.TestTrace.test_df_cpus_wakeups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_df_cpus_wakeups()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_df_tasks_states" title="tests.test_trace.TestTrace.test_df_tasks_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_df_tasks_states()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_get_task_by_name" title="tests.test_trace.TestTrace.test_get_task_by_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_get_task_by_name()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_get_task_by_pid" title="tests.test_trace.TestTrace.test_get_task_by_pid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_get_task_by_pid()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_get_tasks" title="tests.test_trace.TestTrace.test_get_tasks"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_get_tasks()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_overutilized_time" title="tests.test_trace.TestTrace.test_overutilized_time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_overutilized_time()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_plot_cpu_idle_state_residency" title="tests.test_trace.TestTrace.test_plot_cpu_idle_state_residency"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_plot_cpu_idle_state_residency()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_sched_load_avg_signals" title="tests.test_trace.TestTrace.test_sched_load_avg_signals"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_sched_load_avg_signals()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_sched_load_signals" title="tests.test_trace.TestTrace.test_sched_load_signals"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_sched_load_signals()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_setTaskName" title="tests.test_trace.TestTrace.test_setTaskName"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_setTaskName()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_squash_df" title="tests.test_trace.TestTrace.test_squash_df"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_squash_df()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_time_range" title="tests.test_trace.TestTrace.test_time_range"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_time_range()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_trace.TestTraceNoPlatform">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_trace.</code><code class="sig-name descname">TestTraceNoPlatform</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_trace.TestTraceNoPlatform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.test_trace.TestTrace" title="tests.test_trace.TestTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.test_trace.TestTrace</span></code></a></p>
+<p>Test Trace with platform=none</p>
+<p>Inherits from TestTrace, so all the tests are run again but with
+platform=None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_deriving_cpus_count" title="tests.test_trace.TestTrace.test_deriving_cpus_count"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_deriving_cpus_count()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_df_cpus_wakeups" title="tests.test_trace.TestTrace.test_df_cpus_wakeups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_df_cpus_wakeups()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_df_tasks_states" title="tests.test_trace.TestTrace.test_df_tasks_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_df_tasks_states()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_get_task_by_name" title="tests.test_trace.TestTrace.test_get_task_by_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_get_task_by_name()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_get_task_by_pid" title="tests.test_trace.TestTrace.test_get_task_by_pid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_get_task_by_pid()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_get_tasks" title="tests.test_trace.TestTrace.test_get_tasks"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_get_tasks()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_overutilized_time" title="tests.test_trace.TestTrace.test_overutilized_time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_overutilized_time()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_plot_cpu_idle_state_residency" title="tests.test_trace.TestTrace.test_plot_cpu_idle_state_residency"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_plot_cpu_idle_state_residency()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_sched_load_avg_signals" title="tests.test_trace.TestTrace.test_sched_load_avg_signals"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_sched_load_avg_signals()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_sched_load_signals" title="tests.test_trace.TestTrace.test_sched_load_signals"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_sched_load_signals()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_setTaskName" title="tests.test_trace.TestTrace.test_setTaskName"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_setTaskName()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_squash_df" title="tests.test_trace.TestTrace.test_squash_df"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_squash_df()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_trace.TestTrace.test_time_range" title="tests.test_trace.TestTrace.test_time_range"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_time_range()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-tests.test_wlgen_rtapp"></span><dl class="class">
+<dt id="tests.test_wlgen_rtapp.RTABase">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_wlgen_rtapp.</code><code class="sig-name descname">RTABase</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.RTABase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.utils.StorageTestCase" title="tests.utils.StorageTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.utils.StorageTestCase</span></code></a></p>
+<p>Common functionality for testing RTA</p>
+<p>Doesn’t have “Test” in the name so that nosetests doesn’t try to run it
+directly</p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="attribute">
+<dt id="tests.test_wlgen_rtapp.RTABase.tools">
+<code class="sig-name descname">tools</code><em class="property"> = ['rt-app']</em><a class="headerlink" href="#tests.test_wlgen_rtapp.RTABase.tools" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.RTABase.get_expected_command">
+<code class="sig-name descname">get_expected_command</code><span class="sig-paren">(</span><em class="sig-param">rta_wload</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.RTABase.get_expected_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the rt-app command we should execute when <cite>run</cite> is called</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.RTABase.setUp">
+<code class="sig-name descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.RTABase.setUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook method for setting up the test fixture before exercising it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.RTABase.assert_output_file_exists">
+<code class="sig-name descname">assert_output_file_exists</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.RTABase.assert_output_file_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that a file was created</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.RTABase.assert_can_read_logfile">
+<code class="sig-name descname">assert_can_read_logfile</code><span class="sig-paren">(</span><em class="sig-param">exp_tasks</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.RTABase.assert_can_read_logfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that the perf_analysis module understands the log output</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_wlgen_rtapp.TestRTAProfile">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_wlgen_rtapp.</code><code class="sig-name descname">TestRTAProfile</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTAProfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.test_wlgen_rtapp.RTABase" title="tests.test_wlgen_rtapp.RTABase"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.test_wlgen_rtapp.RTABase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTAProfile.test_composition" title="tests.test_wlgen_rtapp.TestRTAProfile.test_composition"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_composition()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTAProfile.test_invalid_composition" title="tests.test_wlgen_rtapp.TestRTAProfile.test_invalid_composition"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_invalid_composition()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTAProfile.test_profile_periodic_smoke" title="tests.test_wlgen_rtapp.TestRTAProfile.test_profile_periodic_smoke"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_profile_periodic_smoke()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTAProfile.test_profile_run_and_sync_smoke" title="tests.test_wlgen_rtapp.TestRTAProfile.test_profile_run_and_sync_smoke"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_profile_run_and_sync_smoke()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTAProfile.test_profile_step_smoke" title="tests.test_wlgen_rtapp.TestRTAProfile.test_profile_step_smoke"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_profile_step_smoke()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.TestRTAProfile.test_profile_periodic_smoke">
+<code class="sig-name descname">test_profile_periodic_smoke</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTAProfile.test_profile_periodic_smoke" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smoketest Periodic rt-app workload</p>
+<p>Creates a workload using Periodic, tests that the JSON has the expected
+content, then tests that it can be run.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.TestRTAProfile.test_profile_step_smoke">
+<code class="sig-name descname">test_profile_step_smoke</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTAProfile.test_profile_step_smoke" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smoketest Step rt-app workload</p>
+<p>Creates a workload using Step, tests that the JSON has the expected
+content, then tests that it can be run.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.TestRTAProfile.test_profile_run_and_sync_smoke">
+<code class="sig-name descname">test_profile_run_and_sync_smoke</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTAProfile.test_profile_run_and_sync_smoke" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.TestRTAProfile.test_composition">
+<code class="sig-name descname">test_composition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTAProfile.test_composition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test RTA task composition with __add__</p>
+<p>Creates a composed workload by +-ing RTATask objects, tests that the
+JSON has the expected content, then tests running the workload</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.TestRTAProfile.test_invalid_composition">
+<code class="sig-name descname">test_invalid_composition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTAProfile.test_invalid_composition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that you can’t compose tasks with a delay in the second task</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_wlgen_rtapp.TestRTACustom">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_wlgen_rtapp.</code><code class="sig-name descname">TestRTACustom</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTACustom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.test_wlgen_rtapp.RTABase" title="tests.test_wlgen_rtapp.RTABase"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.test_wlgen_rtapp.RTABase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTACustom.test_custom_smoke_calib" title="tests.test_wlgen_rtapp.TestRTACustom.test_custom_smoke_calib"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_custom_smoke_calib()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTACustom.test_custom_smoke_no_calib" title="tests.test_wlgen_rtapp.TestRTACustom.test_custom_smoke_no_calib"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_custom_smoke_no_calib()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.TestRTACustom.test_custom_smoke_calib">
+<code class="sig-name descname">test_custom_smoke_calib</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTACustom.test_custom_smoke_calib" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test RTA custom workload (providing calibration)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.TestRTACustom.test_custom_smoke_no_calib">
+<code class="sig-name descname">test_custom_smoke_no_calib</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTACustom.test_custom_smoke_no_calib" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test RTA custom workload (providing no calibration)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tests.test_wlgen_rtapp.TestRTACalibrationConf">
+<em class="property">class </em><code class="sig-prename descclassname">tests.test_wlgen_rtapp.</code><code class="sig-name descname">TestRTACalibrationConf</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTACalibrationConf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tests.test_wlgen_rtapp.RTABase" title="tests.test_wlgen_rtapp.RTABase"><code class="xref py py-class docutils literal notranslate"><span class="pre">tests.test_wlgen_rtapp.RTABase</span></code></a></p>
+<p>Test setting the “calibration” field of rt-app config</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_int" title="tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_int"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_calibration_conf_pload_int()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_nodata" title="tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_nodata"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_calibration_conf_pload_nodata()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_str" title="tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_str"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_calibration_conf_pload_str()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Test methods</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_int" title="tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_int"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_calibration_conf_pload_int()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_nodata" title="tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_nodata"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_calibration_conf_pload_nodata()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_str" title="tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_str"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_calibration_conf_pload_str()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_nodata">
+<code class="sig-name descname">test_calibration_conf_pload_nodata</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_nodata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that the smallest pload value is used</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_int">
+<code class="sig-name descname">test_calibration_conf_pload_int</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that the calibration value is returned as expected</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_str">
+<code class="sig-name descname">test_calibration_conf_pload_str</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tests.test_wlgen_rtapp.TestRTACalibrationConf.test_calibration_conf_pload_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that the calibration value is returned as expected</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="workflows/index.html" class="btn btn-neutral float-right" title="Workflows" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="transition_guide.html" class="btn btn-neutral float-left" title="Transitioning from LISA legacy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+<map id="inheritanceeed4612b10" name="inheritanceeed4612b10">
+<area shape="rect" id="node1" href="#lisa.tests.hotplug.torture.CPUHPSequenceError" target="_top" title="CPUHPSequenceError" alt="" coords="5,55,167,80"/>
+<area shape="rect" id="node2" href="#lisa.tests.hotplug.torture.HotplugBase" target="_top" title="HotplugBase" alt="" coords="215,5,320,31"/>
+<area shape="rect" id="node4" href="#lisa.tests.hotplug.torture.HotplugTorture" target="_top" title="HotplugTorture" alt="" coords="368,5,487,31"/>
+<area shape="rect" id="node3" href="#lisa.tests.base.TestBundle" target="_top" title="A LISA test bundle." alt="" coords="39,5,133,31"/>
+</map>

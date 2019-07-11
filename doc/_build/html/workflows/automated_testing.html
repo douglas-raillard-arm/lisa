@@ -1,0 +1,809 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Automated testing &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Wltest" href="wltest.html" />
+    <link rel="prev" title="Notebooks" href="notebook.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lisa_shell/man/man.html">LISA shell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../transition_guide.html">Transitioning from LISA legacy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributors_guide.html">Contributor’s guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Workflows</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="notebook.html">Notebooks</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Automated testing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exekall">exekall</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#running-tests">Running tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#analyzing-results">Analyzing results</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#advanced-use">Advanced use</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bisector">bisector</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#running">Running</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Analyzing results</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#when-something-goes-wrong">When something goes wrong</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#integration-in-a-ci-loop">Integration in a CI loop</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="wltest.html">Wltest</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../target.html">Target</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workloads.html">Workloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../energy_analysis.html">Energy analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc_utilities.html">Miscellaneous utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bisector/index.html">Bisector Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exekall/index.html">Exekall Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Workflows</a> &raquo;</li>
+        
+      <li>Automated testing</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/workflows/automated_testing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="automated-testing">
+<span id="automated-testing-page"></span><h1>Automated testing<a class="headerlink" href="#automated-testing" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>LISA comes with tools to run synthetic tests and analyse the results. A simple
+workflow will only use the <code class="docutils literal notranslate"><span class="pre">exekall</span></code> test runner (or its <code class="docutils literal notranslate"><span class="pre">lisa-test</span></code> thin
+wrapper). More advanced automation needs will be covered by using <code class="docutils literal notranslate"><span class="pre">bisector</span></code>.</p>
+</div>
+<div class="section" id="exekall">
+<h2>exekall<a class="headerlink" href="#exekall" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">exekall</span></code> is the test runner of LISA. <code class="docutils literal notranslate"><span class="pre">lisa-test</span></code> command is a thin wrapper
+on top of <code class="docutils literal notranslate"><span class="pre">exekall</span></code>. It efficiently shares as many stages as possible between
+tests to speed up the process, and it records these results in a database for
+later inspection.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../exekall/index.html#exekall-doc"><span class="std std-ref">exekall main documentation</span></a></p>
+</div>
+<div class="section" id="running-tests">
+<h3>Running tests<a class="headerlink" href="#running-tests" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> subcommand starts a test session. It needs to be pointed at
+some Python sources containing the definition of stages for each test and some
+initial spark like <code class="docutils literal notranslate"><span class="pre">--conf</span></code> or <code class="docutils literal notranslate"><span class="pre">--load-db</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--conf</span></code> will usually be used with a YAML configuration file in the format
+specified by <a class="reference internal" href="../target.html#lisa.target.TargetConf" title="lisa.target.TargetConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetConf</span></code></a>.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>exekall run lisa/tests/ --conf target_conf.yml
+</pre></div>
+</div>
+<p>When pointed at folders, <code class="docutils literal notranslate"><span class="pre">exekall</span></code> will recursively look for Python files.</p>
+<p>A subset of the tests can be selected using <code class="docutils literal notranslate"><span class="pre">-s</span> <span class="pre">PATTERN</span></code>. The pattern is a
+globbing-style pattern, where <code class="docutils literal notranslate"><span class="pre">*</span></code> stands as a wildcard. If the pattern starts
+with an <code class="docutils literal notranslate"><span class="pre">!</span></code>, no test matching that pattern will be selected. Use <code class="docutils literal notranslate"><span class="pre">--list</span></code>
+to list available tests.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To list the available tests with <code class="docutils literal notranslate"><span class="pre">--list</span></code>, both the Python sources
+and a spark needs to be specified, since exekall will infer what can be run by
+consuming it.</p>
+</div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># Select and run all tests starting with PELTTask but not containing &quot;load&quot;</span>
+exekall run lisa/tests/ --conf target_conf.yml -s <span class="s1">&#39;PELTTask*&#39;</span> -s <span class="s1">&#39;!*load*&#39;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--artifact-dir</span></code> can be used to set the location at which <code class="docutils literal notranslate"><span class="pre">exekall</span></code> will
+store its artifacts. By default, it will be stored in a sub directory of
+<code class="docutils literal notranslate"><span class="pre">$EXEKALL_ARTIFACT_ROOT</span></code> environment variable.</p>
+<div class="section" id="more-of-it">
+<h4>More of it<a class="headerlink" href="#more-of-it" title="Permalink to this headline">¶</a></h4>
+<p>Multiple iterations of the same set of tests can be executed using <code class="docutils literal notranslate"><span class="pre">-n</span></code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>In order to speed up the test session when executing multiple
+iterations, <code class="docutils literal notranslate"><span class="pre">--share</span> <span class="pre">'*Target'</span></code> can be used. That will share the target
+connection stage between all iterations, so some autodetection mechanisms
+will only run once.</p>
+</div>
+</div>
+</div>
+<div class="section" id="analyzing-results">
+<h3>Analyzing results<a class="headerlink" href="#analyzing-results" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> produces an folder that is the home of all artifacts produced.
+Some levels in that hierarchy are UUIDs that can be cross-linked with the
+output. At the deepest levels, one can find artifacts useful for failure
+analysis, such as <code class="docutils literal notranslate"><span class="pre">trace.dat</span></code> files obtained using <code class="docutils literal notranslate"><span class="pre">trace-cmd</span></code> tool, and
+some graphs generated by the tests.</p>
+<p>A major artifact is a <code class="docutils literal notranslate"><span class="pre">VALUE_DB.pickle.xz</span></code> file (see
+<a class="reference internal" href="../exekall/internal_api.html#exekall.engine.ValueDB" title="exekall.engine.ValueDB"><code class="xref py py-class docutils literal notranslate"><span class="pre">exekall.engine.ValueDB</span></code></a>). It contains the objects returned by every
+stage of the tests, serialized in Python’s Pickle format. The <code class="docutils literal notranslate"><span class="pre">exekall</span>
+<span class="pre">compare</span></code> subcommand can compare two such files, and give a list of changes in
+failure rate. The compared files need to contain multiple iterations of the
+same test to have a useful comparison.  Non-significant
+regressions/improvements are not displayed by default. The threshold over which
+the change is considered non-significant can be modified using <code class="docutils literal notranslate"><span class="pre">--alpha</span></code>,
+which will set the alpha risk of the Fisher’s exact test carried out on a
+contingency table like this one:</p>
+<table class="colwidths-auto docutils align-center" id="id5">
+<caption><span class="caption-text">Contingency table for one testcase</span><a class="headerlink" href="#id5" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head stub"><p>count</p></th>
+<th class="head"><p>old</p></th>
+<th class="head"><p>new</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>passed</p></th>
+<td><p>15</p></td>
+<td><p>80</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>failed</p></th>
+<td><p>5</p></td>
+<td><p>20</p></td>
+</tr>
+</tbody>
+</table>
+<p>That would represent an <code class="docutils literal notranslate"><span class="pre">old</span></code> test session with 20 iterations of the test, 15
+of which passed and 5 failed. The <code class="docutils literal notranslate"><span class="pre">new</span></code> session would have had 100
+iterations, out of which 80 passed and 20 failed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This kind of experiments only fixes some marginal totals and
+therefore does not totally satisfy the conditions to use Fisher’s exact test.
+The total number of results on one column (columns marginal total) is fixed,
+since a test either has to pass or fail. However, the row marginal totals are
+not fixed, since the experiment does not constrains the total number of
+success and total number of failures. This kind of experiment would be best
+analysed using Barnard’s test.</p>
+<p>That said, Fisher’s exact test is just less powerful than Barnard’s test,
+which means its only issue is to be too conservative, i.e. will sometimes
+fail to spot a failure rate change although there actually was one.</p>
+<p>Another way to express that is that Fisher’s exact test will require more
+iterations before detecting a failure rate change than strictly required.
+Barnard’s test is unfortunately not widely implemented, so Fisher it is !</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../misc_utilities.html#lisa.regression.RegressionResult" title="lisa.regression.RegressionResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.regression.RegressionResult</span></code></a></p>
+</div>
+<p>The output of <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">compare</span></code> looks like that:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">testcase</span>                                                             <span class="n">old</span><span class="o">%</span>   <span class="n">new</span><span class="o">%</span>  <span class="n">delta</span><span class="o">%</span>       <span class="n">pvalue</span> <span class="n">fix_iter</span><span class="c1">#</span>
+<span class="o">----------------------------------------------------------------------------------------------------------------</span>
+<span class="n">PELTTask</span><span class="p">:</span><span class="n">test_load_avg_behaviour</span>                                     <span class="mf">2.9</span><span class="o">%</span>   <span class="mf">0.0</span><span class="o">%</span>   <span class="o">-</span><span class="mf">2.9</span><span class="o">%</span>     <span class="mf">4.58e-04</span>
+<span class="n">PELTTask</span><span class="p">:</span><span class="n">test_load_avg_range</span>                                         <span class="mf">0.0</span><span class="o">%</span>   <span class="mf">7.1</span><span class="o">%</span>    <span class="mf">7.1</span><span class="o">%</span>     <span class="mf">1.08e-10</span>        <span class="mi">54</span>
+<span class="n">PELTTask</span><span class="p">:</span><span class="n">test_util_avg_behaviour</span>                                     <span class="mf">2.4</span><span class="o">%</span>   <span class="mf">0.0</span><span class="o">%</span>   <span class="o">-</span><span class="mf">2.4</span><span class="o">%</span>     <span class="mf">1.70e-03</span>
+<span class="n">PELTTask</span><span class="p">:</span><span class="n">test_util_avg_range</span>                                         <span class="mf">0.0</span><span class="o">%</span>   <span class="mf">7.1</span><span class="o">%</span>    <span class="mf">7.1</span><span class="o">%</span>     <span class="mf">1.08e-10</span>        <span class="mi">54</span>
+<span class="n">TwoBigTasks</span><span class="p">:</span><span class="n">test_slack</span>                                               <span class="mf">4.7</span><span class="o">%</span>   <span class="mf">1.6</span><span class="o">%</span>   <span class="o">-</span><span class="mf">3.1</span><span class="o">%</span>     <span class="mf">1.25e-02</span>
+</pre></div>
+</div>
+<p>The columns have the following meaning:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">old%</span></code>: failure rate of the test in the old database (i.e. the first on the command line)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">new%</span></code>: failure rate of the test in the new database (i.e. the second on the command line)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">delta%</span></code>: the difference in the old and new failure rates</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pvalue</span></code>: The p-value resulting from the Fisher’s exact test used to
+filter significant regressions or improvements</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fix_iter#</span></code>: The number of iterations required to observe the effects of
+a fix of a regression. This gives an indication on how many iterations are
+needed to have <cite>exekall compare</cite> answer the question “is my fix fixing this
+regression ?”, assuming that you actually fixed it. Running less iterations
+than that to validate a fix will likely result in <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">compare</span></code> not
+being able to conclude that there was a failure rate change (i.e. an
+improvement), even if the fix is actually correct.</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>When comparing results collected from different boards, the test IDs
+will probably not match since they are tagged with the user-defined board
+name. In order to overcome that, use <code class="docutils literal notranslate"><span class="pre">--remove-tag</span> <span class="pre">board</span></code>, so IDs can be
+matched as expected.</p>
+</div>
+</div>
+<div class="section" id="advanced-use">
+<h3>Advanced use<a class="headerlink" href="#advanced-use" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="parametric-sweep">
+<h4>Parametric sweep<a class="headerlink" href="#parametric-sweep" title="Permalink to this headline">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">--sweep</span></code> allows running the same stage multiple times, sweeping over a range
+of values for some of its parameters:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># The energy_est_threshold_pct parameter of functions with a name matching</span>
+<span class="c1"># &#39;*test_task_placement&#39; will take the following values all values from 0 to 15</span>
+<span class="c1"># by increments of 5.</span>
+exekall run lisa/tests/ --conf target_conf.yml --sweep <span class="s1">&#39;*test_task_placement&#39;</span> energy_est_threshold_pct <span class="m">0</span> <span class="m">15</span> <span class="m">5</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="when-something-went-wrong">
+<h4>When something went wrong<a class="headerlink" href="#when-something-went-wrong" title="Permalink to this headline">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">--replay</span></code> provides a simple way of re-executing the last few stages of a
+test that had an error. That can be used to reproduce a bug in the test code
+that makes it raise an exception while working on a fix. <code class="docutils literal notranslate"><span class="pre">--replay</span></code> takes the
+UUID of the value of a stage that could not be computed due to an exception. It
+will then reload the value of all stages that executed correctly, and start
+again from there. For trace analysis related issues, it allows re-executing the
+test code without having to re-execute the workload on a board (and thus
+without needing a board at all):</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>exekall run lisa/tests/ --load-db artifacts/VALUE_DB.pickle.xz --replay ba017f269bee4687b2a902329ba22bd9
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">--replay</span></code> currently will not restore values that were set using
+<code class="docutils literal notranslate"><span class="pre">--sweep</span></code>.</p>
+</div>
+</div>
+<div class="section" id="partial-execution">
+<h4>Partial execution<a class="headerlink" href="#partial-execution" title="Permalink to this headline">¶</a></h4>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> on LISA will try to build instances of
+<a class="reference internal" href="../kernel_tests.html#lisa.tests.base.ResultBundle" title="lisa.tests.base.ResultBundle"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultBundle</span></code></a>, which is the last stage of a test’s
+“pipeline” containing the final pass/fail result. That behaviour can be altered
+using <code class="docutils literal notranslate"><span class="pre">--goal</span></code>, so <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> only runs the first steps of the pipeline
+in order to gather data without processing them immediately. Data-collection
+stages are subclasses of <a class="reference internal" href="../kernel_tests.html#lisa.tests.base.TestBundle" title="lisa.tests.base.TestBundle"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestBundle</span></code></a>. No later stage
+in the pipeline will interact with the target, so it’s a good place to stop:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>exekall run lisa/tests/ --conf target_conf.yml --goal <span class="s1">&#39;*TestBundle&#39;</span> --artifact-dir artifacts
+</pre></div>
+</div>
+<p>Later on, the processing methods can be run from the data collected:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>exekall run lisa/tests/ --load-db artifacts/VALUE_DB.pickle.xz --load-type <span class="s1">&#39;*TestBundle&#39;</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><code class="docutils literal notranslate"><span class="pre">--load-db</span></code> can also be used to re-process data from regular
+invocation of exekall run. That can be useful to observe a change made to the
+processing code over the set of data acquired during an earlier session. A
+typical use case would be to look at the impact of changing a margin of a
+test like the <code class="docutils literal notranslate"><span class="pre">energy_est_threshold_pct</span></code> parameter of
+<a class="reference internal" href="../kernel_tests.html#lisa.tests.scheduler.eas_behaviour.EASBehaviour.test_task_placement" title="lisa.tests.scheduler.eas_behaviour.EASBehaviour.test_task_placement"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_task_placement()</span></code></a></p>
+</div>
+</div>
+<div class="section" id="aggregating-results">
+<h4>Aggregating results<a class="headerlink" href="#aggregating-results" title="Permalink to this headline">¶</a></h4>
+<p>One way to get multiple iterations for a test is to run with <code class="docutils literal notranslate"><span class="pre">-n</span></code>. Another
+one is to merge the artifact folders created by many calls to <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code>.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>exekall merge artifacts1 artifacts2 -o merged_artifacts
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">merged_artifacts</span></code> folder will contains all the artifacts of all original
+folders. File name conflicts are avoided by the use of UUIDs in the artifact
+folder hierarchy. <code class="docutils literal notranslate"><span class="pre">merged_artifacts/VALUE_DB.pickle.xz</span></code> contains all the
+results of each original databases, and is a suitable input for <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">compare</span></code>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># Aggregate the results of all runs of the tests under the &quot;old&quot; conditions</span>
+exekall merge old1 old2 old3 ... -o old_merged
+<span class="c1"># Aggregate the results of all runs of the tests under the &quot;new&quot; conditions</span>
+exekall merge new1 new2 new3 ... -o new_merged
+<span class="c1"># Look for regressions in the common tests</span>
+exekall compare old_merged/VALUE_DB.pickle.xz new_merged/VALUE_DB.pickle.xz
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="bisector">
+<h2>bisector<a class="headerlink" href="#bisector" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bisector</span></code> allows setting up the steps of a test iteration, repeating
+them an infinite number of times (by default).</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../bisector/index.html#bisector-doc"><span class="std std-ref">bisector main documentation</span></a></p>
+</div>
+<dl class="footnote brackets">
+<dt class="label" id="id1"><span class="brackets"><a class="fn-backref" href="#id3">1</a></span></dt>
+<dd><p><a class="reference external" href="https://git-scm.com/docs/git-bisect">https://git-scm.com/docs/git-bisect</a></p>
+</dd>
+</dl>
+<div class="section" id="running">
+<h3>Running<a class="headerlink" href="#running" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code> is in charge of executing the steps and producing a report.
+The most important option is <code class="docutils literal notranslate"><span class="pre">--steps</span></code> which needs to be pointed at a YAML
+file with this kind of content:</p>
+<div class="highlight-YAML notranslate"><div class="highlight"><pre><span></span><span class="nt">steps</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">build</span>
+    <span class="nt">cmd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">make defconfig Image dtbs</span>
+
+  <span class="c1"># If a flash step fails, the whole session is aborted, otherwise the exit</span>
+  <span class="c1"># status is not impacted</span>
+  <span class="p p-Indicator">-</span> <span class="nt">class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">flash</span>
+    <span class="nt">cmd</span><span class="p">:</span> <span class="c1">#insert the command to flash board</span>
+    <span class="nt">timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">180</span> <span class="c1"># timeout in seconds</span>
+    <span class="nt">trials</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span> <span class="c1"># If the command fails, try again and only consider the last trial</span>
+
+  <span class="c1"># If a reboot step fails, the whole session is aborted. If it succeeds, it</span>
+  <span class="c1"># will participate as &quot;good&quot;, like a test step. This allows using bisector</span>
+  <span class="c1"># for boot testing.</span>
+  <span class="p p-Indicator">-</span> <span class="nt">class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">reboot</span>
+    <span class="nt">cmd</span><span class="p">:</span> <span class="c1"># insert a command to reboot your board</span>
+    <span class="nt">timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">300</span>
+    <span class="nt">trials</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
+
+  <span class="c1"># A simple shell step will not participate to the overall return code, even if it fails.</span>
+  <span class="p p-Indicator">-</span> <span class="nt">class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">shell</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ssh-copy-id</span>
+    <span class="nt">timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">300</span>
+    <span class="nt">trials</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+    <span class="c1"># make sure we have ssh key authentication enabled on the target, to</span>
+    <span class="c1"># simplify settings of other scripts</span>
+    <span class="nt">cmd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sshpass -p password ssh-copy-id -i $HOME/.ssh/id_rsa &quot;$USER@$HOSTNAME&quot;</span>
+
+
+  <span class="c1"># A test step will make the result good if the command exit with 0, or bad otherwise.</span>
+  <span class="p p-Indicator">-</span> <span class="nt">class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">LISA-test</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">eas-behaviour</span>
+    <span class="nt">timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3600</span>
+    <span class="c1"># Block-style strings allow multiple lines. For more block style examples:</span>
+    <span class="c1"># https://learnxinyminutes.com/docs/yaml/</span>
+    <span class="nt">cmd</span><span class="p">:</span> <span class="p p-Indicator">&gt;</span>
+      <span class="no">cd &quot;$LISA_HOME&quot; &amp;&amp;</span>
+      <span class="no">exekall run lisa/tests/ --conf target_conf.yml -s &#39;OneSmallTask*&#39;</span>
+
+  <span class="c1"># Another test example, that is not integrated with exekall</span>
+  <span class="p p-Indicator">-</span> <span class="nt">class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">test</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">my-other-test</span>
+    <span class="nt">cmd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">echo hello world</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since all steps are executed in a loop, that means flashing and rebooting is
+going to occur over and over. If that is considered as an overhead, it should
+be done beforehand and not included as a step. Alternatively, one can use
+<code class="docutils literal notranslate"><span class="pre">--skip</span> <span class="pre">boot</span></code> to skip steps that have a name or category matching <em>boot</em>.</p>
+</div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># As a convenience, myreport.yml.gz.log will also be created, with a</span>
+<span class="c1"># behaviour similar to: bisector run ... 2&gt;&amp;1 | tee myreport.yml.gz.log</span>
+bisector run --steps steps.yml --report myreport.yml.gz
+</pre></div>
+</div>
+<p>All available step classes along with available <code class="docutils literal notranslate"><span class="pre">run</span></code> options can be looked
+up using <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">step-help</span></code>. Options are documented in their CLI form, but
+also equally apply to the steps configuration file.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Bisector supports executing commands in a transient systemd scope
+using <code class="docutils literal notranslate"><span class="pre">systemd-run</span></code> binary, using the <code class="docutils literal notranslate"><span class="pre">-ouse-systemd-run</span></code> option. This
+ensures that all processes started indirectly by the command will be
+terminated/killed when the step finishes, just like for a systemd service.
+That is a good idea to enable it for long-running sessions.</p>
+</div>
+<div class="section" id="more-on-steps-options">
+<h4>More on steps options<a class="headerlink" href="#more-on-steps-options" title="Permalink to this headline">¶</a></h4>
+<p>Steps are configured using options, that can be set either from the <code class="docutils literal notranslate"><span class="pre">--steps</span></code>
+YAML config file, or directly on the command line.</p>
+<p>The CLI accepts the format <code class="docutils literal notranslate"><span class="pre">-o</span> <span class="pre">&lt;name</span> <span class="pre">or</span> <span class="pre">category&gt;.&lt;option&gt;[=&lt;value&gt;]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">&lt;name</span> <span class="pre">or</span> <span class="pre">category&gt;</span></code> is omitted, it will match all steps. Otherwise, that is
+a globbing-style pattern matching both the name and category of steps. If the
+the same option is specified multiple times for a given step, the precedence
+rules are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>command line wins over steps config file</p></li>
+<li><p>on the command line, rightmost <code class="docutils literal notranslate"><span class="pre">-o</span></code> wins</p></li>
+</ol>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There is no notion of one pattern being more specific than an other:
+all that matters is the position on the command line.</p>
+</div>
+<p>Steps’ name can be set using <code class="docutils literal notranslate"><span class="pre">name:</span> <span class="pre">foo</span></code> key in the YAML config, and category
+using <code class="docutils literal notranslate"><span class="pre">cat:</span> <span class="pre">bar</span></code>.  All steps class come with a default name and category, so
+you usually don’t need to change the category.</p>
+<p>When setting an option in the YAML config file, strings will be parsed as when
+specified on the command line, other types will be validated but otherwise taken
+as is.</p>
+</div>
+<div class="section" id="i-don-t-want-a-config-file">
+<h4>I don’t want a config file<a class="headerlink" href="#i-don-t-want-a-config-file" title="Permalink to this headline">¶</a></h4>
+<p>In some cases, its easier to declare steps directly on the command line rather
+than having a configuration file. This can be used to build thin wrappers
+around <code class="docutils literal notranslate"><span class="pre">bisector</span></code>. Once a step is declared with a name and a class, its
+options can be set as usual:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>bisector run --inline reboot reboot -oreboot.cmd<span class="o">=</span><span class="s1">&#39;reboot_my_board.sh&#39;</span> --inline LISA-test mytest -omytest.cmd<span class="o">=</span><span class="s1">&#39;lisa-test&#39;</span> --report myreport.yml.gz
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>Analyzing results<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>Reports generated using <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code> can be inspected using <code class="docutils literal notranslate"><span class="pre">bisector</span>
+<span class="pre">report</span></code>. The expected output of the example configuration could look like
+that if everything went well:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>flash/flash (flash) [GOOD]
+    command: &lt;your reboot command&gt;
+    #1 : OK
+    #2 : OK
+    #3 : OK
+    #4 : OK
+    #5 : OK
+
+boot/reboot (reboot) [GOOD]
+    command: &lt;your reboot command&gt;
+    #1 : OK
+    #2 : OK
+    #3 : OK
+    #4 : OK
+    #5 : OK
+
+shell/shell (shell) [GOOD]
+    command: sshpass -p password ssh-copy-id -i $HOME/.ssh/id_rsa &quot;$USER@$HOSTNAME&quot;
+    #1 : OK
+    #2 : OK
+    #3 : OK
+    #4 : OK
+    #5 : OK
+
+test/behaviour (LISA-test) [GOOD]
+    OneSmallTask[board=juno-r0]:test_slack:                      passed 163/163 (100.0%)
+    OneSmallTask[board=juno-r0]:test_task_placement:             passed 163/163 (100.0%)
+    Error: 0/2, Failed: 0/2, Undecided: 0/2, Skipped: 0/2, Passed: 2/2
+
+my-other-test/test (test) [GOOD]
+    command: hello world
+    #1 : OK
+    #2 : OK
+    #3 : OK
+    #4 : OK
+    #5 : OK
+
+Overall bisect result: good commit
+</pre></div>
+</div>
+<p>There is one section per step, reflecting the steps configuration. Each step
+will aggregate the results of all its iterations. The header is formatted as
+<em>&lt;step name&gt;/&lt;step category&gt; (step class name) [&lt;step result&gt;]</em>. The overall
+bisect result is the combination of the result of each steps.</p>
+<p><code class="docutils literal notranslate"><span class="pre">LISA-test</span></code> has special support for inspecting <code class="docutils literal notranslate"><span class="pre">exekall</span></code>’s database
+collected during each iteration of <code class="docutils literal notranslate"><span class="pre">bisector</span></code>, and can display a summary
+table. By default, a <strong>passed</strong> label will only appear if all iteration
+successfully passed.  Otherwise, an appropriate combination of <strong>FAILED</strong>,
+<strong>ERROR</strong>, <strong>SKIPPED</strong> and <strong>UNDECIDED</strong> lines will be displayed with the
+corresponding count.</p>
+<p>Various options can affect what is displayed and taken into account. For
+example, <code class="docutils literal notranslate"><span class="pre">--skip</span> <span class="pre">my-other-test</span></code> will remove the contribution of that step to
+the final result. Step-specific report options are documented in <code class="docutils literal notranslate"><span class="pre">bisector</span>
+<span class="pre">step-help</span></code>. Some of the options allow exporting collected artifacts from the
+report, like <code class="docutils literal notranslate"><span class="pre">-oexport-logs</span></code>. In the case of <code class="docutils literal notranslate"><span class="pre">LISA-test</span></code> step,
+that option also makes a symlink to the artifact folder available along the
+stdout/stderr log.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Generally speaking, <code class="docutils literal notranslate"><span class="pre">-overbose</span></code> will show all available information
+apart from the stdout/stderr output of commands. That may be a lot of
+information, you have been warned :-). <code class="docutils literal notranslate"><span class="pre">-oshow-details</span></code> may be all what
+you need after all.</p>
+</div>
+<div class="section" id="looking-for-regressions">
+<h4>Looking for regressions<a class="headerlink" href="#looking-for-regressions" title="Permalink to this headline">¶</a></h4>
+<p>Using the <code class="docutils literal notranslate"><span class="pre">LISA-test</span></code> step, <code class="docutils literal notranslate"><span class="pre">bisector</span></code> collects a pruned version of
+<code class="docutils literal notranslate"><span class="pre">VALUE_DB.pickle.xz</span></code> artifact for each iteration. These databases are stored
+directly inside the report. When using the <code class="docutils literal notranslate"><span class="pre">-oexport-db=VALUE_DB.pickle.xz</span></code>,
+it is possible to export a database that is the result of merging all the
+collected ones. This can then be compared with another one for regressions:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>bisector report old_report.yml.gz -oexport-db<span class="o">=</span>old_db.pickle.xz
+bisector report new_report.yml.gz -oexport-db<span class="o">=</span>new_db.pickle.xz
+exekall compare old_db.pickle.xz new_db.pickle.xz
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the file already exists, it will be opened as a database and its
+content merged with the new content, then written back to the file.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is also possible to use <code class="docutils literal notranslate"><span class="pre">-oexport-logs</span></code> to get all artifact
+folders/archives, and merge them manually using <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">merge</span></code>. The
+advantage of using <code class="docutils literal notranslate"><span class="pre">-oexport-db</span></code> is that the report is self-contained,
+without relying on other files/folders being available (locally or over
+HTTP).</p>
+</div>
+</div>
+<div class="section" id="fixing-regressions">
+<h4>Fixing regressions<a class="headerlink" href="#fixing-regressions" title="Permalink to this headline">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">check-test-fix.py</span></code> tool can be used to check that a fix to a test resolved
+errors or a regression, provided that the test can be re-executed on
+already-collected <a class="reference internal" href="../kernel_tests.html#lisa.tests.base.TestBundle" title="lisa.tests.base.TestBundle"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.tests.base.TestBundle</span></code></a> instances. It will call
+<code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> in parallel on all the <code class="docutils literal notranslate"><span class="pre">exekall</span></code>’s
+<a class="reference internal" href="../exekall/internal_api.html#exekall.engine.ValueDB" title="exekall.engine.ValueDB"><code class="xref py py-class docutils literal notranslate"><span class="pre">exekall.engine.ValueDB</span></code></a> collected by <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code>, and will produce
+a regression table using <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">compare</span></code> with <code class="docutils literal notranslate"><span class="pre">old</span></code> being the results
+from the report, and <code class="docutils literal notranslate"><span class="pre">new</span></code> being the new results.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># The test to check is selected using --select in the same way as for `exekall run`.</span>
+<span class="c1"># hikey960.report.yml.gz is a bisector report generated using `bisector run`</span>
+<span class="c1"># All options coming after the report are passed to `bisector report` to</span>
+<span class="c1"># control what artifacts are downloaded and what TestBundle are used.</span>
+check-test-fix.py --select <span class="s1">&#39;OneSmallTask:test_task_placement&#39;</span> hikey960.report.yml.gz -oiterations<span class="o">=</span><span class="m">1</span>-20
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="when-something-goes-wrong">
+<h3>When something goes wrong<a class="headerlink" href="#when-something-goes-wrong" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="it-s-not-my-fault">
+<h4>It’s not my fault !<a class="headerlink" href="#it-s-not-my-fault" title="Permalink to this headline">¶</a></h4>
+<p>Sometimes, things go wrong, and your board may need to be manually power cycled
+since it does not reboot anymore for example. <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code> may have aborted
+if you use a step that can trigger that, and you are left with too few
+iterations.</p>
+<p>You can take care of your board manually, and then resume execution using:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>bisector run --resume --report report.yml.gz
+</pre></div>
+</div>
+</div>
+<div class="section" id="typo-in-the-configuration">
+<h4>Typo in the configuration<a class="headerlink" href="#typo-in-the-configuration" title="Permalink to this headline">¶</a></h4>
+<p>One step has been misconfigured, but some other expensive steps have run fine.
+We don’t want to throw the whole report and loose our precious precious data.
+Hope is not lost, you can interrupt <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code>, and then pass <code class="docutils literal notranslate"><span class="pre">-o</span></code>
+options to <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span> <span class="pre">--resume</span></code> to update the value of some options:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>bisector run --steps steps.yml --report myreport.yml.gz
+<span class="c1"># oops, wrong test command</span>
+<span class="c1"># &lt;ctrl-c&gt;</span>
+<span class="c1"># let&#39;s fix that and start again the execution</span>
+bisector run --resume --report report.yml.gz -omy-other-test.cmd<span class="o">=</span><span class="s1">&#39;exit $RANDOM&#39;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is also possible to update <code class="docutils literal notranslate"><span class="pre">-n</span></code> in the same way. <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span>
+<span class="pre">--resume</span></code> will top up with the necessary number of iterations to meet <code class="docutils literal notranslate"><span class="pre">-n</span></code>’s
+value.</p>
+</div>
+</div>
+<div class="section" id="no-time-for-script-baby-sitting">
+<h4>No time for script baby-sitting<a class="headerlink" href="#no-time-for-script-baby-sitting" title="Permalink to this headline">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code> comes with a dbus interface that can publish desktop
+notifications on various events to keep you updated when something goes wrong.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># That process will relay desktop notifications using the FreeDesktop dbus</span>
+<span class="c1"># API Most of the time, only state change (abort, stop etc) is needed, and we</span>
+<span class="c1"># don&#39;t want to be bothered by every new iteration</span>
+bisector monitor-server --notif <span class="nb">enable</span> state <span class="p">&amp;</span>
+bisector run --steps steps.yml --report myreport.yml.gz
+<span class="c1"># Notification settings can be later updated using:</span>
+bisector monitor all --notif <span class="nb">enable</span> all
+</pre></div>
+</div>
+<p>A monitoring command is also available:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># used with an explicit PID, no monitor-server is needed</span>
+bisector monitor BISECTOR_RUN_PID --log
+<span class="c1"># used with &quot;all&quot;, the monitor-server is needed as all run instances register</span>
+<span class="c1"># to it</span>
+bisector monitor all --status
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As long as the necessary packages have been installed and unless
+<code class="docutils literal notranslate"><span class="pre">--no-dbus</span></code> have been used, it is possible to start <code class="docutils literal notranslate"><span class="pre">bisector</span>
+<span class="pre">monitor-server</span></code> after <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code>. The latter will detect the appearance
+of the server and will connect to it.</p>
+</div>
+</div>
+</div>
+<div class="section" id="integration-in-a-ci-loop">
+<h3>Integration in a CI loop<a class="headerlink" href="#integration-in-a-ci-loop" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code> has the ability of uploading reports on the fly to
+<em>Artifactorial</em> <a class="footnote-reference brackets" href="#id1" id="id3">1</a>. <em>Artifactorial</em> is convenient since it allows pushing
+large quantities of data to a server, that are automatically cleaned up after a
+period of time. The <code class="docutils literal notranslate"><span class="pre">LISA-test</span></code> step can upload compressed exekall
+artifact archives using <code class="docutils literal notranslate"><span class="pre">-oupload-artifact</span></code> run option. It will record the
+new HTTP location of the artifacts in the report. In a way, the report becomes
+an index that contains enough information to make a decision on what artifact
+archive to download for further analysis (usually to look at <code class="docutils literal notranslate"><span class="pre">trace-cmd</span></code>
+traces).</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">ARTIFACTORIAL_TOKEN</span><span class="o">=</span><span class="s1">&#39;ONE_TOKEN_TO_RULE_THEM_ALL&#39;</span>
+<span class="nb">export</span> <span class="nv">ARTIFACTORIAL_FOLDER</span><span class="o">=</span><span class="s1">&#39;http://instance.of.artifactorial/artifacts/myfolder&#39;</span>
+bisector run --steps steps.yml --report myreport.yml.gz -oupload-artifact --upload-report
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">report</span></code> accept both local files and HTTP URLs</p>
+</div>
+<p>If the worker is unstable, the latest report can still be used and will contain
+all the steps information collected so far. When using the
+<code class="docutils literal notranslate"><span class="pre">exekall-LISA-step</span></code>, <code class="docutils literal notranslate"><span class="pre">-oexport-logs</span></code> will by default download artifact archives
+accessible over HTTP. That can be changed using <code class="docutils literal notranslate"><span class="pre">-odownload=false</span></code>.</p>
+<dl class="footnote brackets">
+<dt class="label" id="id4"><span class="brackets">2</span></dt>
+<dd><p><a class="reference external" href="https://github.com/ivoire/Artifactorial">https://github.com/ivoire/Artifactorial</a></p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="wltest.html" class="btn btn-neutral float-right" title="Wltest" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="notebook.html" class="btn btn-neutral float-left" title="Notebooks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,1065 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Workloads &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Kernel testing" href="kernel_tests.html" />
+    <link rel="prev" title="Target" href="target.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lisa_shell/man/man.html">LISA shell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transition_guide.html">Transitioning from LISA legacy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows/index.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="target.html">Target</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Workloads</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#available-workloads">Available workloads</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rt-app">rt-app</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sysbench">Sysbench</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#target-script">Target script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#api">API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-lisa.wlgen.workload">Base class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">rt-app</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Sysbench</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Target script</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="energy_analysis.html">Energy analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc_utilities.html">Miscellaneous utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bisector/index.html">Bisector Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exekall/index.html">Exekall Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Workloads</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/workloads.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="workloads">
+<h1>Workloads<a class="headerlink" href="#workloads" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>LISA is not intended to automate the execution of complex workloads such as
+Android benchmarks (Jankbench, PCMark…). For this kind of application, you
+should turn to <a class="reference external" href="https://github.com/ARM-software/workload-automation">Workload Automation</a>
+instead.</p>
+<p>However, a minimal amount of support for running experiments is still useful.
+That is why LISA provides the wlgen API, which lets you execute commands and
+binaries while providing some help for managing tasksets, cgroups, and more.</p>
+</div>
+<div class="section" id="available-workloads">
+<h2>Available workloads<a class="headerlink" href="#available-workloads" title="Permalink to this headline">¶</a></h2>
+<p>Most of these workloads are based on the <a class="reference internal" href="#lisa.wlgen.workload.Workload" title="lisa.wlgen.workload.Workload"><code class="xref py py-class docutils literal notranslate"><span class="pre">Workload</span></code></a>
+class, see the documentation for common functionalities.</p>
+<div class="section" id="rt-app">
+<h3>rt-app<a class="headerlink" href="#rt-app" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://github.com/scheduler-tools/rt-app">rt-app</a> lets you run configurable
+workloads described in JSON, and is the backbone of our scheduler tests. See
+the github page for more information.</p>
+<p>Our <a class="reference internal" href="#lisa.wlgen.rta.RTA" title="lisa.wlgen.rta.RTA"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTA</span></code></a> class is a python wrapper around rt-app, which
+lets us abstract away the generation of the JSON files. On top of that, the
+<a class="reference internal" href="#lisa.wlgen.rta.RTATask" title="lisa.wlgen.rta.RTATask"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTATask</span></code></a> class (and its children) facilitate the workload
+description. For instance, creating a workload with 4 tasks with a 50% duty
+cycle is as simple as this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">profile</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">profile</span><span class="p">[</span><span class="s2">&quot;task_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="n">Periodic</span><span class="p">(</span><span class="n">duty_cycle_pct</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+
+<span class="n">wload</span> <span class="o">=</span> <span class="n">RTA</span><span class="o">.</span><span class="n">by_profile</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s2">&quot;4_50_tasks&quot;</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+<span class="n">wload</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>See the <a class="reference internal" href="#lisa.wlgen.rta.RTA" title="lisa.wlgen.rta.RTA"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTA</span></code></a> &amp; <a class="reference internal" href="#lisa.wlgen.rta.RTATask" title="lisa.wlgen.rta.RTATask"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTATask</span></code></a>
+documentations for more details.</p>
+</div>
+<div class="section" id="sysbench">
+<h3>Sysbench<a class="headerlink" href="#sysbench" title="Permalink to this headline">¶</a></h3>
+<p>Sysbench is a useful workload to get some performance numbers, e.g. to
+assert that higher frequencies lead to more work done
+(as done in <a class="reference internal" href="kernel_tests.html#lisa.tests.cpufreq.sanity.UserspaceSanity" title="lisa.tests.cpufreq.sanity.UserspaceSanity"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserspaceSanity</span></code></a>).</p>
+<p>See <a class="reference internal" href="#lisa.wlgen.sysbench.Sysbench" title="lisa.wlgen.sysbench.Sysbench"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sysbench</span></code></a> for more details.</p>
+</div>
+<div class="section" id="target-script">
+<h3>Target script<a class="headerlink" href="#target-script" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="#lisa.target_script.TargetScript" title="lisa.target_script.TargetScript"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetScript</span></code></a> class lets you define a Bash
+script to be later executed on the target.</p>
+<p>It is useful when you want generate some activity on the target without the
+overhead of an ssh/adb connection.</p>
+</div>
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-lisa.wlgen.workload">
+<span id="base-class"></span><h3>Base class<a class="headerlink" href="#module-lisa.wlgen.workload" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="lisa.wlgen.workload.Workload">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.wlgen.workload.</code><code class="sig-name descname">Workload</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">name</em>, <em class="sig-param">res_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.workload.Workload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="misc_utilities.html#lisa.utils.Loggable" title="lisa.utils.Loggable"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.Loggable</span></code></a></p>
+<p>This is pretty much a wrapper around a command to execute on a target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<a class="reference internal" href="target.html#lisa.target.Target" title="lisa.target.Target"><em>Target</em></a>) – The Target on which to execute this workload</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the workload. Useful for naming related artefacts.</p></li>
+<li><p><strong>res_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Directory into which artefacts will be stored</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>command</strong> – Will be called in <a class="reference internal" href="#lisa.wlgen.workload.Workload.run" title="lisa.wlgen.workload.Workload.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>. Daughter classes should
+specify its value as needed.</p>
+</dd>
+</dl>
+<p><strong>Design notes</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">__init__</span></code> is there to initialize a given workload, and <a class="reference internal" href="#lisa.wlgen.workload.Workload.run" title="lisa.wlgen.workload.Workload.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>
+can be called on it several times, with varying arguments.
+As much work as possible should be delegated to <a class="reference internal" href="#lisa.wlgen.workload.Workload.run" title="lisa.wlgen.workload.Workload.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>, so that
+different flavours of the same workload can be run without the hassle of
+creating a superfluous amount of new instances. However, when persistent
+data is involved (e.g. the workload depends on a file), then this data
+should be exposed as an <code class="docutils literal notranslate"><span class="pre">__init__</span></code> parameter.</p>
+<p><strong>Implementation example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Printer</span><span class="p">(</span><span class="n">Workload</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">res_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">res_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;echo&quot;</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cpus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cgroup</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">as_root</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cpus</span><span class="p">,</span> <span class="n">cgroup</span><span class="p">,</span> <span class="n">background</span><span class="p">,</span> <span class="n">as_root</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Usage example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">printer</span> <span class="o">=</span> <span class="n">Printer</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">printer</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="go">INFO    : Printer      : Execution start: echo 42</span>
+<span class="go">INFO    : Printer      : Execution complete</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">printer</span><span class="o">.</span><span class="n">output</span>
+<span class="go">42</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="lisa.wlgen.workload.Workload.required_tools">
+<code class="sig-name descname">required_tools</code><em class="property"> = ['taskset']</em><a class="headerlink" href="#lisa.wlgen.workload.Workload.required_tools" title="Permalink to this definition">¶</a></dt>
+<dd><p>The tools required to execute the workload. See
+<a class="reference internal" href="target.html#lisa.target.Target.install_tools" title="lisa.target.Target.install_tools"><code class="xref py py-meth docutils literal notranslate"><span class="pre">lisa.target.Target.install_tools()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.wlgen.workload.Workload.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">cpus=None</em>, <em class="sig-param">cgroup=None</em>, <em class="sig-param">background=False</em>, <em class="sig-param">as_root=False</em>, <em class="sig-param">timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.workload.Workload.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the workload on the configured target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>)</em>) – CPUs on which to restrict the workload execution (taskset)</p></li>
+<li><p><strong>cgroup</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – cgroup in which to run the workload</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to run the workload in background or not</p></li>
+<li><p><strong>as_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to run the workload as root or not</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Timeout in seconds for the workload execution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>devlib.exception.TimeoutError</strong> – When the specified <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is hit.</p>
+</dd>
+</dl>
+<p>The standard output will be saved into a file in <code class="docutils literal notranslate"><span class="pre">self.res_dir</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="id2">
+<h3>rt-app<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="lisa.wlgen.rta.RTA">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.wlgen.rta.</code><code class="sig-name descname">RTA</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">name</em>, <em class="sig-param">res_dir=None</em>, <em class="sig-param">json_file=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.RTA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.wlgen.workload.Workload" title="lisa.wlgen.workload.Workload"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.wlgen.workload.Workload</span></code></a></p>
+<p>An rt-app workload</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Path to the rt-app json description</p>
+</dd>
+</dl>
+<p>The class constructor only deals with pre-constructed json files.
+For creating rt-app workloads through other means, see <a class="reference internal" href="#lisa.wlgen.rta.RTA.by_profile" title="lisa.wlgen.rta.RTA.by_profile"><code class="xref py py-meth docutils literal notranslate"><span class="pre">by_profile()</span></code></a>
+and <a class="reference internal" href="#lisa.wlgen.rta.RTA.by_str" title="lisa.wlgen.rta.RTA.by_str"><code class="xref py py-meth docutils literal notranslate"><span class="pre">by_str()</span></code></a>.</p>
+<p>For more information about rt-app itself, see
+<a class="reference external" href="https://github.com/scheduler-tools/rt-app">https://github.com/scheduler-tools/rt-app</a></p>
+<dl class="attribute">
+<dt id="lisa.wlgen.rta.RTA.required_tools">
+<code class="sig-name descname">required_tools</code><em class="property"> = ['taskset', 'rt-app']</em><a class="headerlink" href="#lisa.wlgen.rta.RTA.required_tools" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.wlgen.rta.RTA.sched_policies">
+<code class="sig-name descname">sched_policies</code><em class="property"> = ['OTHER', 'FIFO', 'RR', 'DEADLINE']</em><a class="headerlink" href="#lisa.wlgen.rta.RTA.sched_policies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.wlgen.rta.RTA.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">cpus=None</em>, <em class="sig-param">cgroup=None</em>, <em class="sig-param">background=False</em>, <em class="sig-param">as_root=False</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.RTA.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the workload on the configured target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>)</em>) – CPUs on which to restrict the workload execution (taskset)</p></li>
+<li><p><strong>cgroup</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – cgroup in which to run the workload</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to run the workload in background or not</p></li>
+<li><p><strong>as_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to run the workload as root or not</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Timeout in seconds for the workload execution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>devlib.exception.TimeoutError</strong> – When the specified <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is hit.</p>
+</dd>
+</dl>
+<p>The standard output will be saved into a file in <code class="docutils literal notranslate"><span class="pre">self.res_dir</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.wlgen.rta.RTA.by_profile">
+<em class="property">classmethod </em><code class="sig-name descname">by_profile</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">name</em>, <em class="sig-param">profile</em>, <em class="sig-param">res_dir=None</em>, <em class="sig-param">default_policy=None</em>, <em class="sig-param">max_duration_s=None</em>, <em class="sig-param">calibration=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.RTA.by_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an rt-app workload using <a class="reference internal" href="#lisa.wlgen.rta.RTATask" title="lisa.wlgen.rta.RTATask"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTATask</span></code></a> instances</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>profile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – The workload description in a {task_name : <a class="reference internal" href="#lisa.wlgen.rta.RTATask" title="lisa.wlgen.rta.RTATask"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTATask</span></code></a>}
+shape</p></li>
+<li><p><strong>default_policy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Default scheduler policy. See <a class="reference internal" href="#lisa.wlgen.rta.RTA.sched_policies" title="lisa.wlgen.rta.RTA.sched_policies"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sched_policies</span></code></a></p></li>
+<li><p><strong>max_duration_s</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Maximum duration of the workload. Will be determined
+by the longest running task if not specified.</p></li>
+<li><p><strong>calibration</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The calibration value to be used by rt-app. This can
+be an integer value or a CPU string (e.g. “CPU0”).</p></li>
+</ul>
+</dd>
+</dl>
+<p>A simple profile workload would be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">task</span> <span class="o">=</span> <span class="n">Periodic</span><span class="p">(</span><span class="n">duty_cycle_pct</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">rta</span> <span class="o">=</span> <span class="n">RTA</span><span class="o">.</span><span class="n">by_profile</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span>  <span class="p">{</span><span class="s2">&quot;foo&quot;</span> <span class="p">:</span> <span class="n">task</span><span class="p">})</span>
+<span class="n">rta</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.wlgen.rta.RTA.process_template">
+<em class="property">classmethod </em><code class="sig-name descname">process_template</code><span class="sig-paren">(</span><em class="sig-param">template</em>, <em class="sig-param">duration=None</em>, <em class="sig-param">pload=None</em>, <em class="sig-param">log_dir=None</em>, <em class="sig-param">work_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.RTA.process_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn a raw string rt-app description into a JSON dict.
+Also, process some tokens and replace them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>template</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The raw string to process</p></li>
+<li><p><strong>duration</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – The value to replace <code class="docutils literal notranslate"><span class="pre">__DURATION__</span></code> with</p></li>
+<li><p><strong>pload</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value to replace <code class="docutils literal notranslate"><span class="pre">__PVALUE__</span></code> with</p></li>
+<li><p><strong>log_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value to replace <code class="docutils literal notranslate"><span class="pre">__LOGDIR__</span></code> with</p></li>
+<li><p><strong>work_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The value to replace <code class="docutils literal notranslate"><span class="pre">__WORKDIR__</span></code> with</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a JSON dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.wlgen.rta.RTA.by_str">
+<em class="property">classmethod </em><code class="sig-name descname">by_str</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">name</em>, <em class="sig-param">str_conf</em>, <em class="sig-param">res_dir=None</em>, <em class="sig-param">max_duration_s=None</em>, <em class="sig-param">calibration=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.RTA.by_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an rt-app workload using a pure string description</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>str_conf</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The raw string description. This must be a valid json
+description, with the exception of some tokens (see
+<a class="reference internal" href="#lisa.wlgen.rta.RTA.process_template" title="lisa.wlgen.rta.RTA.process_template"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process_template()</span></code></a>) that will be replaced automagically.</p></li>
+<li><p><strong>max_duration_s</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Maximum duration of the workload.</p></li>
+<li><p><strong>calibration</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The calibration value to be used by rt-app. This can
+be an integer value or a CPU string (e.g. “CPU0”).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.wlgen.rta.RTA.get_cpu_calibrations">
+<em class="property">classmethod </em><code class="sig-name descname">get_cpu_calibrations</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">res_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.RTA.get_cpu_calibrations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the rt-ap calibration value for all CPUs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>target</strong> – Devlib target to run calibration on.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dict mapping CPU numbers to rt-app calibration values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.wlgen.rta.Phase">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.wlgen.rta.</code><code class="sig-name descname">Phase</code><span class="sig-paren">(</span><em class="sig-param">duration_s</em>, <em class="sig-param">period_ms</em>, <em class="sig-param">duty_cycle_pct</em>, <em class="sig-param">cpus=None</em>, <em class="sig-param">barrier_after=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.Phase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="misc_utilities.html#lisa.utils.Loggable" title="lisa.utils.Loggable"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.Loggable</span></code></a></p>
+<p>Descriptor for an rt-app load phase</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>duration_s</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – the phase duration in [s].</p></li>
+<li><p><strong>period_ms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – the phase period in [ms].</p></li>
+<li><p><strong>duty_cycle_pct</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – the generated load in [%].</p></li>
+<li><p><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>)</em>) – the CPUs on which task execution is restricted during this phase.</p></li>
+<li><p><strong>barrier_after</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – if provided, the name of the barrier to sync against
+when reaching the end of this phase. Currently only
+supported when duty_cycle_pct=100</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="lisa.wlgen.rta.Phase.get_rtapp_repr">
+<code class="sig-name descname">get_rtapp_repr</code><span class="sig-paren">(</span><em class="sig-param">task_name</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.Phase.get_rtapp_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a dictionnary representation of the phase as expected by rt-app</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the phase’s task (needed for timers)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>OrderedDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.wlgen.rta.RTATask">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.wlgen.rta.</code><code class="sig-name descname">RTATask</code><span class="sig-paren">(</span><em class="sig-param">delay_s=0</em>, <em class="sig-param">loops=1</em>, <em class="sig-param">sched_policy=None</em>, <em class="sig-param">priority=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.RTATask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base class for conveniently constructing params to <a class="reference internal" href="#lisa.wlgen.rta.RTA.by_profile" title="lisa.wlgen.rta.RTA.by_profile"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RTA.by_profile()</span></code></a></p>
+<p>This class represents an rt-app task which may contain multiple <a class="reference internal" href="#lisa.wlgen.rta.Phase" title="lisa.wlgen.rta.Phase"><code class="xref py py-class docutils literal notranslate"><span class="pre">Phase</span></code></a>.
+It implements <code class="docutils literal notranslate"><span class="pre">__add__</span></code> so that using <code class="docutils literal notranslate"><span class="pre">+</span></code> on two tasks concatenates their
+phases. For example <code class="docutils literal notranslate"><span class="pre">Ramp()</span> <span class="pre">+</span> <span class="pre">Periodic()</span></code> would yield an <code class="docutils literal notranslate"><span class="pre">RTATask</span></code> that
+executes the default phases for <a class="reference internal" href="#lisa.wlgen.rta.Ramp" title="lisa.wlgen.rta.Ramp"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ramp</span></code></a> followed by the default phases for
+<a class="reference internal" href="#lisa.wlgen.rta.Periodic" title="lisa.wlgen.rta.Periodic"><code class="xref py py-class docutils literal notranslate"><span class="pre">Periodic</span></code></a>.</p>
+</dd></dl>
+
+<span class="target" id="module-lisa.wlgen.rta"></span><dl class="class">
+<dt id="lisa.wlgen.rta.Ramp">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.wlgen.rta.</code><code class="sig-name descname">Ramp</code><span class="sig-paren">(</span><em class="sig-param">start_pct=0</em>, <em class="sig-param">end_pct=100</em>, <em class="sig-param">delta_pct=10</em>, <em class="sig-param">time_s=1</em>, <em class="sig-param">period_ms=100</em>, <em class="sig-param">delay_s=0</em>, <em class="sig-param">loops=1</em>, <em class="sig-param">sched_policy=None</em>, <em class="sig-param">priority=None</em>, <em class="sig-param">cpus=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.Ramp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.wlgen.rta.RTATask" title="lisa.wlgen.rta.RTATask"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.wlgen.rta.RTATask</span></code></a></p>
+<p>Configure a ramp load.</p>
+<p>This class defines a task which load is a ramp with a configured number
+of steps according to the input parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_pct</strong> – the initial load percentage.</p></li>
+<li><p><strong>end_pct</strong> – the final load percentage.</p></li>
+<li><p><strong>delta_pct</strong> – the load increase/decrease at each step, in percentage
+points.</p></li>
+<li><p><strong>time_s</strong> – the duration in seconds of each load step.</p></li>
+<li><p><strong>period_ms</strong> – the period used to define the load in [ms].</p></li>
+<li><p><strong>delay_s</strong> – the delay in seconds before ramp start.</p></li>
+<li><p><strong>loops</strong> – number of time to repeat the ramp, with the specified delay in
+between.</p></li>
+<li><p><strong>sched_policy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – the scheduler configuration for this task.</p></li>
+<li><p><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>)</em>) – the list of CPUs on which task can run.
+.. note:: if not specified, it can run on all CPUs</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.wlgen.rta.Step">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.wlgen.rta.</code><code class="sig-name descname">Step</code><span class="sig-paren">(</span><em class="sig-param">start_pct=0</em>, <em class="sig-param">end_pct=100</em>, <em class="sig-param">time_s=1</em>, <em class="sig-param">period_ms=100</em>, <em class="sig-param">delay_s=0</em>, <em class="sig-param">loops=1</em>, <em class="sig-param">sched_policy=None</em>, <em class="sig-param">priority=None</em>, <em class="sig-param">cpus=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.Step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.wlgen.rta.Ramp" title="lisa.wlgen.rta.Ramp"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.wlgen.rta.Ramp</span></code></a></p>
+<p>Configure a step load.</p>
+<p>This class defines a task which load is a step with a configured initial and
+final load. Using the <code class="docutils literal notranslate"><span class="pre">loops</span></code> param, this can be used to create a workload
+that alternates between two load values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_pct</strong> – the initial load percentage.</p></li>
+<li><p><strong>end_pct</strong> – the final load percentage.</p></li>
+<li><p><strong>time_s</strong> – the duration in seconds of each load step.</p></li>
+<li><p><strong>period_ms</strong> – the period used to define the load in [ms].</p></li>
+<li><p><strong>delay_s</strong> – the delay in seconds before ramp start.</p></li>
+<li><p><strong>loops</strong> – number of time to repeat the step, with the specified delay in
+between.</p></li>
+<li><p><strong>sched</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – the scheduler configuration for this task.</p></li>
+<li><p><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>)</em>) – the list of CPUs on which task can run.
+.. note:: if not specified, it can run on all CPUs</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.wlgen.rta.Pulse">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.wlgen.rta.</code><code class="sig-name descname">Pulse</code><span class="sig-paren">(</span><em class="sig-param">start_pct=100</em>, <em class="sig-param">end_pct=0</em>, <em class="sig-param">time_s=1</em>, <em class="sig-param">period_ms=100</em>, <em class="sig-param">delay_s=0</em>, <em class="sig-param">loops=1</em>, <em class="sig-param">sched_policy=None</em>, <em class="sig-param">priority=None</em>, <em class="sig-param">cpus=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.Pulse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.wlgen.rta.RTATask" title="lisa.wlgen.rta.RTATask"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.wlgen.rta.RTATask</span></code></a></p>
+<p>Configure a pulse load.</p>
+<p>This class defines a task which load is a pulse with a configured
+initial and final load.</p>
+<p>The main difference with the ‘step’ class is that a pulse workload is
+by definition a ‘step down’, i.e. the workload switch from an finial
+load to a final one which is always lower than the initial one.
+Moreover, a pulse load does not generate a sleep phase in case of 0[%]
+load, i.e. the task ends as soon as the non null initial load has
+completed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_pct</strong> – the initial load percentage.</p></li>
+<li><p><strong>end_pct</strong> – the final load percentage. Must be lower than <code class="docutils literal notranslate"><span class="pre">start_pct</span></code>
+value. If end_pct is 0, the task end after the <code class="docutils literal notranslate"><span class="pre">start_pct</span></code>
+period has completed.</p></li>
+<li><p><strong>time_s</strong> – the duration in seconds of each load step.</p></li>
+<li><p><strong>period_ms</strong> – the period used to define the load in [ms].</p></li>
+<li><p><strong>delay_s</strong> – the delay in seconds before ramp start.</p></li>
+<li><p><strong>loops</strong> – number of time to repeat the pulse, with the specified delay
+in between.</p></li>
+<li><p><strong>sched</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – the scheduler configuration for this task.</p></li>
+<li><p><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>)</em>) – the list of CPUs on which task can run
+.. note:: if not specified, it can run on all CPUs</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.wlgen.rta.Periodic">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.wlgen.rta.</code><code class="sig-name descname">Periodic</code><span class="sig-paren">(</span><em class="sig-param">duty_cycle_pct=50</em>, <em class="sig-param">duration_s=1</em>, <em class="sig-param">period_ms=100</em>, <em class="sig-param">delay_s=0</em>, <em class="sig-param">sched_policy=None</em>, <em class="sig-param">priority=None</em>, <em class="sig-param">cpus=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.Periodic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.wlgen.rta.Pulse" title="lisa.wlgen.rta.Pulse"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.wlgen.rta.Pulse</span></code></a></p>
+<p>Configure a periodic load. This is the simplest type of RTA task.</p>
+<p>This class defines a task which load is periodic with a configured
+period and duty-cycle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>duty_cycle_pct</strong> – the load percentage.</p></li>
+<li><p><strong>duration_s</strong> – the total duration in seconds of the task.</p></li>
+<li><p><strong>period_ms</strong> – the period used to define the load in milliseconds.</p></li>
+<li><p><strong>delay_s</strong> – the delay in seconds before starting the periodic phase.</p></li>
+<li><p><strong>sched</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – the scheduler configuration for this task.</p></li>
+<li><p><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>)</em>) – the list of CPUs on which task can run.
+.. note:: if not specified, it can run on all CPUs</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.wlgen.rta.RunAndSync">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.wlgen.rta.</code><code class="sig-name descname">RunAndSync</code><span class="sig-paren">(</span><em class="sig-param">barrier</em>, <em class="sig-param">time_s=1</em>, <em class="sig-param">delay_s=0</em>, <em class="sig-param">loops=1</em>, <em class="sig-param">sched_policy=None</em>, <em class="sig-param">priority=None</em>, <em class="sig-param">cpus=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.rta.RunAndSync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.wlgen.rta.RTATask" title="lisa.wlgen.rta.RTATask"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.wlgen.rta.RTATask</span></code></a></p>
+<p>Configure a task that runs 100% then waits on a barrier</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>barrier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – name of barrier to wait for. Sleeps until any other tasks
+that refer to this barrier have reached the barrier too.</p></li>
+<li><p><strong>time_s</strong> – time to run for</p></li>
+<li><p><strong>delay_s</strong> – the delay in seconds before starting.</p></li>
+<li><p><strong>sched</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – the scheduler configuration for this task.</p></li>
+<li><p><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>)</em>) – the list of CPUs on which task can run.
+.. note:: if not specified, it can run on all CPUs</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-lisa.analysis.rta"></span><dl class="class">
+<dt id="lisa.analysis.rta.PerfAnalysis">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.analysis.rta.</code><code class="sig-name descname">PerfAnalysis</code><span class="sig-paren">(</span><em class="sig-param">task_log_map</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="trace_analysis.html#lisa.analysis.base.AnalysisHelpers" title="lisa.analysis.base.AnalysisHelpers"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.analysis.base.AnalysisHelpers</span></code></a></p>
+<p>Parse and analyse a set of RTApp log files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task_log_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Mapping of task names to log files</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>That is not a subclass of
+<a class="reference internal" href="trace_analysis.html#lisa.analysis.base.TraceAnalysisBase" title="lisa.analysis.base.TraceAnalysisBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.analysis.base.TraceAnalysisBase</span></code></a> since it does not uses traces.</p>
+</div>
+<p>Load peformance data of an rt-app workload</p>
+<dl class="attribute">
+<dt id="lisa.analysis.rta.PerfAnalysis.name">
+<code class="sig-name descname">name</code><em class="property"> = 'rta'</em><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.analysis.rta.PerfAnalysis.RTA_LOG_PATTERN">
+<code class="sig-name descname">RTA_LOG_PATTERN</code><em class="property"> = 'rt-app-{task}.log'</em><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis.RTA_LOG_PATTERN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filename pattern matching RTApp log files</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.analysis.rta.PerfAnalysis.from_log_files">
+<em class="property">classmethod </em><code class="sig-name descname">from_log_files</code><span class="sig-paren">(</span><em class="sig-param">rta_logs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis.from_log_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a <a class="reference internal" href="#lisa.analysis.rta.PerfAnalysis" title="lisa.analysis.rta.PerfAnalysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">PerfAnalysis</span></code></a> from a sequence of RTApp log files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>rta_logs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em>) – sequence of path to log files</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.analysis.rta.PerfAnalysis.from_dir">
+<em class="property">classmethod </em><code class="sig-name descname">from_dir</code><span class="sig-paren">(</span><em class="sig-param">log_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis.from_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a <a class="reference internal" href="#lisa.analysis.rta.PerfAnalysis" title="lisa.analysis.rta.PerfAnalysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">PerfAnalysis</span></code></a> from a folder path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>log_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Folder containing RTApp log files</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.analysis.rta.PerfAnalysis.from_task_names">
+<em class="property">classmethod </em><code class="sig-name descname">from_task_names</code><span class="sig-paren">(</span><em class="sig-param">task_names</em>, <em class="sig-param">log_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis.from_task_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a <a class="reference internal" href="#lisa.analysis.rta.PerfAnalysis" title="lisa.analysis.rta.PerfAnalysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">PerfAnalysis</span></code></a> from a list of task names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em>) – List of task names to look for</p></li>
+<li><p><strong>log_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Folder containing RTApp log files</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.analysis.rta.PerfAnalysis.tasks">
+<em class="property">property </em><code class="sig-name descname">tasks</code><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis.tasks" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of tasks for which performance data have been loaded</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.analysis.rta.PerfAnalysis.get_log_file">
+<code class="sig-name descname">get_log_file</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis.get_log_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the logfile for the specified task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the task that we want the logfile of.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.analysis.rta.PerfAnalysis.get_df">
+<code class="sig-name descname">get_df</code><span class="sig-paren">(</span><em class="sig-param">task</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis.get_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the pandas dataframe with the performance data for the
+specified task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the task that we want the performance dataframe of.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.analysis.rta.PerfAnalysis.plot_perf">
+<code class="sig-name descname">plot_perf</code><span class="sig-paren">(</span><em class="sig-param">task</em>, <em class="sig-param">*</em>, <em class="sig-param">filepath=None</em>, <em class="sig-param">axis=None</em>, <em class="sig-param">output=None</em>, <em class="sig-param">img_format=None</em>, <em class="sig-param">always_save=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis.plot_perf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the performance Index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filepath</strong> – If no axis is specified, the figure will be saved to
+that path</p>
+</dd>
+</dl>
+<p><strong>Added by</strong> <a class="reference internal" href="trace_analysis.html#lisa.analysis.base.AnalysisHelpers.plot_method" title="lisa.analysis.base.AnalysisHelpers.plot_method"><code class="xref py py-meth docutils literal notranslate"><span class="pre">lisa.analysis.base.AnalysisHelpers.plot_method()</span></code></a>:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An <a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a> containing the plot,
+or rich formats depending on <code class="docutils literal notranslate"><span class="pre">output</span></code> value.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>axis</strong> (<a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><em>matplotlib.axes.Axes</em></a><em>
+or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em>(</em><a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><em>matplotlib.axes.Axes</em></a><em>)
+or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – instance of <a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a> to plot into.
+If <cite>None</cite>, a new figure and axis are created and returned.</p></li>
+<li><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Path of the file to save the figure in. If
+<cite>None</cite>, no file is saved.</p></li>
+<li><p><strong>always_save</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – When <code class="docutils literal notranslate"><span class="pre">True</span></code>, the plot is always saved
+even if no <code class="docutils literal notranslate"><span class="pre">filepath</span></code> has explicitely been set. In that
+case, a default path will be used.</p></li>
+<li><p><strong>img_format</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The image format to generate. Defaults to
+using filepath to guess the type, or “png” if no filepath is
+given. <cite>html</cite> and <cite>rst</cite> are supported in addition to
+matplotlib image formats.</p></li>
+<li><p><strong>output</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Can be <code class="docutils literal notranslate"><span class="pre">None</span></code> to return a
+<a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>, <code class="docutils literal notranslate"><span class="pre">html</span></code> to return an HTML
+document, or <code class="docutils literal notranslate"><span class="pre">rst</span></code> for a reStructuredText output.</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – keyword arguments forwarded to
+<a class="reference internal" href="trace_analysis.html#lisa.analysis.base.AnalysisHelpers.setup_plot" title="lisa.analysis.base.AnalysisHelpers.setup_plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup_plot()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.analysis.rta.PerfAnalysis.plot_latency">
+<code class="sig-name descname">plot_latency</code><span class="sig-paren">(</span><em class="sig-param">task</em>, <em class="sig-param">*</em>, <em class="sig-param">filepath=None</em>, <em class="sig-param">axis=None</em>, <em class="sig-param">output=None</em>, <em class="sig-param">img_format=None</em>, <em class="sig-param">always_save=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis.plot_latency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the Latency/Slack and Performance data for the specified task.</p>
+<p><strong>Added by</strong> <a class="reference internal" href="trace_analysis.html#lisa.analysis.base.AnalysisHelpers.plot_method" title="lisa.analysis.base.AnalysisHelpers.plot_method"><code class="xref py py-meth docutils literal notranslate"><span class="pre">lisa.analysis.base.AnalysisHelpers.plot_method()</span></code></a>:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An <a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a> containing the plot,
+or rich formats depending on <code class="docutils literal notranslate"><span class="pre">output</span></code> value.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>axis</strong> (<a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><em>matplotlib.axes.Axes</em></a><em>
+or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em>(</em><a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><em>matplotlib.axes.Axes</em></a><em>)
+or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – instance of <a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a> to plot into.
+If <cite>None</cite>, a new figure and axis are created and returned.</p></li>
+<li><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Path of the file to save the figure in. If
+<cite>None</cite>, no file is saved.</p></li>
+<li><p><strong>always_save</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – When <code class="docutils literal notranslate"><span class="pre">True</span></code>, the plot is always saved
+even if no <code class="docutils literal notranslate"><span class="pre">filepath</span></code> has explicitely been set. In that
+case, a default path will be used.</p></li>
+<li><p><strong>img_format</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The image format to generate. Defaults to
+using filepath to guess the type, or “png” if no filepath is
+given. <cite>html</cite> and <cite>rst</cite> are supported in addition to
+matplotlib image formats.</p></li>
+<li><p><strong>output</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Can be <code class="docutils literal notranslate"><span class="pre">None</span></code> to return a
+<a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>, <code class="docutils literal notranslate"><span class="pre">html</span></code> to return an HTML
+document, or <code class="docutils literal notranslate"><span class="pre">rst</span></code> for a reStructuredText output.</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – keyword arguments forwarded to
+<a class="reference internal" href="trace_analysis.html#lisa.analysis.base.AnalysisHelpers.setup_plot" title="lisa.analysis.base.AnalysisHelpers.setup_plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup_plot()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.analysis.rta.PerfAnalysis.plot_slack_histogram">
+<code class="sig-name descname">plot_slack_histogram</code><span class="sig-paren">(</span><em class="sig-param">task</em>, <em class="sig-param">*</em>, <em class="sig-param">filepath=None</em>, <em class="sig-param">axis=None</em>, <em class="sig-param">output=None</em>, <em class="sig-param">img_format=None</em>, <em class="sig-param">always_save=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.analysis.rta.PerfAnalysis.plot_slack_histogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the slack histogram</p>
+<p><strong>Added by</strong> <a class="reference internal" href="trace_analysis.html#lisa.analysis.base.AnalysisHelpers.plot_method" title="lisa.analysis.base.AnalysisHelpers.plot_method"><code class="xref py py-meth docutils literal notranslate"><span class="pre">lisa.analysis.base.AnalysisHelpers.plot_method()</span></code></a>:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An <a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a> containing the plot,
+or rich formats depending on <code class="docutils literal notranslate"><span class="pre">output</span></code> value.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>axis</strong> (<a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><em>matplotlib.axes.Axes</em></a><em>
+or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em>(</em><a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><em>matplotlib.axes.Axes</em></a><em>)
+or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – instance of <a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a> to plot into.
+If <cite>None</cite>, a new figure and axis are created and returned.</p></li>
+<li><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Path of the file to save the figure in. If
+<cite>None</cite>, no file is saved.</p></li>
+<li><p><strong>always_save</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – When <code class="docutils literal notranslate"><span class="pre">True</span></code>, the plot is always saved
+even if no <code class="docutils literal notranslate"><span class="pre">filepath</span></code> has explicitely been set. In that
+case, a default path will be used.</p></li>
+<li><p><strong>img_format</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The image format to generate. Defaults to
+using filepath to guess the type, or “png” if no filepath is
+given. <cite>html</cite> and <cite>rst</cite> are supported in addition to
+matplotlib image formats.</p></li>
+<li><p><strong>output</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Can be <code class="docutils literal notranslate"><span class="pre">None</span></code> to return a
+<a class="reference external" href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes" title="(in Matplotlib v3.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>, <code class="docutils literal notranslate"><span class="pre">html</span></code> to return an HTML
+document, or <code class="docutils literal notranslate"><span class="pre">rst</span></code> for a reStructuredText output.</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – keyword arguments forwarded to
+<a class="reference internal" href="trace_analysis.html#lisa.analysis.base.AnalysisHelpers.setup_plot" title="lisa.analysis.base.AnalysisHelpers.setup_plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup_plot()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="id3">
+<h3>Sysbench<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-lisa.wlgen.sysbench"></span><dl class="class">
+<dt id="lisa.wlgen.sysbench.SysbenchOutput">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.wlgen.sysbench.</code><code class="sig-name descname">SysbenchOutput</code><a class="headerlink" href="#lisa.wlgen.sysbench.SysbenchOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
+<p>A wrapper around sysbench’s stdout to more easily access some results</p>
+<dl class="method">
+<dt id="lisa.wlgen.sysbench.SysbenchOutput.nr_events">
+<em class="property">property </em><code class="sig-name descname">nr_events</code><a class="headerlink" href="#lisa.wlgen.sysbench.SysbenchOutput.nr_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of events as reported on the “total number of events” line</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.wlgen.sysbench.SysbenchOutput.duration_s">
+<em class="property">property </em><code class="sig-name descname">duration_s</code><a class="headerlink" href="#lisa.wlgen.sysbench.SysbenchOutput.duration_s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execution duration as reported on the “total time” line</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.wlgen.sysbench.Sysbench">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.wlgen.sysbench.</code><code class="sig-name descname">Sysbench</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">name</em>, <em class="sig-param">res_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.sysbench.Sysbench" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.wlgen.workload.Workload" title="lisa.wlgen.workload.Workload"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.wlgen.workload.Workload</span></code></a></p>
+<p>A sysbench workload</p>
+<dl class="attribute">
+<dt id="lisa.wlgen.sysbench.Sysbench.required_tools">
+<code class="sig-name descname">required_tools</code><em class="property"> = ['taskset', 'sysbench']</em><a class="headerlink" href="#lisa.wlgen.sysbench.Sysbench.required_tools" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.wlgen.sysbench.Sysbench.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">cpus=None</em>, <em class="sig-param">cgroup=None</em>, <em class="sig-param">background=False</em>, <em class="sig-param">as_root=False</em>, <em class="sig-param">test='cpu'</em>, <em class="sig-param">max_duration_s=None</em>, <em class="sig-param">max_requests=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.wlgen.sysbench.Sysbench.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the workload on the configured target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>)</em>) – CPUs on which to restrict the workload execution (taskset)</p></li>
+<li><p><strong>cgroup</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – cgroup in which to run the workload</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to run the workload in background or not</p></li>
+<li><p><strong>as_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to run the workload as root or not</p></li>
+<li><p><strong>test</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The sysbench test to run (run <code class="docutils literal notranslate"><span class="pre">sysbench</span> <span class="pre">--help</span></code>)</p></li>
+<li><p><strong>max_duration_s</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Maximum duration in seconds</p></li>
+</ul>
+</dd>
+<dt class="field-even">Param</dt>
+<dd class="field-even"><p>max_requests: Maximum number of event requests</p>
+</dd>
+<dt class="field-odd">Keyword arguments</dt>
+<dd class="field-odd"><p>Additionnal arguments required by the specific
+test (run <code class="docutils literal notranslate"><span class="pre">sysbench</span> <span class="pre">--test=&lt;test&gt;</span> <span class="pre">help</span></code>). Due to Python limitations,
+use <code class="docutils literal notranslate"><span class="pre">_</span></code> instead of <code class="docutils literal notranslate"><span class="pre">-</span></code> for argument naming.</p>
+</dd>
+</dl>
+<p>The standard output will be saved into a file in <code class="docutils literal notranslate"><span class="pre">self.res_dir</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="id4">
+<h3>Target script<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-lisa.target_script"></span><dl class="class">
+<dt id="lisa.target_script.TargetScript">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.target_script.</code><code class="sig-name descname">TargetScript</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">script_name='remote_script.sh'</em>, <em class="sig-param">local_dir='./'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.target_script.TargetScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class provides utility to create and run a script
+directly on a devlib target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – Reference <code class="xref py py-class docutils literal notranslate"><span class="pre">devlib.target.Target</span></code> instance. Will be
+used for some commands that must really be executed instead of accumulated.</p></li>
+<li><p><strong>script_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the script that will be pushed on the target</p></li>
+<li><p><strong>local_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Local directory to use to prepare the script</p></li>
+</ul>
+</dd>
+</dl>
+<p><a class="reference internal" href="#lisa.target_script.TargetScript.execute" title="lisa.target_script.TargetScript.execute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">execute()</span></code></a> is made to look like Devlib’s, so a Target instance can
+be swapped with an instance of this class, and the commands will be
+accumulated for later use instead of being executed straight away.</p>
+<dl class="method">
+<dt id="lisa.target_script.TargetScript.execute">
+<code class="sig-name descname">execute</code><span class="sig-paren">(</span><em class="sig-param">cmd</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.target_script.TargetScript.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accumulate command for later execution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cmd</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Command that would be run on the target</p>
+</dd>
+</dl>
+<p>This is made to look like the devlib Target execute()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.target_script.TargetScript.append">
+<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param">cmd</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.target_script.TargetScript.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a command to the script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cmd</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Command string to append</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.target_script.TargetScript.push">
+<code class="sig-name descname">push</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.target_script.TargetScript.push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push a script to the target</p>
+<p>The script is created and stored on the host, and is then sent
+to the target.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.target_script.TargetScript.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">as_root=False</em>, <em class="sig-param">timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.target_script.TargetScript.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the previously pushed script</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>as_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Execute that script as root</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Timeout (in seconds) for the execution of the script</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p><a class="reference internal" href="#lisa.target_script.TargetScript.push" title="lisa.target_script.TargetScript.push"><code class="xref py py-meth docutils literal notranslate"><span class="pre">push()</span></code></a> must have been called beforehand</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.target_script.TargetScript.background">
+<code class="sig-name descname">background</code><span class="sig-paren">(</span><em class="sig-param">as_root=False</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.target_script.TargetScript.background" title="Permalink to this definition">¶</a></dt>
+<dd><p>Non-blocking variant of <a class="reference internal" href="#lisa.target_script.TargetScript.run" title="lisa.target_script.TargetScript.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>as_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Execute that script as root</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the <a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.Popen" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">subprocess.Popen</span></code></a> instance for the command</p>
+</dd>
+</dl>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>You’ll have to properly close the file descriptors used by
+<a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.Popen" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">subprocess.Popen</span></code></a>, for this we recommend using it as a context
+manager:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">script</span><span class="o">.</span><span class="n">background</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.target_script.TargetScript.wait">
+<code class="sig-name descname">wait</code><span class="sig-paren">(</span><em class="sig-param">poll_sleep_s=1</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.target_script.TargetScript.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for a script started via <a class="reference internal" href="#lisa.target_script.TargetScript.background" title="lisa.target_script.TargetScript.background"><code class="xref py py-meth docutils literal notranslate"><span class="pre">background()</span></code></a> to complete</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>poll_sleep_s</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Sleep duration between poll() calls</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">devlib.exception.TargetNotRespondingError</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.target_script.TargetScript.kill">
+<code class="sig-name descname">kill</code><span class="sig-paren">(</span><em class="sig-param">as_root=False</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.target_script.TargetScript.kill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kill a script started via <a class="reference internal" href="#lisa.target_script.TargetScript.background" title="lisa.target_script.TargetScript.background"><code class="xref py py-meth docutils literal notranslate"><span class="pre">background()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>as_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Kill the script as root</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="kernel_tests.html" class="btn btn-neutral float-right" title="Kernel testing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="target.html" class="btn btn-neutral float-left" title="Target" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

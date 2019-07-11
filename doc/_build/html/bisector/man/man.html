@@ -1,0 +1,1199 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Man page &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="API Documentation" href="../api.html" />
+    <link rel="prev" title="Bisector Documentation" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lisa_shell/man/man.html">LISA shell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transition_guide.html">Transitioning from LISA legacy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributors_guide.html">Contributor’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../workflows/index.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../target.html">Target</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../workloads.html">Workloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../energy_analysis.html">Energy analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc_utilities.html">Miscellaneous utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Bisector Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#overview">Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#contents">Contents</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Man page</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#monitoring">Monitoring</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html">API Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../exekall/index.html">Exekall Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Bisector Documentation</a> &raquo;</li>
+        
+      <li>Man page</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/bisector/man/man.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="man-page">
+<h1>Man page<a class="headerlink" href="#man-page" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bisector</span></code> is a <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">bisect</span> <span class="pre">run</span></code> <a class="footnote-reference brackets" href="#id3" id="id1">1</a> compatible tool used in LISA. Its goal is
+to sequence commands to be repeated an arbitrary number of times and generates
+a report.</p>
+<p>For example, <code class="docutils literal notranslate"><span class="pre">bisector</span></code> can be used to compile a kernel, flash a board,
+reboot it and run test suite. To achieve that, <code class="docutils literal notranslate"><span class="pre">bisector</span></code> runs a sequence of
+steps, and saves a report file containing the result of each step. This step
+sequence is run for a number of iterations, or for a given duration. That
+allows tracking fluctuating bugs by repeating a test process many times.</p>
+<p>The steps class can implement any run or report behavior, with the ability to
+take parameters. They also decide what data is saved into the report, and
+their contribution to the overall <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">bisect</span></code> result:</p>
+<ul class="simple">
+<li><p><cite>good</cite>: the test steps passed</p></li>
+<li><p><cite>bad</cite>: the test steps failed</p></li>
+<li><p><cite>untestable</cite>: the build or flash step failed</p></li>
+<li><p><cite>abort</cite>: the reboot step failed, and the board is now unusable and requires
+manual intervention</p></li>
+<li><p><cite>NA</cite>: the step will not impact the overall result</p></li>
+</ul>
+<p>It is important to note that <code class="docutils literal notranslate"><span class="pre">bisector</span></code> step classes usually only invoke a
+user-specified command line tool and will use the return code to decide what
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">bisect</span></code> result to return. They can also implement more specific result
+reporting, and additional run behaviors.</p>
+</div>
+<div class="section" id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="bisector">
+<h3>bisector<a class="headerlink" href="#bisector" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: bisector [-h] [--cli-options CLI_OPTIONS]
+                {step-help,run,report,edit,monitor-server,monitor} ...
+
+    Git-bisect-compatible command sequencer.
+
+    bisector allows to run commands with timeout handling in predefined
+    sequences (steps). The output is saved in a report that can be later
+    analyzed. The exit status of all steps is merged to obtain a git bisect
+    compatible value which is returned. The error code 254 is used
+    when bisector itself encounters an error.
+
+    SIGNAL HANDLING
+
+    The script can be stopped with SIGINT (Ctrl-C) or SIGTERM (kill or timeout
+    commands) or SIGHUP (when the terminal dies) and will save the completed
+    iterations to the report. The execution can later be resumed with --resume.
+    
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --cli-options CLI_OPTIONS
+                        YAML file containing command line option string in a
+                        &quot;cmd-line&quot; toplevel key. Therefore, the same file can be used
+                        for --steps.  The options are inserted at the location of
+                        --cli-options in the command line. That can be used to control what
+                        can be overriden by configuration file and what is forced by the
+                        command line
+
+subcommands:
+  {step-help,run,report,edit,monitor-server,monitor}
+</pre></div>
+</div>
+</div>
+<div class="section" id="bisector-run">
+<h3>bisector run<a class="headerlink" href="#bisector-run" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: bisector run [-h] [--cli-options CLI_OPTIONS] [-o OPTION] [--debug]
+                    [--steps STEPS] [--allowed-bad ALLOWED_BAD] [--skip SKIP]
+                    [--only ONLY] [--git-clean] [--inline CLASS NAME]
+                    [-n ITERATIONS] [--timeout TIMEOUT] [--log LOG]
+                    [--report REPORT] [--overwrite] [--resume] [--desc DESC]
+                    [--early-bailout] [--upload-report] [--dbus | --no-dbus]
+
+Run the given steps in a loop and record the result in a report file. The
+report file can be inspected using the &quot;report&quot; subcommand. The exit status is
+suitable for git bisect.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --cli-options CLI_OPTIONS
+                        YAML file containing command line option string in a
+                        &quot;cmd-line&quot; toplevel key. Therefore, the same file can
+                        be used for --steps. The options are inserted at the
+                        location of --cli-options in the command line. That
+                        can be used to control what can be overriden by
+                        configuration file and what is forced by the command
+                        line
+  -o OPTION, --option OPTION
+                        Step-specific options. Can be repeated. The format is
+                        &lt;step category or name pattern&gt;.&lt;option&gt;=&lt;value&gt;. If
+                        the step name or category is omitted, it will be
+                        passed to all steps. See &quot;step-help&quot; subcommand for
+                        the available options. Options specified this way
+                        override the steps definition file, and can be used to
+                        modify the report when used with run --resume or edit
+                        subcommand.
+  --debug               Show Python traceback to help debugging this script.
+  --steps STEPS         YAML configuration of steps to run. The steps
+                        definitions lives under a &quot;step&quot; toplevel key.
+  --allowed-bad ALLOWED_BAD
+                        Percentage of bad iterations that still result in a
+                        good overall result.
+  --skip SKIP           Step name or category to skip. Can be repeated.
+  --only ONLY           Step name or category to execute. Can be repeated.
+  --git-clean           Run git reset --hard and git clean -fdx before and
+                        after the steps are executed. It is useful for
+                        automated bisect to avoid checkout failure that leads
+                        to bisect abortion. WARNING: this will erase all
+                        changes and untracked files from the worktree.
+  --inline CLASS NAME, -s CLASS NAME
+                        Class and name of inline step. Can be repeated to
+                        build a list of steps in the order of appearance.
+  -n ITERATIONS, --iterations ITERATIONS
+                        Number of iterations. &quot;inf&quot; means an infinite number
+                        of iterations.
+  --timeout TIMEOUT     Timeout after which no more itertions will be started.
+                        &quot;inf&quot; means infinite timeout (i.e. no timeout).
+  --log LOG             Log all events to the log file. By default, a log file
+                        is created as &lt;report file&gt;.log .
+  --report REPORT       Execution report containing output and return values
+                        for all steps. Can be displayed using the &quot;report&quot;
+                        subcommand. The {commit} placeholder is replaced with
+                        the truncated sha1 of HEAD in current directory, and
+                        {date} by a string built from the current date and
+                        time. If the file name ends with .pickle or
+                        .pickle.gz, a Pickle file is created, otherwise YAML
+                        format is used. YAML is good for archiving but slow to
+                        generate and load, Pickle format cannot expected to be
+                        backward compatible with different versions of the
+                        tool but can be faster to read and write. CAVEAT:
+                        Pickle format will not handle references to modules
+                        that are not in sys.path.
+  --overwrite           Overwrite existing report files.
+  --resume              Resume execution from the report specified with
+                        --report. The steps will be extracted from the report
+                        instead of from the command line. The number of
+                        completed iterations will be deducted from the
+                        specified number of iterations.
+  --desc DESC           Report description. Can use {commit} and {date}
+                        placeholders.
+  --early-bailout       Restart a new iteration if a step marked the commit as
+                        bad or non-testable. Bisect abortion will still take
+                        place even without this option.
+  --upload-report       Continuously upload the report to Artifactorial after
+                        every iteration. This relies on the following
+                        environment variables: ARTIFACTORIAL_FOLDER set to the
+                        folder&#39;s URL and ARTIFACTORIAL_TOKEN set to the token.
+                        Remember to use the right step option to upload the
+                        results as they are computed if desired.
+  --dbus                Try enable DBus API if the necessary dependencies are
+                        installed.
+  --no-dbus             Disable DBus even when pydbus module is available.
+</pre></div>
+</div>
+</div>
+<div class="section" id="bisector-report">
+<h3>bisector report<a class="headerlink" href="#bisector-report" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: bisector report [-h] [--cli-options CLI_OPTIONS] [-o OPTION] [--debug]
+                       [--steps STEPS] [--allowed-bad ALLOWED_BAD]
+                       [--skip SKIP] [--only ONLY] [--export EXPORT] [--cache]
+                       report
+
+Analyze a report generated by run command. The exit status is suitable for git
+bisect. In most cases, step options (``-o``) will act as filters to ignore
+parts of the data before computing the overall bisect result.
+
+positional arguments:
+  report                Read back a previous session saved using --report
+                        option of run subcommand.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --cli-options CLI_OPTIONS
+                        YAML file containing command line option string in a
+                        &quot;cmd-line&quot; toplevel key. Therefore, the same file can
+                        be used for --steps. The options are inserted at the
+                        location of --cli-options in the command line. That
+                        can be used to control what can be overriden by
+                        configuration file and what is forced by the command
+                        line
+  -o OPTION, --option OPTION
+                        Step-specific options. Can be repeated. The format is
+                        &lt;step category or name pattern&gt;.&lt;option&gt;=&lt;value&gt;. If
+                        the step name or category is omitted, it will be
+                        passed to all steps. See &quot;step-help&quot; subcommand for
+                        the available options. Options specified this way
+                        override the steps definition file, and can be used to
+                        modify the report when used with run --resume or edit
+                        subcommand.
+  --debug               Show Python traceback to help debugging this script.
+  --steps STEPS         YAML configuration of steps to run. The steps
+                        definitions lives under a &quot;step&quot; toplevel key.
+  --allowed-bad ALLOWED_BAD
+                        Percentage of bad iterations that still result in a
+                        good overall result.
+  --skip SKIP           Step name or category to skip. Can be repeated.
+  --only ONLY           Step name or category to execute. Can be repeated.
+  --export EXPORT       Export the report as a Pickle or YAML file. File
+                        format is infered from the filename. If it ends with
+                        .pickle, a Pickle file is created, otherwise YAML
+                        format is used.
+  --cache               When loading a report, create a cache file named
+                        &quot;{report_filename}.cache.pickle&quot; using the fastest
+                        format available. It is the reused until the original
+                        file is modified. This is mostly useful when working
+                        with big YAML files that are long to load.
+</pre></div>
+</div>
+</div>
+<div class="section" id="bisector-step-help">
+<h3>bisector step-help<a class="headerlink" href="#bisector-step-help" title="Permalink to this headline">¶</a></h3>
+<p>Steps-specific options to be used with <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span> <span class="pre">-o</span></code> and <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">report</span> <span class="pre">-o</span></code>.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>LISA-test (test)
+----------------
+Inherits from: shell
+
+    Execute an exekall LISA test command and collect
+    :class:`exekall.engine.ValueDB`. Also compress the result directory and
+    record its path. It will also define some environment variables that are
+    expected to be used by the command to be able to locate resources to
+    collect.
+
+    run:
+      -o bail-out= (bool) 
+            start a new iteration if the command fails, without executing
+            remaining steps for this iteration
+
+      -o cmd= (non-empty str) 
+            shell command to be executed
+
+      -o compress-artifact= (bool) 
+            compress the exekall artifact directory in an archive
+
+      -o delete-artifact= (bool) 
+            delete the exekall artifact directory to Artifactorial as the
+            execution goes.
+
+      -o env= (env var list) 
+            environment variables with a list of values that will be used for
+            each iterations, wrapping around. The string format is:
+            VAR1=val1%val2%...%%VAR2=val1%val2%.... In YAML, it is a map of var
+            names to list of values. A single string can be supplied instead of
+            a list of values.
+
+      -o kill-timeout= (int or &quot;inf&quot;) 
+            time to wait before sending SIGKILL after having sent SIGTERM
+
+      -o prune-db= (bool) 
+            Prune exekall&#39;s ValueDB so that only roots values are preserved.
+            That allows smaller reports that are faster to load
+
+      -o shell= (non-empty str) 
+            shell to execute the command in
+
+      -o timeout= (int or &quot;inf&quot;) 
+            timeout in seconds before sending SIGTERM to the command, or &quot;inf&quot;
+            for infinite timeout
+
+      -o upload-artifact= (bool) 
+            upload the exekall artifact directory to Artifactorial as the
+            execution goes, and delete the local archive.
+
+      -o use-systemd-run= (bool) 
+            use systemd-run to run the command. This allows cleanup of daemons
+            spawned by the command (using cgroups), and using a private /tmp
+            that is also cleaned up automatically
+
+
+    report:
+      -o download= (bool) 
+            Download the exekall artifact archives if necessary
+
+      -o dump-artifact-dirs= (non-empty str) 
+            write the list of exekall artifact directories to a file. Useful to
+            implement garbage collection of unreferenced artifact archives
+
+      -o export-db= (non-empty str) 
+            export a merged exekall ValueDB, merging it with existing ValueDB if
+            the file exists
+
+      -o export-logs= (non-empty str) 
+            export the logs and artifact directory symlink to the given
+            directory
+
+      -o ignore-excep= (comma-separated list) 
+            ignore the given comma-separated list of exceptions class name
+            patterns that caused tests error. This will also match on base
+            classes of the exception.
+
+      -o ignore-non-error= (bool) 
+            consider only tests that had an error
+
+      -o ignore-non-issue= (bool) 
+            consider only tests that failed or had an error
+
+      -o ignore-testcase= (comma-separated list) 
+            completely ignore untagged test cases matching one of the patterns
+            in the comma-separated list. * can be used to match any part of the
+            name.
+
+      -o iterations= (comma-separated list of integer ranges) 
+            comma-separated list of iterations to consider. Inclusive ranges can
+            be specified with &lt;first&gt;-&lt;last&gt;
+
+      -o result-uuid= (comma-separated list) 
+            show only the test results with a UUID in the comma-separated list.
+
+      -o show-artifact-dirs= (bool) 
+            show exekall artifact directory for all iterations
+
+      -o show-basic= (bool) 
+            show command exit status for all iterations
+
+      -o show-details= (&quot;msg&quot; or bool) 
+            show details of results. Use &quot;msg&quot; for only a brief message
+
+      -o show-dist= (bool) 
+            show graphical distribution of issues among iterations with a one
+            letter code: passed=&quot;.&quot;, failed=&quot;F&quot;, error=&quot;#&quot;, skipped=&quot;s&quot;,
+            undecided=&quot;u&quot;
+
+      -o show-pass-rate= (bool) 
+            always show the pass rate of tests, even when there are failures or
+            errors as well
+
+      -o show-rates= (bool) 
+            show percentages of failure, error, skipped, undecided and passed
+            tests
+
+      -o testcase= (comma-separated list) 
+            show only the untagged test cases matching one of the patterns in
+            the comma-separated list. * can be used to match any part of the
+            name
+
+      -o upload-artifact= (bool) 
+            upload the artifact directory to Artifactorial and update the in-
+            memory report. Following env var are needed: ARTIFACTORIAL_FOLDER
+            set to the folder URL and ARTIFACTORIAL_TOKEN. Note: --export should
+            be used to save the report with updated paths
+
+      -o verbose= (bool) 
+            increase verbosity
+
+
+
+build (build)
+-------------
+Inherits from: shell
+
+    Similar to :class:`ShellStep` .
+    
+    Non-zero exit status of the command will be interpreted as a bisect
+    untestable status, and zero exit status as bisect good.
+
+    run:
+      -o bail-out= (bool) 
+            start a new iteration if the command fails, without executing
+            remaining steps for this iteration
+
+      -o cmd= (non-empty str) 
+            shell command to be executed
+
+      -o env= (env var list) 
+            environment variables with a list of values that will be used for
+            each iterations, wrapping around. The string format is:
+            VAR1=val1%val2%...%%VAR2=val1%val2%.... In YAML, it is a map of var
+            names to list of values. A single string can be supplied instead of
+            a list of values.
+
+      -o kill-timeout= (int or &quot;inf&quot;) 
+            time to wait before sending SIGKILL after having sent SIGTERM
+
+      -o shell= (non-empty str) 
+            shell to execute the command in
+
+      -o timeout= (int or &quot;inf&quot;) 
+            timeout in seconds before sending SIGTERM to the command, or &quot;inf&quot;
+            for infinite timeout
+
+      -o trials= (int) 
+            number of times the command will be retried if it does not return 0
+
+      -o use-systemd-run= (bool) 
+            use systemd-run to run the command. This allows cleanup of daemons
+            spawned by the command (using cgroups), and using a private /tmp
+            that is also cleaned up automatically
+
+
+    report:
+      -o export-logs= (non-empty str) 
+            export the logs to the given directory
+
+      -o ignore-non-issue= (bool) 
+            consider only iteration with non-zero command exit status
+
+      -o iterations= (comma-separated list of integer ranges) 
+            comma-separated list of iterations to consider. Inclusive ranges can
+            be specified with &lt;first&gt;-&lt;last&gt;
+
+      -o show-basic= (bool) 
+            show command exit status for all iterations
+
+      -o verbose= (bool) 
+            increase verbosity
+
+
+
+flash (flash)
+-------------
+Inherits from: shell
+
+    Similar to :class:`ShellStep` .
+    
+    Non-zero exit status of the command will be interpreted as a bisect
+    abort, and zero exit status ignored.
+
+    run:
+      -o bail-out= (bool) 
+            start a new iteration if the command fails, without executing
+            remaining steps for this iteration
+
+      -o cmd= (non-empty str) 
+            shell command to be executed
+
+      -o env= (env var list) 
+            environment variables with a list of values that will be used for
+            each iterations, wrapping around. The string format is:
+            VAR1=val1%val2%...%%VAR2=val1%val2%.... In YAML, it is a map of var
+            names to list of values. A single string can be supplied instead of
+            a list of values.
+
+      -o kill-timeout= (int or &quot;inf&quot;) 
+            time to wait before sending SIGKILL after having sent SIGTERM
+
+      -o shell= (non-empty str) 
+            shell to execute the command in
+
+      -o timeout= (int or &quot;inf&quot;) 
+            timeout in seconds before sending SIGTERM to the command, or &quot;inf&quot;
+            for infinite timeout
+
+      -o trials= (int) 
+            number of times the command will be retried if it does not return 0
+
+      -o use-systemd-run= (bool) 
+            use systemd-run to run the command. This allows cleanup of daemons
+            spawned by the command (using cgroups), and using a private /tmp
+            that is also cleaned up automatically
+
+
+    report:
+      -o export-logs= (non-empty str) 
+            export the logs to the given directory
+
+      -o ignore-non-issue= (bool) 
+            consider only iteration with non-zero command exit status
+
+      -o iterations= (comma-separated list of integer ranges) 
+            comma-separated list of iterations to consider. Inclusive ranges can
+            be specified with &lt;first&gt;-&lt;last&gt;
+
+      -o show-basic= (bool) 
+            show command exit status for all iterations
+
+      -o verbose= (bool) 
+            increase verbosity
+
+
+
+macro (macro)
+-------------
+    Provide a loop-like construct to the steps definitions.
+    
+    All sub-steps will be executed in order. This sequence will be repeated
+    for the given number of iterations or until it times out. The steps
+    definition YAML configuration file is interpreted assuming an implicit
+    toplevel :class:`MacroStep` that is parameterized using command line options.
+
+    run:
+      -o bail-out-early= (bool) 
+            start a new iteration when a step returned bisect status bad or
+            untestable and skip all remaining steps
+
+      -o iterations= (int or &quot;inf&quot;) 
+            number of iterations
+
+      -o timeout= (int or &quot;inf&quot;) 
+            time after which no new iteration will be started
+
+
+
+reboot (boot)
+-------------
+Inherits from: shell
+
+    Similar to :class:`ShellStep` .
+    
+    Non-zero exit status of the command will be interpreted as a bisect
+    abort, and zero exit status as bisect good.
+
+    run:
+      -o bail-out= (bool) 
+            start a new iteration if the command fails, without executing
+            remaining steps for this iteration
+
+      -o cmd= (non-empty str) 
+            shell command to be executed
+
+      -o env= (env var list) 
+            environment variables with a list of values that will be used for
+            each iterations, wrapping around. The string format is:
+            VAR1=val1%val2%...%%VAR2=val1%val2%.... In YAML, it is a map of var
+            names to list of values. A single string can be supplied instead of
+            a list of values.
+
+      -o kill-timeout= (int or &quot;inf&quot;) 
+            time to wait before sending SIGKILL after having sent SIGTERM
+
+      -o shell= (non-empty str) 
+            shell to execute the command in
+
+      -o timeout= (int or &quot;inf&quot;) 
+            timeout in seconds before sending SIGTERM to the command, or &quot;inf&quot;
+            for infinite timeout
+
+      -o trials= (int) 
+            number of times the command will be retried if it does not return 0
+
+      -o use-systemd-run= (bool) 
+            use systemd-run to run the command. This allows cleanup of daemons
+            spawned by the command (using cgroups), and using a private /tmp
+            that is also cleaned up automatically
+
+
+    report:
+      -o export-logs= (non-empty str) 
+            export the logs to the given directory
+
+      -o ignore-non-issue= (bool) 
+            consider only iteration with non-zero command exit status
+
+      -o iterations= (comma-separated list of integer ranges) 
+            comma-separated list of iterations to consider. Inclusive ranges can
+            be specified with &lt;first&gt;-&lt;last&gt;
+
+      -o show-basic= (bool) 
+            show command exit status for all iterations
+
+      -o verbose= (bool) 
+            increase verbosity
+
+
+
+shell (shell)
+-------------
+    Execute a command in a shell.
+    
+    Stdout and stderr are merged and logged. The exit status of the command
+    will have no influence of the bisect status.
+
+    run:
+      -o bail-out= (bool) 
+            start a new iteration if the command fails, without executing
+            remaining steps for this iteration
+
+      -o cmd= (non-empty str) 
+            shell command to be executed
+
+      -o env= (env var list) 
+            environment variables with a list of values that will be used for
+            each iterations, wrapping around. The string format is:
+            VAR1=val1%val2%...%%VAR2=val1%val2%.... In YAML, it is a map of var
+            names to list of values. A single string can be supplied instead of
+            a list of values.
+
+      -o kill-timeout= (int or &quot;inf&quot;) 
+            time to wait before sending SIGKILL after having sent SIGTERM
+
+      -o shell= (non-empty str) 
+            shell to execute the command in
+
+      -o timeout= (int or &quot;inf&quot;) 
+            timeout in seconds before sending SIGTERM to the command, or &quot;inf&quot;
+            for infinite timeout
+
+      -o trials= (int) 
+            number of times the command will be retried if it does not return 0
+
+      -o use-systemd-run= (bool) 
+            use systemd-run to run the command. This allows cleanup of daemons
+            spawned by the command (using cgroups), and using a private /tmp
+            that is also cleaned up automatically
+
+
+    report:
+      -o export-logs= (non-empty str) 
+            export the logs to the given directory
+
+      -o ignore-non-issue= (bool) 
+            consider only iteration with non-zero command exit status
+
+      -o iterations= (comma-separated list of integer ranges) 
+            comma-separated list of iterations to consider. Inclusive ranges can
+            be specified with &lt;first&gt;-&lt;last&gt;
+
+      -o show-basic= (bool) 
+            show command exit status for all iterations
+
+      -o verbose= (bool) 
+            increase verbosity
+
+
+
+test (test)
+-----------
+Inherits from: shell
+
+    Similar to :class:`ShellStep` .
+    
+    Non-zero exit status of the command will be interpreted as a bisect bad
+    status, and zero exit status as bisect good.
+
+    run:
+      -o bail-out= (bool) 
+            start a new iteration if the command fails, without executing
+            remaining steps for this iteration
+
+      -o cmd= (non-empty str) 
+            shell command to be executed
+
+      -o env= (env var list) 
+            environment variables with a list of values that will be used for
+            each iterations, wrapping around. The string format is:
+            VAR1=val1%val2%...%%VAR2=val1%val2%.... In YAML, it is a map of var
+            names to list of values. A single string can be supplied instead of
+            a list of values.
+
+      -o kill-timeout= (int or &quot;inf&quot;) 
+            time to wait before sending SIGKILL after having sent SIGTERM
+
+      -o shell= (non-empty str) 
+            shell to execute the command in
+
+      -o timeout= (int or &quot;inf&quot;) 
+            timeout in seconds before sending SIGTERM to the command, or &quot;inf&quot;
+            for infinite timeout
+
+      -o trials= (int) 
+            number of times the command will be retried if it does not return 0
+
+      -o use-systemd-run= (bool) 
+            use systemd-run to run the command. This allows cleanup of daemons
+            spawned by the command (using cgroups), and using a private /tmp
+            that is also cleaned up automatically
+
+
+    report:
+      -o export-logs= (non-empty str) 
+            export the logs to the given directory
+
+      -o ignore-non-issue= (bool) 
+            consider only iteration with non-zero command exit status
+
+      -o iterations= (comma-separated list of integer ranges) 
+            comma-separated list of iterations to consider. Inclusive ranges can
+            be specified with &lt;first&gt;-&lt;last&gt;
+
+      -o show-basic= (bool) 
+            show command exit status for all iterations
+
+      -o verbose= (bool) 
+            increase verbosity
+
+
+
+yield (yield)
+-------------
+    Abort current iteration with the yield return code.
+    
+    If the specified command returns a non-zero return code, bisector will
+    abort the current iteration with the yield return code.
+    
+    .. note:: This step can only be used under the main macrostep (it cannot be
+        used in nested macrosteps).
+
+    run:
+      -o bail-out= (bool) 
+            start a new iteration if the command fails, without executing
+            remaining steps for this iteration
+
+      -o cmd= (non-empty str) 
+            shell command to be executed
+
+      -o env= (env var list) 
+            environment variables with a list of values that will be used for
+            each iterations, wrapping around. The string format is:
+            VAR1=val1%val2%...%%VAR2=val1%val2%.... In YAML, it is a map of var
+            names to list of values. A single string can be supplied instead of
+            a list of values.
+
+      -o every-n-iterations= (int) 
+            The step will be a no-op except if the iteration number can be
+            evenly divided by that value.
+
+      -o kill-timeout= (int or &quot;inf&quot;) 
+            time to wait before sending SIGKILL after having sent SIGTERM
+
+      -o shell= (non-empty str) 
+            shell to execute the command in
+
+      -o timeout= (int or &quot;inf&quot;) 
+            timeout in seconds before sending SIGTERM to the command, or &quot;inf&quot;
+            for infinite timeout
+
+      -o trials= (int) 
+            number of times the command will be retried if it does not return 0
+
+      -o use-systemd-run= (bool) 
+            use systemd-run to run the command. This allows cleanup of daemons
+            spawned by the command (using cgroups), and using a private /tmp
+            that is also cleaned up automatically
+</pre></div>
+</div>
+</div>
+<div class="section" id="bisector-monitor">
+<h3>bisector monitor<a class="headerlink" href="#bisector-monitor" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: bisector monitor [-h] [--cli-options CLI_OPTIONS] [--status]
+                        [--prop PROP] [--list]
+                        [--pause | --stop | --continue | --kill | --log | --report ... | --notif enable/disable PROPERTY]
+                        PID
+
+Monitor and control a running instance.
+
+positional arguments:
+  PID                   Slave PID to act on or &quot;all&quot;. Start a monitor-server
+                        before using &quot;all&quot;.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --cli-options CLI_OPTIONS
+                        YAML file containing command line option string in a
+                        &quot;cmd-line&quot; toplevel key. Therefore, the same file can
+                        be used for --steps. The options are inserted at the
+                        location of --cli-options in the command line. That
+                        can be used to control what can be overriden by
+                        configuration file and what is forced by the command
+                        line
+  --status              Show status.
+  --prop PROP           Show given property.
+  --list                List all slaves.
+  --pause               Pause at the end of the iteration.
+  --stop                Stop at the end of the iteration.
+  --continue            Continue paused or stopped instance.
+  --kill                Kill the given instance.
+  --log                 Show log in $PAGER.
+  --report ...          Equivalent to running bisector report, all remaining
+                        options being passed to it.
+  --notif enable/disable PROPERTY
+                        Enable and disable desktop notifications when the
+                        given property changes. &#39;all&#39; will select all
+                        properties.
+</pre></div>
+</div>
+</div>
+<div class="section" id="bisector-monitor-server">
+<h3>bisector monitor-server<a class="headerlink" href="#bisector-monitor-server" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: bisector monitor-server [-h] [--cli-options CLI_OPTIONS]
+                               [--notif enable/disable PROPERTY]
+
+Start the DBus server to allow monitoring all running instances. Note that the
+server is not necessary to monitor a specific run instance.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --cli-options CLI_OPTIONS
+                        YAML file containing command line option string in a
+                        &quot;cmd-line&quot; toplevel key. Therefore, the same file can
+                        be used for --steps. The options are inserted at the
+                        location of --cli-options in the command line. That
+                        can be used to control what can be overriden by
+                        configuration file and what is forced by the command
+                        line
+  --notif enable/disable PROPERTY
+                        Enable and disable desktop notifications when the
+                        given property changes. &#39;all&#39; will select all
+                        properties.
+</pre></div>
+</div>
+</div>
+<div class="section" id="bisector-edit">
+<h3>bisector edit<a class="headerlink" href="#bisector-edit" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: bisector edit [-h] [-o OPTION] [--debug] [--steps STEPS] report
+
+Modify the properties of the steps in an existing report.
+
+positional arguments:
+  report                Report to edit.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OPTION, --option OPTION
+                        Step-specific options. Can be repeated. The format is
+                        &lt;step category or name pattern&gt;.&lt;option&gt;=&lt;value&gt;. If
+                        the step name or category is omitted, it will be
+                        passed to all steps. See &quot;step-help&quot; subcommand for
+                        the available options. Options specified this way
+                        override the steps definition file, and can be used to
+                        modify the report when used with run --resume or edit
+                        subcommand.
+  --debug               Show Python traceback to help debugging this script.
+  --steps STEPS         YAML configuration of steps used to find new paths of
+                        classes if necessary. It is otherwise ignored and
+                        --option must be used to edit the report.
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code> is configured using a YAML <a class="footnote-reference brackets" href="#id4" id="id2">2</a> file specified using <code class="docutils literal notranslate"><span class="pre">--steps</span></code> that
+defines the steps that will be executed in a loop. Each declared step has a (usually
+unique) name and a class that will influence the way its result is used and its
+options.</p>
+<p>The YAML file is structured as following:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Top-level &quot;steps&quot; key is important as the same file can be used to host other</span>
+<span class="c1"># information.</span>
+<span class="nt">steps</span><span class="p">:</span>
+
+   <span class="c1"># build step will interpret a non-zero exit status of the command as a</span>
+   <span class="c1"># bisect untestable status, and zero exit status as bisect good.</span>
+    <span class="p p-Indicator">-</span>
+      <span class="nt">class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">BuildStep</span>
+      <span class="nt">cmd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">make defconfig Image dtbs</span>
+      <span class="nt">trials</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+
+   <span class="c1"># flash step will interpret a non-zero exit status of the command as a</span>
+   <span class="c1"># bisect abort, and zero exit status ignored.</span>
+<span class=" -Error">   </span><span class="p p-Indicator">-</span>
+      <span class="nt">class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">FlashStep</span>
+      <span class="nt">cmd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">flash-my-board</span>
+      <span class="nt">timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">180</span>
+      <span class="nt">trials</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
+
+   <span class="c1"># reboot step will interpret a non-zero exit status of the command as a</span>
+   <span class="c1"># bisect abort, and zero exit status as bisect good.</span>
+   <span class=" -Error"> </span><span class="p p-Indicator">-</span>
+      <span class="nt">class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">reboot</span>
+      <span class="nt">timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">300</span>
+      <span class="nt">trials</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+      <span class="nt">cmd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">reboot-my-board</span>
+
+    <span class="c1"># exekall LISA test will interpret a non-zero exit status of the command</span>
+    <span class="c1"># as bisect bad, and a zero exit status as bisect good.</span>
+    <span class="p p-Indicator">-</span>
+      <span class="nt">class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">LISA-test</span>
+      <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">one-small-task</span>
+      <span class="c1"># Using systemd-run ensures all child process is killed if the session</span>
+      <span class="c1"># is interrupted</span>
+      <span class="nt">use-systemd-run</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+      <span class="nt">timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3600</span>
+      <span class="nt">cmd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">lisa-test &#39;OneSmallTask*&#39;</span>
+</pre></div>
+</div>
+<p>All step options can also be specified using <code class="docutils literal notranslate"><span class="pre">--options/-o</span></code>, which will
+override what is described in the YAML steps configuration.</p>
+</div>
+<div class="section" id="monitoring">
+<h2>Monitoring<a class="headerlink" href="#monitoring" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code> allows some live monitoring by exposing a DBus interface. This
+is used by two subcommands: <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">monitor-server</span></code> and <code class="docutils literal notranslate"><span class="pre">bisector</span>
+<span class="pre">monitor</span></code>.</p>
+<div class="section" id="server">
+<h3>Server<a class="headerlink" href="#server" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">monitor-server</span></code> acts as a registry of all <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code>
+executing under the same user (DBus session bus). It allows <code class="docutils literal notranslate"><span class="pre">bisector</span>
+<span class="pre">monitor</span></code> to list active instances and also forwards desktop notifications to
+the desktop environment. The server can be (re)started after <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code>
+if necessary.</p>
+</div>
+<div class="section" id="monitor">
+<h3>Monitor<a class="headerlink" href="#monitor" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">monitor</span></code> allows listing active instances of <code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">run</span></code> (when
+the server is running), and allows querying various information from them.
+Since the query can be directed to a specific PID, the server is only necessary
+for listing.</p>
+</div>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>A typical flow of <code class="docutils literal notranslate"><span class="pre">bisector</span></code> looks like that:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run the steps and generate a report.</span>
+<span class="c1"># systemd-run will be used for all steps by using &quot;-o&quot; without specifying a</span>
+step name or category.
+bisector run --desc <span class="s2">&quot;description of my report&quot;</span> --steps bisector_steps.yaml --report bisector.report.yml.gz -ouse-systemd-run<span class="o">=</span>yes
+
+<span class="c1"># Later inspection of the report, only looking at the steps that have &quot;test&quot;</span>
+<span class="c1"># name or category.</span>
+bisector report bisector.report.yml.gz
+
+<span class="c1"># Show steps with the &quot;test&quot; name or category</span>
+bisector report bisector.report.yml.gz --only <span class="nb">test</span>
+
+<span class="c1"># Help of a exekall LISA&#39;s step options</span>
+bisector step-help LISA-test
+
+<span class="c1"># Get all information about tests failures</span>
+bisector report bisector.report.yml.gz -overbose
+
+<span class="c1"># Show the tests failure backtraces and messages, and the metrics in the</span>
+<span class="c1"># other cases.</span>
+<span class="c1"># -oshow-details=msg only displays the message without the backtrace</span>
+bisector report bisector.report.yml.gz -oshow-details
+
+<span class="c1"># Ignore some exceptions in LISA results</span>
+<span class="c1"># These exceptions are related to network/ssh issues and are usually not interesting</span>
+bisector report bisector.report.yml.gz -oignore-excep<span class="o">=</span>ExceptionPxssh,HostError,TimeoutError
+
+<span class="c1"># Only show the results of a specific test case</span>
+<span class="c1"># the name is as reported by exekall, so it is best to use * to match the</span>
+<span class="c1"># boilerplate prefix.</span>
+<span class="c1"># For example -otestcase=&#39;OneSmallTask:*&#39; will match both</span>
+<span class="c1"># &quot;OneSmallTask:test_slack&quot; and &quot;OneSmallTask:test_task_placement&quot;.</span>
+bisector report bisector.report.yml.gz -otestcase<span class="o">=</span><span class="s1">&#39;OneSmallTask:*&#39;</span>
+
+<span class="c1"># Only consider iterations 1 to 5, 42 and 56</span>
+<span class="c1"># Useful to limit the amount of downloaded result archives</span>
+bisector report bisector.report.yml.gz -oiterations<span class="o">=</span><span class="m">1</span>-5,42,56
+
+<span class="c1"># Ignore LISA tests results that are not failures</span>
+<span class="c1"># use that to only download the result archives for failed tests.</span>
+bisector report bisector.report.yml.gz -oignore-non-issue
+
+<span class="c1"># Download the archives of failed tests and export stdout/sdterr logs to files in</span>
+<span class="c1"># the &quot;logs&quot; directory.</span>
+<span class="c1"># The hierarchy created is &lt;folder to export to&gt;/&lt;step name&gt;/&lt;iteration number&gt;</span>
+<span class="c1"># This will create files for commands output, xUnit files and download the result archives.</span>
+bisector report bisector.report.yml.gz -oexport-logs<span class="o">=</span>logs
+
+<span class="c1"># &quot;-oXXXX=YYYY&quot; options can be applied to a specific step instead of all of them using</span>
+<span class="c1"># -o &lt;step name or category&gt;.XXXX=YYYY</span>
+<span class="c1"># This command will only show iteration #2 for the eas_behaviour step</span>
+bisector report bisector.report.yml.gz -oeas_behaviour.iterations<span class="o">=</span><span class="m">2</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p><a class="reference external" href="https://git-scm.com/docs/git-bisect#_bisect_run">https://git-scm.com/docs/git-bisect#_bisect_run</a></p>
+</dd>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p><a class="reference external" href="https://learnxinyminutes.com/docs/yaml/">https://learnxinyminutes.com/docs/yaml/</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../api.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral float-left" title="Bisector Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

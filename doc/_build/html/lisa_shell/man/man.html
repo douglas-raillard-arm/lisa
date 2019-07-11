@@ -1,0 +1,396 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>LISA shell &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="==== Guides &amp; workflows ====" href="../../guides_separator.html" />
+    <link rel="prev" title="Setup" href="../../setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Setup</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">LISA shell</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#activation">Activation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#commands">Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#maintenance-commands">Maintenance commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notebooks-commands">Notebooks commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-commands">Test commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#buildroot-commands">Buildroot commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#misc-commands">Misc commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-variables">Environment variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transition_guide.html">Transitioning from LISA legacy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributors_guide.html">Contributor’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../workflows/index.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../target.html">Target</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../workloads.html">Workloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../energy_analysis.html">Energy analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc_utilities.html">Miscellaneous utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bisector/index.html">Bisector Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exekall/index.html">Exekall Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>LISA shell</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/lisa_shell/man/man.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lisa-shell">
+<h1>LISA shell<a class="headerlink" href="#lisa-shell" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Once you have all of the required dependencies installed, you can use the LISA
+shell, which provides a convenient set of commands for easy access to many LISA
+related functions, scripts and environment variables.</p>
+<p>For more details, see
+<a class="reference external" href="https://lisa-linux-integrated-system-analysis.readthedocs.io/en/master/">https://lisa-linux-integrated-system-analysis.readthedocs.io/en/master/</a></p>
+</div>
+<div class="section" id="activation">
+<h2>Activation<a class="headerlink" href="#activation" title="Permalink to this headline">¶</a></h2>
+<p>In order to use the shell, source the script:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> init_env
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is done automatically by vagrant, so you don’t have to issue this
+command after doing a <code class="docutils literal notranslate"><span class="pre">vagrant</span> <span class="pre">ssh</span></code></p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Run <code class="docutils literal notranslate"><span class="pre">man</span> <span class="pre">lisa</span></code> to see an overview of the provided LISA commands.</p>
+</div>
+</div>
+<div class="section" id="commands">
+<h2>Commands<a class="headerlink" href="#commands" title="Permalink to this headline">¶</a></h2>
+<p>Most LISA Shell commands start with <code class="docutils literal notranslate"><span class="pre">lisa-</span></code>, thus using shell completion it
+is easy to get a list of all the available commands.</p>
+<p>Here is the documentation of the simple ones, more complex scripts have
+integrated <code class="docutils literal notranslate"><span class="pre">--help</span></code> documentation, a section in the online documentation, or
+man pages.</p>
+<div class="section" id="maintenance-commands">
+<h3>Maintenance commands<a class="headerlink" href="#maintenance-commands" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-help</span></code>             - Show this help</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-install</span></code>          - Remove the previous venv and do a fresh ven install</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-version</span></code>          - Dump info on the LISA in use</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-activate-venv</span></code>    - Activate the LISA venv, and create it if it does not exist</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-deactivate-venv</span></code>  - Deactivate the LISA venv, and create it if it does not exist</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-update-subtrees</span></code>  - Update the subtrees by pulling their latest changes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-log-subtree</span></code>      - Git log on the squashed commits of the given
+subtree. All other options are passed to <cite>git log</cite>.</p></li>
+</ul>
+</div>
+<div class="section" id="notebooks-commands">
+<h3>Notebooks commands<a class="headerlink" href="#notebooks-commands" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-jupyter</span></code> - Start/Stop the Jupyter Notebook server.</p>
+<blockquote>
+<div><p>Usage: <code class="docutils literal notranslate"><span class="pre">lisa-jupyter</span> <span class="pre">CMD</span> <span class="pre">[NETIF</span> <span class="pre">[PORT]]</span></code></p>
+<table class="colwidths-auto docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><cite>CMD</cite></p></td>
+<td><p><cite>start</cite> to start the jupyter notebook server, <cite>stop</cite> to stop it
+(default: <cite>start</cite>)</p></td>
+</tr>
+<tr class="row-even"><td><p><cite>NETIF</cite></p></td>
+<td><p>the network interface to start the server on (default: <cite>lo</cite>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><cite>PORT</cite></p></td>
+<td><p>the tcp port for the server (default: 8888)</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="test-commands">
+<h3>Test commands<a class="headerlink" href="#test-commands" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-test</span></code> - Run LISA synthetic tests.</p>
+<blockquote>
+<div><p>This is just a wrapper around <code class="docutils literal notranslate"><span class="pre">exekall</span></code> that selects all tests modules and
+use positional arguments as <code class="docutils literal notranslate"><span class="pre">--select</span></code> patterns. The default configuration
+file (<code class="docutils literal notranslate"><span class="pre">$LISA_CONF</span></code>) will be used if available. This can be extended with
+user-supplied <code class="docutils literal notranslate"><span class="pre">--conf</span></code>. If multiple iterations are requested using <code class="docutils literal notranslate"><span class="pre">-n</span></code>,
+the <a class="reference internal" href="../../target.html#lisa.target.Target" title="lisa.target.Target"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.target.Target</span></code></a> instance will be reused across iterations,
+to avoid the overhead of setting up the target environment.</p>
+<p>Usage: <code class="docutils literal notranslate"><span class="pre">lisa-test</span> <span class="pre">TEST_PATTERN</span> <span class="pre">...</span> <span class="pre">[EXEKALL_OPTIONS</span> <span class="pre">...]</span></code></p>
+<p>Example: <code class="docutils literal notranslate"><span class="pre">lisa-test</span> <span class="pre">'OneSmallTask*'</span> <span class="pre">--list</span></code></p>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-wltest-series</span></code>    - See <a class="reference internal" href="../../workflows/wltest.html#wltest-doc"><span class="std std-ref">wltest main documentation</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exekall</span></code>               - See <a class="reference internal" href="../../exekall/index.html#exekall-doc"><span class="std std-ref">exekall main documentation</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bisector</span></code>              - See <a class="reference internal" href="../../bisector/index.html#bisector-doc"><span class="std std-ref">bisector main documentation</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="buildroot-commands">
+<h3>Buildroot commands<a class="headerlink" href="#buildroot-commands" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-buildroot-create-rootfs</span></code>- Create a buildroot based rootfs to be used
+as userland for testing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-buildroot-update-kernel-config</span></code> - Update a kernel config to bake a
+buildroot initramfs into the kernel.</p></li>
+</ul>
+</div>
+<div class="section" id="misc-commands">
+<h3>Misc commands<a class="headerlink" href="#misc-commands" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">lisa-plot</span></code> - Generate various plots from a <code class="docutils literal notranslate"><span class="pre">trace.dat</span></code> file.
+See <code class="docutils literal notranslate"><span class="pre">lisa-plot</span> <span class="pre">-h</span></code> for available plots.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="environment-variables">
+<h2>Environment variables<a class="headerlink" href="#environment-variables" title="Permalink to this headline">¶</a></h2>
+<p>The following environment variables are available:</p>
+<table class="colwidths-auto docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p>EXEKALL_ARTIFACT_ROOT</p></td>
+<td><p>Default root for exekall’s artifacts</p></td>
+<td><p>results</p></td>
+</tr>
+<tr class="row-even"><td><p>LISA_CONF</p></td>
+<td><p>Default configuration file for exekall</p></td>
+<td><p>target_conf.yml</p></td>
+</tr>
+<tr class="row-odd"><td><p>LISA_DEVMODE</p></td>
+<td><p>By default use internal libraries</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>LISA_HOME</p></td>
+<td><p>Base directory of LISA environment</p></td>
+<td><p>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>LISA_HOST_ABI</p></td>
+<td><p>Add some shell utilities to the PATH, with lower priority than
+system’s one in case the user needs a different version of them</p></td>
+<td><p>x86_64</p></td>
+</tr>
+<tr class="row-even"><td><p>LISA_PRESERVE_SHELL</p></td>
+<td><p>By default use Lisa’s PS1 and colorscheme for the shell</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>LISA_PYTHON</p></td>
+<td><p>Python binary to use. This allows users to install multiple versions
+in parallel, and ease testing</p></td>
+<td><p>python3</p></td>
+</tr>
+<tr class="row-even"><td><p>LISA_RESULT_ROOT</p></td>
+<td><p>By default, store the results under that folder</p></td>
+<td><p>results</p></td>
+</tr>
+<tr class="row-odd"><td><p>LISA_USE_VENV</p></td>
+<td><p>1 to make lisa-install use a venv specified in LISA_VENV_PATH, 0
+otherwise</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>LISA_VENV_PATH</p></td>
+<td><p>Path to venv to be used by lisa-install</p></td>
+<td><p>.lisa-venv-&lt;python version&gt;</p></td>
+</tr>
+</tbody>
+</table>
+<p>If an environment variable is defined prior to sourcing <code class="docutils literal notranslate"><span class="pre">init_env</span></code>, it will
+keep its value.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../guides_separator.html" class="btn btn-neutral float-right" title="==== Guides &amp; workflows ====" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../../setup.html" class="btn btn-neutral float-left" title="Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

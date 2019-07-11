@@ -1,0 +1,506 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Transitioning from LISA legacy &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Contributor’s guide" href="contributors_guide.html" />
+    <link rel="prev" title="==== Guides &amp; workflows ====" href="guides_separator.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lisa_shell/man/man.html">LISA shell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Transitioning from LISA legacy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#global-changes">Global changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#project-structure">Project structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#updating-your-tree">Updating your tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-3">Python 3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#imports">Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logging">Logging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notebooks">Notebooks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#api-changes">API Changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#testenv">TestEnv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trace">Trace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis">Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wlgen">wlgen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kernel-tests">Kernel tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#energy-meter">Energy Meter</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows/index.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="target.html">Target</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workloads.html">Workloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="energy_analysis.html">Energy analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc_utilities.html">Miscellaneous utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bisector/index.html">Bisector Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exekall/index.html">Exekall Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Transitioning from LISA legacy</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/transition_guide.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="transitioning-from-lisa-legacy">
+<h1>Transitioning from LISA legacy<a class="headerlink" href="#transitioning-from-lisa-legacy" title="Permalink to this headline">¶</a></h1>
+<p>A big refactoring effort was started in mid 2018, which produced a lot of
+(much needed) changes. If you are used to using LISA before the refactoring came
+into place, this guide is for you.</p>
+<div class="section" id="global-changes">
+<h2>Global changes<a class="headerlink" href="#global-changes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="project-structure">
+<h3>Project structure<a class="headerlink" href="#project-structure" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">$repo/libs/utils</span></code> is now <code class="docutils literal notranslate"><span class="pre">$repo/lisa/</span></code>. <code class="docutils literal notranslate"><span class="pre">$repo/libs/wlgen</span></code> has also been
+moved to that location.</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">devlib</span></code>, <a class="reference external" href="https://pythonhosted.org/TRAPpy/trappy.html#module-trappy" title="(in TRAPpy v5.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">trappy</span></code></a>, <a class="reference external" href="https://pythonhosted.org/bart-py/bart.html#module-bart" title="(in BART v1.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bart</span></code></a> and <a class="reference external" href="https://workload-automation.readthedocs.io/en/latest/user_information.html#module-wa" title="(in wa v3.1.3.dev1)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">wa</span></code></a> are
+now under <code class="docutils literal notranslate"><span class="pre">$repo/external/</span></code>. Git subtrees are now used instead of submodules.</p></li>
+<li><p>All non self-tests have been moved from <code class="docutils literal notranslate"><span class="pre">$repo/tests</span></code> to <code class="docutils literal notranslate"><span class="pre">$repo/lisa/tests</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="updating-your-tree">
+<h3>Updating your tree<a class="headerlink" href="#updating-your-tree" title="Permalink to this headline">¶</a></h3>
+<p>Since we no longer use submodules, a <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">pull</span></code> is all you need
+(<code class="docutils literal notranslate"><span class="pre">lisa-update</span></code> no longer exists). Also, see <a class="reference internal" href="kernel_tests.html#kernel-testing-page"><span class="std std-ref">Kernel testing</span></a>.</p>
+</div>
+<div class="section" id="python-3">
+<h3>Python 3<a class="headerlink" href="#python-3" title="Permalink to this headline">¶</a></h3>
+<p>With Python 2 end of life drawing near, we decided to bridge the gap and move over
+to Python 3. Unlike <code class="xref py py-mod docutils literal notranslate"><span class="pre">devlib</span></code> or <a class="reference external" href="https://pythonhosted.org/TRAPpy/trappy.html#module-trappy" title="(in TRAPpy v5.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">trappy</span></code></a>, we didn’t go for compatibility
+with both Python 2 and Python 3 - LISA is now Python 3 only.</p>
+</div>
+<div class="section" id="imports">
+<h3>Imports<a class="headerlink" href="#imports" title="Permalink to this headline">¶</a></h3>
+<p>LISA legacy used implicit relative imports with a bit of dark magic to hold
+everything together. Say you want to import the <a class="reference internal" href="trace_analysis.html#lisa.trace.Trace" title="lisa.trace.Trace"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.trace.Trace</span></code></a> class
+found in <code class="docutils literal notranslate"><span class="pre">lisa/trace.py</span></code>, previously you would do it like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">trace</span> <span class="k">import</span> <span class="n">Trace</span>
+</pre></div>
+</div>
+<p>However, implicit relative imports are dangerous - did you know <a class="reference external" href="https://docs.python.org/3/library/trace.html#trace.Trace" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">trace.Trace</span></code></a>
+exists in Python’s standard library? This means that with the previous setup, the LISA
+module would shadow the standard library’s. The above import done in a non-LISA
+environment would have imported something completely different!</p>
+<p>We now mandate the use of absolute imports, which look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lisa.trace</span> <span class="k">import</span> <span class="n">Trace</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>This can help you figure out what you are really importing:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">trace</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">__path__</span><span class="p">)</span>
+<span class="go">/usr/lib/python3.5/trace.py</span>
+</pre></div>
+</div>
+<p>if that doesn’t work you can try</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">xxx</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Do make sure you haven’t kept some <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code> tweaking in your <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code>
+that could lead to an older LISA/devlib/trappy being imported.</p>
+</div>
+</div>
+<div class="section" id="logging">
+<h3>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h3>
+<p>Enabling the LISA logger has changed slightly:</p>
+<p><strong>LISA legacy</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">conf</span> <span class="k">import</span> <span class="n">LisaLogging</span>
+<span class="n">LisaLogging</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>LISA next</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">lisa.utils</span> <span class="k">import</span> <span class="n">setup_logging</span>
+<span class="n">setup_logging</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="notebooks">
+<h3>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this headline">¶</a></h3>
+<p>The LISA shell command to start notebooks has been changed from <code class="docutils literal notranslate"><span class="pre">lisa-ipython</span></code> to
+<code class="docutils literal notranslate"><span class="pre">lisa-jupyter</span></code> (the actual notebooks have been Jupyter for several years now).</p>
+<p>We also use the newer Jupyterlab, as the regular Jupyter notebooks will slowly
+be phased out - see the
+<a class="reference external" href="https://github.com/jupyter/roadmap/blob/master/notebook.md">Official Jupyter roadmap</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Jupyterlab breaks the TRAPpy plots that use JS injection (e.g.
+<a class="reference external" href="https://pythonhosted.org/TRAPpy/trappy.plotter.ILinePlot.html#module-trappy.plotter.ILinePlot" title="(in TRAPpy v5.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ILinePlot</span></code></a>). You can use the “old” notebooks by clicking
+<code class="docutils literal notranslate"><span class="pre">Help-&gt;Launch</span> <span class="pre">Classic</span> <span class="pre">Notebook</span></code>, but that is bound to go away eventually.</p>
+</div>
+<p>Furthermore, in LISA legacy notebooks served as documentations and where the
+main source of examples. We now have a proper documentation (you’re reading it!),
+so we greatly trimmed down the number of notebooks we had.</p>
+<p>We’ve kept older notebooks in <code class="docutils literal notranslate"><span class="pre">ipynb/deprecated</span></code>, but they have not been ported
+over to the new APIs (or even to Python3) so they won’t work. They are there in
+case we find a reason to bring back some of them.</p>
+</div>
+</div>
+<div class="section" id="api-changes">
+<h2>API Changes<a class="headerlink" href="#api-changes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="testenv">
+<h3>TestEnv<a class="headerlink" href="#testenv" title="Permalink to this headline">¶</a></h3>
+<p>Creating a <code class="docutils literal notranslate"><span class="pre">env.TestEnv</span></code> used to look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">target_conf</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># Define the kind of target platform to use for the experiments</span>
+    <span class="s2">&quot;platform&quot;</span>    <span class="p">:</span> <span class="s1">&#39;linux&#39;</span><span class="p">,</span>
+
+    <span class="c1"># Preload settings for a specific target</span>
+    <span class="s2">&quot;board&quot;</span>       <span class="p">:</span> <span class="s1">&#39;juno&#39;</span><span class="p">,</span>  <span class="c1"># juno - JUNO board with mainline hwmon</span>
+
+    <span class="c1"># Define devlib module to load</span>
+    <span class="s2">&quot;modules&quot;</span>     <span class="p">:</span> <span class="p">[</span>
+        <span class="s1">&#39;bl&#39;</span><span class="p">,</span>           <span class="c1"># enable big.LITTLE support</span>
+        <span class="s1">&#39;cpufreq&#39;</span>       <span class="c1"># enable CPUFreq support</span>
+    <span class="p">],</span>
+
+    <span class="s2">&quot;host&quot;</span>        <span class="p">:</span> <span class="s1">&#39;192.168.0.1&#39;</span><span class="p">,</span>
+    <span class="s2">&quot;username&quot;</span>    <span class="p">:</span> <span class="s1">&#39;root&#39;</span><span class="p">,</span>
+    <span class="s2">&quot;password&quot;</span>    <span class="p">:</span> <span class="s1">&#39;root&#39;</span><span class="p">,</span>
+
+    <span class="s2">&quot;rtapp-calib&quot;</span> <span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;0&#39;</span><span class="p">:</span> <span class="mi">361</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="mi">138</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="mi">138</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">:</span> <span class="mi">352</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">:</span> <span class="mi">360</span><span class="p">,</span> <span class="s1">&#39;5&#39;</span><span class="p">:</span> <span class="mi">353</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">te</span> <span class="o">=</span> <span class="n">TestEnv</span><span class="p">(</span><span class="n">target_conf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The equivalent class to use is now <a class="reference internal" href="target.html#lisa.target.Target" title="lisa.target.Target"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.target.Target</span></code></a>. It does not
+require a mapping to be built anymore.</p>
+<p>We now have a dedicated class for the <code class="docutils literal notranslate"><span class="pre">target_conf</span></code>, see <a class="reference internal" href="target.html#lisa.target.TargetConf" title="lisa.target.TargetConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.target.TargetConf</span></code></a>.
+The most notable changes are as follows (see the doc for details):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;platform&quot;</span></code> is now <code class="docutils literal notranslate"><span class="pre">&quot;kind&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;board&quot;</span></code> used to load some target-specific settings, which we got rid of.
+The closest thing to it is <code class="docutils literal notranslate"><span class="pre">&quot;name&quot;</span></code> which is just a pretty-printing name and
+has no extra impact.</p></li>
+<li><p>You don’t have to specify devlib modules to load anymore. All (loadable)
+modules are now loaded. If you find some module too slow to load, you can
+specify a list of modules to exclude.</p></li>
+<li><p>LISA used to have <code class="docutils literal notranslate"><span class="pre">target.config</span></code> JSON file at its root. Its equivalent is
+now <code class="docutils literal notranslate"><span class="pre">target_conf.yml</span></code>, which is in YAML.</p></li>
+</ul>
+<div class="admonition-cool-new-feature admonition">
+<p class="admonition-title">Cool new feature</p>
+<p><a class="reference internal" href="target.html#lisa.target.Target" title="lisa.target.Target"><code class="xref py py-class docutils literal notranslate"><span class="pre">Target</span></code></a> instances can now be easily be created
+<a class="reference internal" href="target.html#lisa.target.Target.from_default_conf" title="lisa.target.Target.from_default_conf"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from</span> <span class="pre">the</span> <span class="pre">configuration</span> <span class="pre">file</span></code></a> or
+<a class="reference internal" href="target.html#lisa.target.Target.from_cli" title="lisa.target.Target.from_cli"><code class="xref py py-meth docutils literal notranslate"><span class="pre">via</span> <span class="pre">the</span> <span class="pre">CLI</span></code></a>.</p>
+</div>
+</div>
+<div class="section" id="trace">
+<h3>Trace<a class="headerlink" href="#trace" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="trace_analysis.html#lisa.trace.Trace" title="lisa.trace.Trace"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.trace.Trace</span></code></a> class hasn’t changed much in terms of functionality,
+but we did rename/move things to make them more coherent.</p>
+<ul class="simple">
+<li><p>Removed last occurences of camelCase</p></li>
+<li><p>Removed big.LITTLE assumptions and made the code only rely on CPU capacities or
+frequency domains, where relevant.</p></li>
+<li><p>Constructor now only takes trace files as input, not folders anymore.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Trace.data_frame</span></code> is gone:</p></li>
+</ul>
+<p><strong>LISA legacy</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">trace</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">trace_event</span><span class="p">(</span><span class="s2">&quot;sched_switch&quot;</span><span class="p">)</span>
+<span class="c1"># or</span>
+<span class="n">trace</span><span class="o">.</span><span class="n">df</span><span class="p">(</span><span class="s2">&quot;sched_switch&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>LISA next</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">trace</span><span class="o">.</span><span class="n">df_events</span><span class="p">(</span><span class="s2">&quot;sched_switch&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="analysis">
+<h3>Analysis<a class="headerlink" href="#analysis" title="Permalink to this headline">¶</a></h3>
+<p>Most of the analysis functionality provided by LISA legacy has made its way into
+LISA next, although several functionalities were restructured and merged together.
+Most methods were moved into different modules as well in an attempt to instore
+some sense of logic - for instance, <code class="docutils literal notranslate"><span class="pre">analysis.latency.df_latency</span></code> is now
+<a class="reference internal" href="trace_analysis.html#lisa.analysis.tasks.TasksAnalysis.df_task_states" title="lisa.analysis.tasks.TasksAnalysis.df_task_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">df_task_states()</span></code></a>. An exact changelog would
+fill up your screen, so we recommend having a look at <a class="reference internal" href="trace_analysis.html#analysis-page"><span class="std std-ref">Kernel trace analysis</span></a>.</p>
+<p>Note that a new <a class="reference internal" href="trace_analysis.html#module-lisa.analysis.load_tracking" title="lisa.analysis.load_tracking"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lisa.analysis.load_tracking</span></code></a> module has been added to
+regroup all load-tracking analysis, and provide wrappers to abstract between our
+different load tracking trace event versions (e.g.
+<a class="reference internal" href="trace_analysis.html#lisa.analysis.load_tracking.LoadTrackingAnalysis.df_tasks_signals" title="lisa.analysis.load_tracking.LoadTrackingAnalysis.df_tasks_signals"><code class="xref py py-meth docutils literal notranslate"><span class="pre">df_tasks_signals()</span></code></a>)</p>
+<p>Analysis function calls must now include their respective module:</p>
+<p><strong>LISA legacy</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">trace</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">cpu_frequency_transitions</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>LISA next</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">trace</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">frequency</span><span class="o">.</span><span class="n">df_cpu_frequency_transitions</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To make autocompletion more useful, all methods returning a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.24.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
+will start with <code class="docutils literal notranslate"><span class="pre">df_</span></code>, whereas all methods rendering a plot will start with <code class="docutils literal notranslate"><span class="pre">plot_</span></code>.</p>
+<div class="admonition-cool-new-feature admonition">
+<p class="admonition-title">Cool new feature</p>
+<p>Trace events required by the analysis methods are now automatically documented,
+see <a class="reference internal" href="trace_analysis.html#lisa.analysis.frequency.FrequencyAnalysis.df_cpu_frequency_residency" title="lisa.analysis.frequency.FrequencyAnalysis.df_cpu_frequency_residency"><code class="xref py py-meth docutils literal notranslate"><span class="pre">df_cpu_frequency_residency()</span></code></a>
+for instance.</p>
+</div>
+</div>
+<div class="section" id="wlgen">
+<h3>wlgen<a class="headerlink" href="#wlgen" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="workloads.html#lisa.wlgen.rta.RTA" title="lisa.wlgen.rta.RTA"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.wlgen.rta.RTA</span></code></a> class has been simplified somewhat:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="workloads.html#lisa.wlgen.rta.RTATask" title="lisa.wlgen.rta.RTATask"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.wlgen.rta.RTATask</span></code></a> no longer has a superfluous <code class="docutils literal notranslate"><span class="pre">get()</span></code> method</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RTA.conf()</span></code> has been squashed inside alternative constructors, see
+<a class="reference internal" href="workloads.html#lisa.wlgen.rta.RTA.by_str" title="lisa.wlgen.rta.RTA.by_str"><code class="xref py py-meth docutils literal notranslate"><span class="pre">lisa.wlgen.rta.RTA.by_str()</span></code></a> and <a class="reference internal" href="workloads.html#lisa.wlgen.rta.RTA.by_profile" title="lisa.wlgen.rta.RTA.by_profile"><code class="xref py py-meth docutils literal notranslate"><span class="pre">lisa.wlgen.rta.RTA.by_profile()</span></code></a>.</p></li>
+</ul>
+<p><strong>LISA legacy</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">profile</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">profile</span><span class="p">[</span><span class="s2">&quot;my_task&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Periodic</span><span class="p">(</span><span class="n">duty_cycle_pct</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+<span class="n">wload</span> <span class="o">=</span> <span class="n">RTA</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="n">calibration</span><span class="p">)</span>
+<span class="n">wload</span><span class="o">.</span><span class="n">conf</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;profile&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">profile</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>LISA next</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">profile</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">profile</span><span class="p">[</span><span class="s2">&quot;my_task&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Periodic</span><span class="p">(</span><span class="n">duty_cycle_pct</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+<span class="n">wload</span> <span class="o">=</span> <span class="n">RTA</span><span class="o">.</span><span class="n">by_profile</span><span class="p">(</span><span class="n">te</span><span class="p">,</span> <span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="n">profile</span><span class="p">,</span> <span class="n">res_dir</span><span class="p">,</span> <span class="n">calibration</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="kernel-tests">
+<h3>Kernel tests<a class="headerlink" href="#kernel-tests" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Executor</span></code> from LISA legacy has been entirely removed, and a new test
+framework has been put in place. Tests are now coded as pure Python classes,
+which means they can be imported and executed in scripts/notebooks without any
+additionnal effort. See <a class="reference internal" href="kernel_tests.html#kernel-testing-page"><span class="std std-ref">Kernel testing</span></a> for more details about
+using/writing tests.</p>
+</div>
+<div class="section" id="energy-meter">
+<h3>Energy Meter<a class="headerlink" href="#energy-meter" title="Permalink to this headline">¶</a></h3>
+<p>Energy meters are all subclasses of <a class="reference internal" href="energy_analysis.html#lisa.energy_meter.EnergyMeter" title="lisa.energy_meter.EnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_meter.EnergyMeter</span></code></a>.
+They can now be created in two ways. For <a class="reference internal" href="energy_analysis.html#lisa.energy_meter.HWMon" title="lisa.energy_meter.HWMon"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_meter.HWMon</span></code></a>, this
+would give:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">target</span> <span class="o">=</span> <span class="n">Target</span><span class="o">.</span><span class="n">from_default_conf</span><span class="p">()</span>
+<span class="n">res_dir</span> <span class="o">=</span> <span class="s2">&quot;/foo/bar&quot;</span>
+
+<span class="c1"># Directly build an instance</span>
+<span class="n">emeter</span> <span class="o">=</span> <span class="n">HWMon</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">channel_map</span><span class="o">=...</span><span class="p">,</span> <span class="n">res_dir</span><span class="o">=</span><span class="n">res_dir</span><span class="p">)</span>
+
+<span class="c1"># Or using a configuration file</span>
+<span class="n">conf</span> <span class="o">=</span> <span class="n">HWMonConf</span><span class="o">.</span><span class="n">from_yaml_map</span><span class="p">(</span><span class="s1">&#39;path/to/hwmon_conf.yml&#39;</span><span class="p">)</span>
+<span class="n">emeter</span> <span class="o">=</span> <span class="n">HWMon</span><span class="o">.</span><span class="n">from_conf</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">res_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>with <code class="docutils literal notranslate"><span class="pre">hwmon_conf.yml</span></code> containing:</p>
+<div class="highlight-YAML notranslate"><div class="highlight"><pre><span></span><span class="nt">hwmon-conf</span><span class="p">:</span>
+     <span class="nt">channel-map</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">...</span>
+</pre></div>
+</div>
+<p>All subclasses of <a class="reference internal" href="energy_analysis.html#lisa.energy_meter.EnergyMeter" title="lisa.energy_meter.EnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_meter.EnergyMeter</span></code></a> have a configuration
+class named <cite>*Conf</cite>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="contributors_guide.html" class="btn btn-neutral float-right" title="Contributor’s guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="guides_separator.html" class="btn btn-neutral float-left" title="==== Guides &amp; workflows ====" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

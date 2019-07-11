@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Wltest &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="==== API documentation ====" href="../api_separator.html" />
+    <link rel="prev" title="Automated testing" href="automated_testing.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lisa_shell/man/man.html">LISA shell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../transition_guide.html">Transitioning from LISA legacy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributors_guide.html">Contributor’s guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Workflows</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="notebook.html">Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automated_testing.html">Automated testing</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Wltest</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#target-types">Target types</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#standard-targets">Standard targets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#repo-targets">Repo targets</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../target.html">Target</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workloads.html">Workloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../energy_analysis.html">Energy analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc_utilities.html">Miscellaneous utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bisector/index.html">Bisector Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exekall/index.html">Exekall Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Workflows</a> &raquo;</li>
+        
+      <li>Wltest</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/workflows/wltest.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="wltest">
+<span id="wltest-doc"></span><h1>Wltest<a class="headerlink" href="#wltest" title="Permalink to this headline">¶</a></h1>
+<p>Wltest enables the comparison of power and performance impacts of kernel
+changes on Android devices. Wltest takes a list of kernel commits as input,
+build and flashes each one on a device, and runs a <cite>workload-automation</cite> agenda
+in order to collect power and performance metrics. After the execution, the
+results can be parsed and analyized using the ipython agenda provided in Lisa
+under <code class="docutils literal notranslate"><span class="pre">ipynb/wltests/sched-evaluation-full.ipynb</span></code></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">lisa-wltest-series</span> <span class="pre">--help</span></code> command provides the full list of parameters
+for wltest.</p>
+<div class="section" id="target-types">
+<h2>Target types<a class="headerlink" href="#target-types" title="Permalink to this headline">¶</a></h2>
+<p>Wltests supports two types of targets:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>the <cite>standard</cite> targets, for which the build procedure is aligned with
+upstream (using a simple defconfig and make command);</p></li>
+<li><p>the <cite>repo</cite> targets, for which the build procedure is entirely managed
+by a repo containing the kernel sources, modules, toolchains and build
+scripts. The repo targets have <code class="docutils literal notranslate"><span class="pre">WLTEST_REPO_TARGET=&quot;y&quot;</span></code> set in their
+<cite>definitions</cite> file.</p></li>
+</ol>
+</div></blockquote>
+<div class="section" id="standard-targets">
+<h3>Standard targets<a class="headerlink" href="#standard-targets" title="Permalink to this headline">¶</a></h3>
+<p>For standard targets, such as Hikey 960, the wltest workflow goes as follows:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Clone the kernel sources with
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://android.googlesource.com/kernel/hikey-linaro</span></code></p></li>
+<li><p>Hack the kernel and commit your changes</p></li>
+<li><p>Repeat 2. as necessary</p></li>
+<li><p>Put in a ‘series’ file the list commits you want to test using the
+<code class="docutils literal notranslate"><span class="pre">&lt;sha1&gt;</span> <span class="pre">&lt;commit</span> <span class="pre">title&gt;</span></code> format as provided by
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">log</span> <span class="pre">--oneline</span> <span class="pre">--no-color</span> <span class="pre">--no-decorate</span></code></p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">lisa-wltest-series</span></code> with <code class="docutils literal notranslate"><span class="pre">-k</span></code> pointed at the kernel source tree and
+<code class="docutils literal notranslate"><span class="pre">-s</span></code> pointed at the file created in 4.</p></li>
+</ol>
+</div></blockquote>
+</div>
+<div class="section" id="repo-targets">
+<h3>Repo targets<a class="headerlink" href="#repo-targets" title="Permalink to this headline">¶</a></h3>
+<p>The kernel sources of <cite>repo</cite> targets are managed using Google’s <code class="docutils literal notranslate"><span class="pre">repo</span></code> tool
+(see <a class="reference external" href="https://source.android.com/setup/develop/repo">https://source.android.com/setup/develop/repo</a>). The kernel repo usually
+features the kernel sources, the module sources, the required toolchains, the
+build scripts, and potentially more.</p>
+<p>For repo targets, such as Pixel 3, the wltest workflow goes as follows:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Download the sources using <code class="docutils literal notranslate"><span class="pre">repo</span></code> as explained in
+<a class="reference external" href="https://source.android.com/setup/build/building-kernels#downloading">https://source.android.com/setup/build/building-kernels#downloading</a></p></li>
+<li><p>Issue <code class="docutils literal notranslate"><span class="pre">repo</span> <span class="pre">start</span> <span class="pre">--all</span> <span class="pre">&lt;branch</span> <span class="pre">name&gt;</span></code> in the repo</p></li>
+<li><p>Go in the sub-trees (kernel and/or modules), hack the code, and commit
+your changes</p></li>
+<li><p>Repeat 2. and 3. as necessary</p></li>
+<li><p>Put in a ‘series’ files the list of repo branches you want to test</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">lisa-wltest-series</span></code> with <code class="docutils literal notranslate"><span class="pre">-k</span></code> pointed at the top level repo folder
+downloaded in 1., and <code class="docutils literal notranslate"><span class="pre">-s</span></code> pointing at the file created in 5.</p></li>
+</ol>
+</div></blockquote>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../api_separator.html" class="btn btn-neutral float-right" title="==== API documentation ====" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="automated_testing.html" class="btn btn-neutral float-left" title="Automated testing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,1952 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Miscellaneous utilities &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="==== Tools documentation ====" href="tools_separator.html" />
+    <link rel="prev" title="Energy analysis" href="energy_analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lisa_shell/man/man.html">LISA shell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transition_guide.html">Transitioning from LISA legacy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows/index.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="target.html">Target</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workloads.html">Workloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="energy_analysis.html">Energy analysis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Miscellaneous utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-management">Configuration management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-lisa.regression">Regression testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-lisa.utils">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-lisa.datautils">Dataframe and Series handling utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-lisa.doc.helpers">Sphinx documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bisector/index.html">Bisector Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exekall/index.html">Exekall Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Miscellaneous utilities</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/misc_utilities.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="miscellaneous-utilities">
+<h1>Miscellaneous utilities<a class="headerlink" href="#miscellaneous-utilities" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="configuration-management">
+<h2>Configuration management<a class="headerlink" href="#configuration-management" title="Permalink to this headline">¶</a></h2>
+<p>Configuration files are managed by subclasses of
+<a class="reference internal" href="#lisa.conf.MultiSrcConf" title="lisa.conf.MultiSrcConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.MultiSrcConf</span></code></a>. It allows loading from a YAML file (not to be
+confused with serializing the instance).</p>
+<span class="target" id="module-lisa.conf"></span><dl class="class">
+<dt id="lisa.conf.DeferredValue">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">DeferredValue</code><span class="sig-paren">(</span><em class="sig-param">callback</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.DeferredValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Wrapper similar to functools.partial.</p>
+<p>I is a nown class to detect and to derive from to create different
+categories of deferred values.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.KeyDescBase">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">KeyDescBase</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">help</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.KeyDescBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<p>Base class for configuration files key descriptor.</p>
+<p>This allows defining the structure of the configuration file, in order
+to sanitize user input and generate help snippets used in various places.</p>
+<dl class="attribute">
+<dt id="lisa.conf.KeyDescBase.INDENTATION">
+<code class="sig-name descname">INDENTATION</code><em class="property"> = '    '</em><a class="headerlink" href="#lisa.conf.KeyDescBase.INDENTATION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.KeyDescBase.qualname">
+<em class="property">property </em><code class="sig-name descname">qualname</code><a class="headerlink" href="#lisa.conf.KeyDescBase.qualname" title="Permalink to this definition">¶</a></dt>
+<dd><p>“Qualified” name of the key.</p>
+<p>This is a slash-separated path in the config file from the root to that
+key:
+&lt;parent qualname&gt;/&lt;name&gt;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.KeyDescBase.get_help">
+<em class="property">abstract </em><code class="sig-name descname">get_help</code><span class="sig-paren">(</span><em class="sig-param">style=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.KeyDescBase.get_help" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a help message describing the key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>style</strong> – When “rst”, ResStructuredText formatting may be applied</p></li>
+<li><p><strong>style</strong> – str</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.KeyDescBase.validate_val">
+<em class="property">abstract </em><code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.KeyDescBase.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate a value to be used for that key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.7)"><strong>TypeError</strong></a> – When the value has the wrong type</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.7)"><strong>ValueError</strong></a> – If the value does not comply with some other
+constraints. Note that constraints should ideally be encoded in the
+type itself, to make help message as straightforward as possible.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.KeyDesc">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">KeyDesc</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">help</em>, <em class="sig-param">classinfo</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.KeyDesc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.KeyDescBase" title="lisa.conf.KeyDescBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.KeyDescBase</span></code></a></p>
+<p>Key descriptor describing a leaf key in the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Name of the key</p></li>
+<li><p><strong>help</strong> – Short help message describing the use of that key</p></li>
+<li><p><strong>classinfo</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.7)"><em>collections.abc.Sequence</em></a>) – sequence of allowed types for that key. As a special
+case, <cite>None</cite> is allowed in that sequence of types, even though it is
+not strictly speaking a type.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="lisa.conf.KeyDesc.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.KeyDesc.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that the value is an instance of one of the type specified in the
+<code class="docutils literal notranslate"><span class="pre">self.classinfo</span></code>.</p>
+<p>If the value is not an instance of any of these types, then a
+<a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> is raised corresponding to the first type in the
+tuple, which is assumed to be the main one.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.KeyDesc.get_help">
+<code class="sig-name descname">get_help</code><span class="sig-paren">(</span><em class="sig-param">style=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.KeyDesc.get_help" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a help message describing the key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>style</strong> – When “rst”, ResStructuredText formatting may be applied</p></li>
+<li><p><strong>style</strong> – str</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.KeyDesc.pretty_format">
+<code class="sig-name descname">pretty_format</code><span class="sig-paren">(</span><em class="sig-param">v</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.KeyDesc.pretty_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the value for pretty printing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>v</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) – Value of the key that is being printed</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="lisa.conf.MissingBaseKeyError">
+<em class="property">exception </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">MissingBaseKeyError</code><a class="headerlink" href="#lisa.conf.MissingBaseKeyError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">KeyError</span></code></a></p>
+<p>Exception raised when a base key needed to compute a derived key is missing.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.DerivedKeyDesc">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">DerivedKeyDesc</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">help</em>, <em class="sig-param">classinfo</em>, <em class="sig-param">base_key_paths</em>, <em class="sig-param">compute</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.DerivedKeyDesc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.KeyDesc" title="lisa.conf.KeyDesc"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.KeyDesc</span></code></a></p>
+<p>Key descriptor describing a key derived from other keys</p>
+<p>Derived keys cannot be added from a source, since they are purely computed
+out of other keys. It is also not possible to change their source
+priorities. To achieve that, set the source priorities on the keys it is
+based on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_key_paths</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em><em>)</em>) – List of paths to the keys this key is derived from.
+The paths in the form of a list of string are relative to the current
+level, and cannot reference any level above the current one.</p></li>
+<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.7)"><em>collections.abc.Callable</em></a>) – Function used to compute the value of the key. It takes a
+dictionary of base keys specified in <code class="docutils literal notranslate"><span class="pre">base_key_paths</span></code> as only
+parameter and is expected to return the key’s value.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="lisa.conf.DerivedKeyDesc.help">
+<em class="property">property </em><code class="sig-name descname">help</code><a class="headerlink" href="#lisa.conf.DerivedKeyDesc.help" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.DerivedKeyDesc.can_be_computed">
+<code class="sig-name descname">can_be_computed</code><span class="sig-paren">(</span><em class="sig-param">conf</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.DerivedKeyDesc.can_be_computed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.DerivedKeyDesc.compute_val">
+<code class="sig-name descname">compute_val</code><span class="sig-paren">(</span><em class="sig-param">conf</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.DerivedKeyDesc.compute_val" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.DerivedKeyDesc.get_src">
+<code class="sig-name descname">get_src</code><span class="sig-paren">(</span><em class="sig-param">conf</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.DerivedKeyDesc.get_src" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.LevelKeyDesc">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">LevelKeyDesc</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">help</em>, <em class="sig-param">children</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.LevelKeyDesc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.KeyDescBase" title="lisa.conf.KeyDescBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.KeyDescBase</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Mapping</span></code></a></p>
+<p>Key descriptor defining a hierarchical level in the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – name of the key in the configuration</p></li>
+<li><p><strong>help</strong> – Short help describing the use of the keys inside that level</p></li>
+<li><p><strong>children</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.7)"><em>collections.abc.Sequence</em></a>) – collections.abc.Sequence of <a class="reference internal" href="#lisa.conf.KeyDescBase" title="lisa.conf.KeyDescBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">KeyDescBase</span></code></a> defining the allowed keys
+under that level</p></li>
+</ul>
+</dd>
+</dl>
+<p>Children keys will get this key assigned as a parent when passed to the
+constructor.</p>
+<dl class="method">
+<dt id="lisa.conf.LevelKeyDesc.check_allowed_key">
+<code class="sig-name descname">check_allowed_key</code><span class="sig-paren">(</span><em class="sig-param">key</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.LevelKeyDesc.check_allowed_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks that a given key is allowed under that levels</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.LevelKeyDesc.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">conf</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.LevelKeyDesc.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate a mapping to be used as a configuration source</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.LevelKeyDesc.get_help">
+<code class="sig-name descname">get_help</code><span class="sig-paren">(</span><em class="sig-param">style=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.LevelKeyDesc.get_help" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a help message describing the key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>style</strong> – When “rst”, ResStructuredText formatting may be applied</p></li>
+<li><p><strong>style</strong> – str</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.TopLevelKeyDesc">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">TopLevelKeyDesc</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">help</em>, <em class="sig-param">children</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.TopLevelKeyDesc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.LevelKeyDesc" title="lisa.conf.LevelKeyDesc"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.LevelKeyDesc</span></code></a></p>
+<p>Top-level key descriptor, which defines the top-level key to use in the
+configuration files.</p>
+<p>This top-level key is omitted in all interfaces except for the
+configuration file, since it only reflects the configuration class</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.MultiSrcConfMeta">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">MultiSrcConfMeta</code><a class="headerlink" href="#lisa.conf.MultiSrcConfMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABCMeta</span></code></a></p>
+<p>Metaclass of <a class="reference internal" href="#lisa.conf.MultiSrcConf" title="lisa.conf.MultiSrcConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiSrcConf</span></code></a>.</p>
+<p>It will use the docstring of the class, using it as a <code class="docutils literal notranslate"><span class="pre">str.format</span></code>
+template with the <code class="docutils literal notranslate"><span class="pre">{generated_help}</span></code> placeholder replaced by a snippet of
+ResStructuredText containing the list of allowed keys.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since the dosctring is interpreted as a template, “{” and “}”
+characters must be doubled to appear in the final output.</p>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.MultiSrcConfABC">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">MultiSrcConfABC</code><a class="headerlink" href="#lisa.conf.MultiSrcConfABC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.utils.Serializable" title="lisa.utils.Serializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.Serializable</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConfABC.to_map">
+<em class="property">abstract </em><code class="sig-name descname">to_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConfABC.to_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConfABC.from_map">
+<em class="property">abstract classmethod </em><code class="sig-name descname">from_map</code><span class="sig-paren">(</span><em class="sig-param">mapping</em>, <em class="sig-param">add_default_src=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConfABC.from_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConfABC.from_yaml_map">
+<em class="property">classmethod </em><code class="sig-name descname">from_yaml_map</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">add_default_src=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConfABC.from_yaml_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allow reloading from a plain mapping, to avoid having to specify a tag
+in the configuration file. The content is hosted under the top-level
+key specified in <code class="docutils literal notranslate"><span class="pre">STRUCTURE</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Path to the YAML file</p></li>
+<li><p><strong>add_default_src</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Add a default source if available for that
+class.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConfABC.to_yaml_map">
+<code class="sig-name descname">to_yaml_map</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConfABC.to_yaml_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.MultiSrcConf">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">MultiSrcConf</code><span class="sig-paren">(</span><em class="sig-param">conf=None</em>, <em class="sig-param">src='user'</em>, <em class="sig-param">add_default_src=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.MultiSrcConfABC" title="lisa.conf.MultiSrcConfABC"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.MultiSrcConfABC</span></code></a>, <a class="reference internal" href="#lisa.utils.Loggable" title="lisa.utils.Loggable"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.Loggable</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Mapping</span></code></a></p>
+<p>Base class providing layered configuration management.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conf</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><em>collections.abc.Mapping</em></a>) – collections.abc.Mapping to initialize the configuration with. This must be
+optional, in which case it is assumed the object will contain a default
+base configuration.</p></li>
+<li><p><strong>src</strong> – Name of the source added when passing <code class="docutils literal notranslate"><span class="pre">conf</span></code></p></li>
+<li><p><strong>src</strong> – str</p></li>
+</ul>
+</dd>
+</dl>
+<p>The class inherits from <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Mapping</span></code></a>, which means it
+can be used like a readonly dict. Writing to it is handled by a different
+API that allows naming the source of values that are stored.</p>
+<p>Each configuration key can be either a leaf key, that holds a value, or
+a level key that allows to defined nested levels. The allowed keys is set
+by the <code class="docutils literal notranslate"><span class="pre">STRUCTURE</span></code> class attribute.</p>
+<p>Each leaf key can hold different values coming from different named
+sources.  By default, the last added source will have the highest priority
+and will be served when looking up that key. A different priority order can
+be defined for a specific key if needed.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#lisa.conf.KeyDescBase" title="lisa.conf.KeyDescBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">KeyDescBase</span></code></a></p>
+</div>
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.STRUCTURE">
+<em class="property">abstract </em><code class="sig-name descname">STRUCTURE</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.STRUCTURE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class attribute defining the structure of the configuration file, as a
+instance of <a class="reference internal" href="#lisa.conf.TopLevelKeyDesc" title="lisa.conf.TopLevelKeyDesc"><code class="xref py py-class docutils literal notranslate"><span class="pre">TopLevelKeyDesc</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.conf.MultiSrcConf.DEFAULT_SRC">
+<code class="sig-name descname">DEFAULT_SRC</code><em class="property"> = {}</em><a class="headerlink" href="#lisa.conf.MultiSrcConf.DEFAULT_SRC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Source added automatically using <a class="reference internal" href="#lisa.conf.MultiSrcConf.add_src" title="lisa.conf.MultiSrcConf.add_src"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_src()</span></code></a> under the name ‘default’
+when instances are built.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.get_help">
+<em class="property">classmethod </em><code class="sig-name descname">get_help</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.get_help" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.to_map">
+<code class="sig-name descname">to_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.to_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export the configuration as a mapping.</p>
+<p>The return value should preserve key-specific priority override list,
+which is not done if directly passing that instance to <code class="docutils literal notranslate"><span class="pre">dict()</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.from_map">
+<em class="property">classmethod </em><code class="sig-name descname">from_map</code><span class="sig-paren">(</span><em class="sig-param">mapping</em>, <em class="sig-param">add_default_src=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.from_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new configuration instance, using the output of <a class="reference internal" href="#lisa.conf.MultiSrcConf.to_map" title="lisa.conf.MultiSrcConf.to_map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_map()</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.add_src">
+<code class="sig-name descname">add_src</code><span class="sig-paren">(</span><em class="sig-param">src</em>, <em class="sig-param">conf</em>, <em class="sig-param">filter_none=False</em>, <em class="sig-param">fallback=False</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.add_src" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a source of configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>src</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the soruce to add</p></li>
+<li><p><strong>conf</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><em>collections.abc.Mapping</em></a>) – Nested mapping of key/values to overlay</p></li>
+<li><p><strong>filter_none</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Ignores the keys that have a <code class="docutils literal notranslate"><span class="pre">None</span></code> value. That
+simplifies the creation of the mapping, by having keys always
+present. That should not be used if <code class="docutils literal notranslate"><span class="pre">None</span></code> value for a key is
+expected, as opposit to not having that key set at all.</p></li>
+<li><p><strong>fallback</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If True, the source will be added as a fallback, which
+means at the end of the priority list. By default, the source will
+have the highest priority and will be used unless a key-specific
+priority override is setup.</p></li>
+</ul>
+</dd>
+</dl>
+<p>This method provides a way to update the configuration, by importing a
+mapping as a new source.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.set_default_src">
+<code class="sig-name descname">set_default_src</code><span class="sig-paren">(</span><em class="sig-param">src_prio</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.set_default_src" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the default source priority list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>src_prio</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.7)"><em>collections.abc.Sequence</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em>) – list of source names, first is the highest priority</p>
+</dd>
+</dl>
+<p>Adding sources using <a class="reference internal" href="#lisa.conf.MultiSrcConf.add_src" title="lisa.conf.MultiSrcConf.add_src"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_src()</span></code></a> in the right order is preferable,
+but the default priority order can be specified using that method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.force_src_nested">
+<code class="sig-name descname">force_src_nested</code><span class="sig-paren">(</span><em class="sig-param">key_src_map</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.force_src_nested" title="Permalink to this definition">¶</a></dt>
+<dd><p>Force the source priority list for all the keys defined in the nested
+mapping <code class="docutils literal notranslate"><span class="pre">key_src_map</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key_src_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><em>collections.abc.Mapping</em></a>) – nested mapping of keys to priority list of sources</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.force_src">
+<code class="sig-name descname">force_src</code><span class="sig-paren">(</span><em class="sig-param">key</em>, <em class="sig-param">src_prio</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.force_src" title="Permalink to this definition">¶</a></dt>
+<dd><p>Force the source priority list for a given key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – name of the key. Only leaf keys are allowed here, since
+level keys have no source on their own.</p></li>
+<li><p><strong>src_prio</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.7)"><em>collections.abc.Sequence</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>) or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – List of sources in priority order (first is highest
+priority).  Special value <code class="docutils literal notranslate"><span class="pre">None</span></code> can be used to remove the
+key-specific priority override, so the default priority list will
+be used instead.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.resolve_src">
+<code class="sig-name descname">resolve_src</code><span class="sig-paren">(</span><em class="sig-param">key</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.resolve_src" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the source name that will be used to serve the value of <code class="docutils literal notranslate"><span class="pre">key</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.eval_deferred">
+<code class="sig-name descname">eval_deferred</code><span class="sig-paren">(</span><em class="sig-param">cls=&lt;class 'lisa.conf.DeferredValue'&gt;</em>, <em class="sig-param">src=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.eval_deferred" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate instances of <a class="reference internal" href="#lisa.conf.DeferredValue" title="lisa.conf.DeferredValue"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeferredValue</span></code></a> that can be used for
+values that are expensive to compute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> (subclass of <a class="reference internal" href="#lisa.conf.DeferredValue" title="lisa.conf.DeferredValue"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeferredValue</span></code></a>) – Only evaluate values of instances of that class. This can
+be used to have different categories of <a class="reference internal" href="#lisa.conf.DeferredValue" title="lisa.conf.DeferredValue"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeferredValue</span></code></a> by
+subclassing.</p></li>
+<li><p><strong>src</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, only evaluate values that were added under
+that source name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.get_key">
+<code class="sig-name descname">get_key</code><span class="sig-paren">(</span><em class="sig-param">key</em>, <em class="sig-param">src=None</em>, <em class="sig-param">eval_deferred=True</em>, <em class="sig-param">quiet=False</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.get_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the value of the given key. It returns a deepcopy of the value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – name of the key to lookup</p></li>
+<li><p><strong>src</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – If not None, look up the value of the key in that source</p></li>
+<li><p><strong>eval_deferred</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If True, evaluate instances of
+<a class="reference internal" href="#lisa.conf.DeferredValue" title="lisa.conf.DeferredValue"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeferredValue</span></code></a> if needed</p></li>
+<li><p><strong>quiet</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Avoid logging the access</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Using the indexing operator <code class="docutils literal notranslate"><span class="pre">self[key]</span></code> is preferable in
+most cases , but this method provides more parameters.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.get_src_map">
+<code class="sig-name descname">get_src_map</code><span class="sig-paren">(</span><em class="sig-param">key</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.get_src_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a mapping of all sources for the given <code class="docutils literal notranslate"><span class="pre">key</span></code>, in priority order
+(first item is the highest priority source).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.pretty_format">
+<code class="sig-name descname">pretty_format</code><span class="sig-paren">(</span><em class="sig-param">eval_deferred=False</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.pretty_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give a pretty string representation of the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>eval_deferred</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If True, evaluate all deferred values before
+printing.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.MultiSrcConf.items">
+<code class="sig-name descname">items</code><span class="sig-paren">(</span><em class="sig-param">eval_deferred=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.MultiSrcConf.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override the default definition of
+<code class="docutils literal notranslate"><span class="pre">collections.abc.Mapping.items()</span></code> to allow not evaluating deferred
+values if necessary.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.SimpleMultiSrcConf">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">SimpleMultiSrcConf</code><span class="sig-paren">(</span><em class="sig-param">conf=None</em>, <em class="sig-param">src='user'</em>, <em class="sig-param">add_default_src=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.SimpleMultiSrcConf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.MultiSrcConf" title="lisa.conf.MultiSrcConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.MultiSrcConf</span></code></a></p>
+<p>Like <a class="reference internal" href="#lisa.conf.MultiSrcConf" title="lisa.conf.MultiSrcConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiSrcConf</span></code></a>, with a simpler config file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">conf</span></code> and <code class="docutils literal notranslate"><span class="pre">source</span></code> are not available, and the behaviour is as all keys
+were located under a <code class="docutils literal notranslate"><span class="pre">conf</span></code> key. We do not allow overriding source for
+this kind of configuration to keep the YAML interface simple and dict-like</p>
+<dl class="method">
+<dt id="lisa.conf.SimpleMultiSrcConf.from_map">
+<em class="property">classmethod </em><code class="sig-name descname">from_map</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.SimpleMultiSrcConf.from_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new configuration instance, using the output of <a class="reference internal" href="#lisa.conf.SimpleMultiSrcConf.to_map" title="lisa.conf.SimpleMultiSrcConf.to_map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_map()</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.SimpleMultiSrcConf.to_map">
+<code class="sig-name descname">to_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.SimpleMultiSrcConf.to_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export the configuration as a mapping.</p>
+<p>The return value should preserve key-specific priority override list,
+which is not done if directly passing that instance to <code class="docutils literal notranslate"><span class="pre">dict()</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.ConfigurableMeta">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">ConfigurableMeta</code><a class="headerlink" href="#lisa.conf.ConfigurableMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABCMeta</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.Configurable">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">Configurable</code><a class="headerlink" href="#lisa.conf.Configurable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<p>Pear a regular class with a configuration class.</p>
+<p>The pearing is achieved by inheriting from <a class="reference internal" href="#lisa.conf.Configurable" title="lisa.conf.Configurable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Configurable</span></code></a> and
+setting <code class="docutils literal notranslate"><span class="pre">CONF_CLASS</span></code> attribute. The benefits are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The docstring of the class is processed as a string template and
+<code class="docutils literal notranslate"><span class="pre">{configurable_params}</span></code> is replaced with a Sphinx-compliant list of
+parameters. The help and type of each parameter is extracted from the
+configuration class.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">DEFAULT_SRC</span></code> attribute of the configuration class is updated
+with non-<code class="docutils literal notranslate"><span class="pre">None</span></code> default values of the class <code class="docutils literal notranslate"><span class="pre">__init__</span></code> parameters.</p></li>
+<li><p>The <a class="reference internal" href="#lisa.conf.Configurable.conf_to_init_kwargs" title="lisa.conf.Configurable.conf_to_init_kwargs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">conf_to_init_kwargs()</span></code></a> method allows turning a
+configuration object into a dictionary suitable for passing to
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code> as <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>.</p></li>
+<li><p>The <a class="reference internal" href="#lisa.conf.Configurable.check_init_param" title="lisa.conf.Configurable.check_init_param"><code class="xref py py-meth docutils literal notranslate"><span class="pre">check_init_param()</span></code></a> method allows checking
+types of <code class="docutils literal notranslate"><span class="pre">__init__</span></code> parameters according to what is specified in the
+configuration class.</p></li>
+</ul>
+</div></blockquote>
+<p>Most of the time, the configuration keys and <code class="docutils literal notranslate"><span class="pre">__init__</span></code> parameters have
+the same name (modulo underscore/dashes which are handled automatically).
+In that case, the mapping between config keys and <code class="docutils literal notranslate"><span class="pre">__init__</span></code> parameters
+is done without user intervention. When that is not the case, the
+<code class="docutils literal notranslate"><span class="pre">INIT_KWARGS_KEY_MAP</span></code> class attribute can be used. Its a dictionary with
+keys being <code class="docutils literal notranslate"><span class="pre">__init__</span></code> parameter names, and values being path to
+configuration key. That path is a list of strings to take into account
+sublevels like <code class="docutils literal notranslate"><span class="pre">['level-key',</span> <span class="pre">'sublevel',</span> <span class="pre">'foo']</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A given configuration class must be peared to only one class.
+Otherwise, the <code class="docutils literal notranslate"><span class="pre">DEFAULT_SRC</span></code> conf class attribute will be updated
+multiple times, leading to unexpected results.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some services offered by <a class="reference internal" href="#lisa.conf.Configurable" title="lisa.conf.Configurable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Configurable</span></code></a> are not extended
+to subclasses of a class using it. For example, it would not make sense
+to update <code class="docutils literal notranslate"><span class="pre">DEFAULT_SRC</span></code> using a subclass <code class="docutils literal notranslate"><span class="pre">__init__</span></code> parameters.</p>
+</div>
+<dl class="attribute">
+<dt id="lisa.conf.Configurable.INIT_KWARGS_KEY_MAP">
+<code class="sig-name descname">INIT_KWARGS_KEY_MAP</code><em class="property"> = {}</em><a class="headerlink" href="#lisa.conf.Configurable.INIT_KWARGS_KEY_MAP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.Configurable.conf_to_init_kwargs">
+<em class="property">classmethod </em><code class="sig-name descname">conf_to_init_kwargs</code><span class="sig-paren">(</span><em class="sig-param">conf</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.Configurable.conf_to_init_kwargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn a configuration object into a dictionary suitable for passing to
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code> as <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.conf.Configurable.check_init_param">
+<em class="property">classmethod </em><code class="sig-name descname">check_init_param</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.Configurable.check_init_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take the same parameters as <code class="docutils literal notranslate"><span class="pre">__init__</span></code>, and check their types
+according to what is specified in the configuration class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.7)"><strong>TypeError</strong></a> – When the wrong type is detected for a parameter.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.GenericContainerMetaBase">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">GenericContainerMetaBase</code><a class="headerlink" href="#lisa.conf.GenericContainerMetaBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a></p>
+<p>Base class for the metaclass of generic containers.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.GenericContainerBase">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">GenericContainerBase</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.GenericContainerBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base class for generic containers.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.GenericMappingMeta">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">GenericMappingMeta</code><a class="headerlink" href="#lisa.conf.GenericMappingMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.GenericContainerMetaBase" title="lisa.conf.GenericContainerMetaBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.GenericContainerMetaBase</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABCMeta</span></code></a></p>
+<p>Metaclass for generic mapping containers.</p>
+<p>It provides an <code class="docutils literal notranslate"><span class="pre">__instancecheck__</span></code> implementation that checks the type
+of the keys and values. This make it suitable for input sanitizing based
+on type checking.</p>
+<dl class="method">
+<dt id="lisa.conf.GenericMappingMeta.instancecheck">
+<code class="sig-name descname">instancecheck</code><span class="sig-paren">(</span><em class="sig-param">instance</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.GenericMappingMeta.instancecheck" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.TypedDict">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">TypedDict</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.TypedDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.GenericContainerBase" title="lisa.conf.GenericContainerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.GenericContainerBase</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></p>
+<p>Subclass of dict providing keys and values type check.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.GenericSequenceMeta">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">GenericSequenceMeta</code><a class="headerlink" href="#lisa.conf.GenericSequenceMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.GenericContainerMetaBase" title="lisa.conf.GenericContainerMetaBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.GenericContainerMetaBase</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABCMeta</span></code></a></p>
+<p>Similar to <a class="reference internal" href="#lisa.conf.GenericMappingMeta" title="lisa.conf.GenericMappingMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenericMappingMeta</span></code></a> for sequences</p>
+<dl class="method">
+<dt id="lisa.conf.GenericSequenceMeta.instancecheck">
+<code class="sig-name descname">instancecheck</code><span class="sig-paren">(</span><em class="sig-param">instance</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.GenericSequenceMeta.instancecheck" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.TypedList">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">TypedList</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.TypedList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.GenericContainerBase" title="lisa.conf.GenericContainerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.GenericContainerBase</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a></p>
+<p>Subclass of list providing keys and values type check.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.IntIntDict">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">IntIntDict</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.IntIntDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.TypedDict" title="lisa.conf.TypedDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.TypedDict</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.IntList">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">IntList</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.IntList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.TypedList" title="lisa.conf.TypedList"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.TypedList</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.FloatList">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">FloatList</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.FloatList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.TypedList" title="lisa.conf.TypedList"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.TypedList</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.IntIntListDict">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">IntIntListDict</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.IntIntListDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.TypedDict" title="lisa.conf.TypedDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.TypedDict</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.IntListList">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">IntListList</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.IntListList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.TypedList" title="lisa.conf.TypedList"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.TypedList</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.StrList">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">StrList</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.StrList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.TypedList" title="lisa.conf.TypedList"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.TypedList</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.conf.StrIntListDict">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.conf.</code><code class="sig-name descname">StrIntListDict</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.conf.StrIntListDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.TypedDict" title="lisa.conf.TypedDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.TypedDict</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lisa.regression">
+<span id="regression-testing"></span><h2>Regression testing<a class="headerlink" href="#module-lisa.regression" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lisa.regression.ResultCount">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.regression.</code><code class="sig-name descname">ResultCount</code><span class="sig-paren">(</span><em class="sig-param">passed</em>, <em class="sig-param">failed</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.regression.ResultCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<p>Create new instance of ResultCount(passed, failed)</p>
+<dl class="method">
+<dt id="lisa.regression.ResultCount.failed">
+<em class="property">property </em><code class="sig-name descname">failed</code><a class="headerlink" href="#lisa.regression.ResultCount.failed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.regression.ResultCount.passed">
+<em class="property">property </em><code class="sig-name descname">passed</code><a class="headerlink" href="#lisa.regression.ResultCount.passed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.regression.RegressionResult">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.regression.</code><code class="sig-name descname">RegressionResult</code><span class="sig-paren">(</span><em class="sig-param">testcase_id</em>, <em class="sig-param">old_count</em>, <em class="sig-param">new_count</em>, <em class="sig-param">alpha=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.regression.RegressionResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Compute failure-rate regression between old and new series.</p>
+<p>The regression is checked using Fisher’s exact test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testcase_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – ID of the testcase, used for pretty-printing</p></li>
+<li><p><strong>old_count</strong> (<a class="reference internal" href="#lisa.regression.ResultCount" title="lisa.regression.ResultCount"><em>ResultCount</em></a>) – number of times the test passed and failed in the old series</p></li>
+<li><p><strong>new_count</strong> (<a class="reference internal" href="#lisa.regression.ResultCount" title="lisa.regression.ResultCount"><em>ResultCount</em></a>) – number of times the test passed and failed in the new series</p></li>
+<li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Alpha risk when carrying the statistical test</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="lisa.regression.RegressionResult.from_result_list">
+<em class="property">classmethod </em><code class="sig-name descname">from_result_list</code><span class="sig-paren">(</span><em class="sig-param">testcase_id</em>, <em class="sig-param">old_list</em>, <em class="sig-param">new_list</em>, <em class="sig-param">alpha=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.regression.RegressionResult.from_result_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a <a class="reference internal" href="#lisa.regression.RegressionResult" title="lisa.regression.RegressionResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegressionResult</span></code></a> from two list of
+<a class="reference internal" href="kernel_tests.html#lisa.tests.base.Result" title="lisa.tests.base.Result"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.tests.base.Result</span></code></a>, or objects that can be
+converted to <cite>bool</cite>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only <code class="docutils literal notranslate"><span class="pre">FAILED</span></code> and <code class="docutils literal notranslate"><span class="pre">PASSED</span></code> results are taken into account,
+other results are ignored.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testcase_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – ID of the testcase</p></li>
+<li><p><strong>old_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference internal" href="kernel_tests.html#lisa.tests.base.Result" title="lisa.tests.base.Result"><em>lisa.tests.base.Result</em></a><em>)</em>) – old series</p></li>
+<li><p><strong>new_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference internal" href="kernel_tests.html#lisa.tests.base.Result" title="lisa.tests.base.Result"><em>lisa.tests.base.Result</em></a><em>)</em>) – new series</p></li>
+<li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Alpha risk of the statistical test</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.regression.RegressionResult.sample_size">
+<em class="property">property </em><code class="sig-name descname">sample_size</code><a class="headerlink" href="#lisa.regression.RegressionResult.sample_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tuple of sample sizes for old and new series.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.regression.RegressionResult.failure_pc">
+<em class="property">property </em><code class="sig-name descname">failure_pc</code><a class="headerlink" href="#lisa.regression.RegressionResult.failure_pc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tuple of failure rate in percent for old an new series.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.regression.RegressionResult.failure_delta_pc">
+<em class="property">property </em><code class="sig-name descname">failure_delta_pc</code><a class="headerlink" href="#lisa.regression.RegressionResult.failure_delta_pc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delta between old and new failure rate in percent.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.regression.RegressionResult.significant">
+<em class="property">property </em><code class="sig-name descname">significant</code><a class="headerlink" href="#lisa.regression.RegressionResult.significant" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if there is a significant difference in failure rate, False
+otherwise.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.regression.RegressionResult.p_val">
+<em class="property">property </em><code class="sig-name descname">p_val</code><a class="headerlink" href="#lisa.regression.RegressionResult.p_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>P-value of the statistical test.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.regression.RegressionResult.get_p_val">
+<code class="sig-name descname">get_p_val</code><span class="sig-paren">(</span><em class="sig-param">alternative='two-sided'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.regression.RegressionResult.get_p_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the p-value of the statistical test, with the given alternative
+hypothesis.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.regression.RegressionResult.fix_validation_min_iter_nr">
+<em class="property">property </em><code class="sig-name descname">fix_validation_min_iter_nr</code><a class="headerlink" href="#lisa.regression.RegressionResult.fix_validation_min_iter_nr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of iterations required to validate a fix that would “revert”
+a regression.</p>
+<p>Assuming that the “fixed” failure rate is exactly equal to the “old”
+one, this gives the number of iterations after which comparing the
+“fixed” failure rate with the “new” failure rate will give a
+statistically significant result.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.regression.compute_regressions">
+<code class="sig-prename descclassname">lisa.regression.</code><code class="sig-name descname">compute_regressions</code><span class="sig-paren">(</span><em class="sig-param">old_list</em>, <em class="sig-param">new_list</em>, <em class="sig-param">remove_tags=[]</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.regression.compute_regressions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute a list of <a class="reference internal" href="#lisa.regression.RegressionResult" title="lisa.regression.RegressionResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegressionResult</span></code></a> out of two lists of
+<a class="reference internal" href="exekall/internal_api.html#exekall.engine.FrozenExprVal" title="exekall.engine.FrozenExprVal"><code class="xref py py-class docutils literal notranslate"><span class="pre">exekall.engine.FrozenExprVal</span></code></a>.</p>
+<p>The tests are first grouped by their ID, and then a
+<a class="reference internal" href="#lisa.regression.RegressionResult" title="lisa.regression.RegressionResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegressionResult</span></code></a> is computed for each of these ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>old_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference internal" href="exekall/internal_api.html#exekall.engine.FrozenExprVal" title="exekall.engine.FrozenExprVal"><em>exekall.engine.FrozenExprVal</em></a><em>)</em>) – old series of <a class="reference internal" href="exekall/internal_api.html#exekall.engine.FrozenExprVal" title="exekall.engine.FrozenExprVal"><code class="xref py py-class docutils literal notranslate"><span class="pre">exekall.engine.FrozenExprVal</span></code></a>.</p></li>
+<li><p><strong>new_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference internal" href="exekall/internal_api.html#exekall.engine.FrozenExprVal" title="exekall.engine.FrozenExprVal"><em>exekall.engine.FrozenExprVal</em></a><em>)</em>) – new series of <a class="reference internal" href="exekall/internal_api.html#exekall.engine.FrozenExprVal" title="exekall.engine.FrozenExprVal"><code class="xref py py-class docutils literal notranslate"><span class="pre">exekall.engine.FrozenExprVal</span></code></a>. Values
+with a UUID that is also present in <cite>old_list</cite> will be removed from
+that list before the regressions are computed.</p></li>
+<li><p><strong>remove_tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em>) – remove the given list of tags from the IDs before
+computing the regression. That allows computing regressions with a
+different “board” tag for example.</p></li>
+<li><p><strong>kwargs</strong> – extra <a class="reference internal" href="#lisa.regression.RegressionResult.from_result_list" title="lisa.regression.RegressionResult.from_result_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RegressionResult.from_result_list()</span></code></a> parameters</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lisa.utils">
+<span id="utilities"></span><h2>Utilities<a class="headerlink" href="#module-lisa.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="data">
+<dt id="lisa.utils.LISA_HOME">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">LISA_HOME</code><em class="property"> = '/home/dourai01/Data/Git/lisa/repo'</em><a class="headerlink" href="#lisa.utils.LISA_HOME" title="Permalink to this definition">¶</a></dt>
+<dd><p>The detected location of your LISA installation</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.utils.Loggable">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">Loggable</code><a class="headerlink" href="#lisa.utils.Loggable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A simple class for uniformly named loggers</p>
+<dl class="method">
+<dt id="lisa.utils.Loggable.get_logger">
+<em class="property">classmethod </em><code class="sig-name descname">get_logger</code><span class="sig-paren">(</span><em class="sig-param">suffix=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.Loggable.get_logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.utils.Loggable.log_locals">
+<em class="property">classmethod </em><code class="sig-name descname">log_locals</code><span class="sig-paren">(</span><em class="sig-param">var_names=None</em>, <em class="sig-param">level='debug'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.Loggable.log_locals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Debugging aid: log the local variables of the calling function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>var_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em>) – List of variable names to display, or all of them if
+left to default.</p></li>
+<li><p><strong>level</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – log level to use.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.get_subclasses">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">get_subclasses</code><span class="sig-paren">(</span><em class="sig-param">cls</em>, <em class="sig-param">only_leaves=False</em>, <em class="sig-param">cls_set=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.get_subclasses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all indirect subclasses of the class.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.get_cls_name">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">get_cls_name</code><span class="sig-paren">(</span><em class="sig-param">cls</em>, <em class="sig-param">style=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.get_cls_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a prettily-formated name for the class given as parameter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.7)"><em>type</em></a>) – class to get the name from</p></li>
+<li><p><strong>style</strong> – When “rst”, a RestructuredText snippet is returned</p></li>
+<li><p><strong>style</strong> – str</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.utils.HideExekallID">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">HideExekallID</code><a class="headerlink" href="#lisa.utils.HideExekallID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Hide the subclasses in the simplified ID format of exekall.</p>
+<p>That is mainly used for uninteresting classes that do not add any useful
+information to the ID. This should not be used on domain-specific classes
+since alternatives may be used by the user while debugging for example.
+Hiding too many classes may lead to ambiguity, which is exactly what the ID
+is fighting against.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.memoized">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">memoized</code><span class="sig-paren">(</span><em class="sig-param">f</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.memoized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to memoize the result of a callable, based on
+<a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.lru_cache" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.lru_cache()</span></code></a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The first parameter of the callable is cached with a weak
+reference. This suits well the method use-case, since we don’t want the
+memoization of methods to prevent garbage collection of the instances
+they are bound to.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.resolve_dotted_name">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">resolve_dotted_name</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.resolve_dotted_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only resolve names where __qualname__ == __name__, i.e the callable is a
+module-level name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.import_all_submodules">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">import_all_submodules</code><span class="sig-paren">(</span><em class="sig-param">pkg</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.import_all_submodules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import all submodules of a given package.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.utils.UnknownTagPlaceholder">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">UnknownTagPlaceholder</code><span class="sig-paren">(</span><em class="sig-param">tag</em>, <em class="sig-param">data</em>, <em class="sig-param">location=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.UnknownTagPlaceholder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.utils.Serializable">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">Serializable</code><a class="headerlink" href="#lisa.utils.Serializable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.utils.Loggable" title="lisa.utils.Loggable"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.Loggable</span></code></a></p>
+<p>A helper class for YAML serialization/deserialization</p>
+<p>The following YAML tags are supported on top of what YAML provides out of
+the box:</p>
+<blockquote>
+<div><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">!call</span></code>: call a Python callable with a mapping of arguments:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># will execute:</span>
+<span class="c1"># package.module.Class(arg1=&#39;foo&#39;, arg2=&#39;bar&#39;, arg3=42)</span>
+<span class="c1"># NB: there is no space after &quot;call:&quot;</span>
+<span class="kt">!call:package.module.Class</span>
+    <span class="nt">arg1</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">foo</span>
+    <span class="nt">arg2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">bar</span>
+    <span class="nt">arg3</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">42</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">!include</span></code>: include the content of another YAML file. Environment
+variables are expanded in the given path:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="kt">!include</span> <span class="l l-Scalar l-Scalar-Plain">/foo/$ENV_VAR/bar.yml</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">!env</span></code>: take the value of an environment variable, and convert
+it to a Python type:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="kt">!env:int</span> <span class="l l-Scalar l-Scalar-Plain">MY_ENV_VAR</span>
+</pre></div>
+</div>
+<p>If <cite>interpolate</cite> is used as type, the value will be interpolated
+using <a class="reference external" href="https://docs.python.org/3/library/os.path.html#os.path.expandvars" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.path.expandvars()</span></code></a> and the resulting string
+returned:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="kt">!env:interpolate</span> <span class="l l-Scalar l-Scalar-Plain">/foo/$MY_ENV_VAR/bar</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">!var</span></code>: reference a module-level variable:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="kt">!var</span> <span class="l l-Scalar l-Scalar-Plain">package.module.var</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not to be used on its own - instead, your class should inherit
+from this class to gain serialization superpowers.</p>
+</div>
+<dl class="attribute">
+<dt id="lisa.utils.Serializable.serialized_whitelist">
+<code class="sig-name descname">serialized_whitelist</code><em class="property"> = []</em><a class="headerlink" href="#lisa.utils.Serializable.serialized_whitelist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.utils.Serializable.serialized_blacklist">
+<code class="sig-name descname">serialized_blacklist</code><em class="property"> = []</em><a class="headerlink" href="#lisa.utils.Serializable.serialized_blacklist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.utils.Serializable.serialized_placeholders">
+<code class="sig-name descname">serialized_placeholders</code><em class="property"> = {}</em><a class="headerlink" href="#lisa.utils.Serializable.serialized_placeholders" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.utils.Serializable.YAML_ENCODING">
+<code class="sig-name descname">YAML_ENCODING</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#lisa.utils.Serializable.YAML_ENCODING" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encoding used for YAML files</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.utils.Serializable.DEFAULT_SERIALIZATION_FMT">
+<code class="sig-name descname">DEFAULT_SERIALIZATION_FMT</code><em class="property"> = 'yaml'</em><a class="headerlink" href="#lisa.utils.Serializable.DEFAULT_SERIALIZATION_FMT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default format used when serializing objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.utils.Serializable.to_path">
+<code class="sig-name descname">to_path</code><span class="sig-paren">(</span><em class="sig-param">filepath</em>, <em class="sig-param">fmt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.Serializable.to_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize the object to a file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The path of the file in which the object will be dumped</p></li>
+<li><p><strong>fmt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Serialization format.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.utils.Serializable.to_yaml">
+<code class="sig-name descname">to_yaml</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.Serializable.to_yaml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a YAML string with the serialized object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.utils.Serializable.from_path">
+<em class="property">classmethod </em><code class="sig-name descname">from_path</code><span class="sig-paren">(</span><em class="sig-param">filepath</em>, <em class="sig-param">fmt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.Serializable.from_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserialize an object from a file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The path of file in which the object has been dumped</p></li>
+<li><p><strong>fmt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Serialization format.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.7)"><strong>AssertionError</strong></a> – if the deserialized object is not an instance
+of the class.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.setup_logging">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">setup_logging</code><span class="sig-paren">(</span><em class="sig-param">filepath='logging.conf'</em>, <em class="sig-param">level=20</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.setup_logging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize logging used for all the LISA modules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – the relative or absolute path of the logging
+configuration to use. Relative path uses
+<a class="reference internal" href="#lisa.utils.LISA_HOME" title="lisa.utils.LISA_HOME"><code class="xref py py-attr docutils literal notranslate"><span class="pre">lisa.utils.LISA_HOME</span></code></a> as base folder.</p></li>
+<li><p><strong>level</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – the default log level to enable</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.utils.ArtifactPath">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">ArtifactPath</code><a class="headerlink" href="#lisa.utils.ArtifactPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="#lisa.utils.Loggable" title="lisa.utils.Loggable"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.Loggable</span></code></a>, <a class="reference internal" href="#lisa.utils.HideExekallID" title="lisa.utils.HideExekallID"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.HideExekallID</span></code></a></p>
+<p>Path to a folder that can be used to store artifacts of a function.
+This must be a clean folder, already created on disk.</p>
+<dl class="method">
+<dt id="lisa.utils.ArtifactPath.relative_to">
+<code class="sig-name descname">relative_to</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.ArtifactPath.relative_to" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.utils.ArtifactPath.with_root">
+<code class="sig-name descname">with_root</code><span class="sig-paren">(</span><em class="sig-param">root</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.ArtifactPath.with_root" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.utils.ArtifactPath.join">
+<em class="property">classmethod </em><code class="sig-name descname">join</code><span class="sig-paren">(</span><em class="sig-param">path1</em>, <em class="sig-param">path2</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.ArtifactPath.join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Join two paths together, similarly to <a class="reference external" href="https://docs.python.org/3/library/os.path.html#os.path.join" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">os.path.join()</span></code></a>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">path1</span></code> is a <a class="reference internal" href="#lisa.utils.ArtifactPath" title="lisa.utils.ArtifactPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArtifactPath</span></code></a>, the result will also be one,
+and the root of <code class="docutils literal notranslate"><span class="pre">path1</span></code> will be used as the root of the new path.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.groupby">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">groupby</code><span class="sig-paren">(</span><em class="sig-param">iterable</em>, <em class="sig-param">key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.groupby" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.group_by_value">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">group_by_value</code><span class="sig-paren">(</span><em class="sig-param">mapping</em>, <em class="sig-param">key_sort=&lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.group_by_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Group a mapping by its values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mapping</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><em>collections.abc.Mapping</em></a>) – Mapping to reverse</p></li>
+<li><p><strong>key_sort</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.7)"><em>collections.abc.Callable</em></a>) – The <code class="docutils literal notranslate"><span class="pre">key</span></code> parameter to a <a class="reference external" href="https://docs.python.org/3/library/functions.html#sorted" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sorted()</span></code></a> call on the
+mapping keys</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.OrderedDict" title="(in Python v3.7)">collections.OrderedDict</a></p>
+</dd>
+</dl>
+<p>The idea behind this method is to “reverse” a mapping, IOW to create a new
+mapping that has the passed mapping’s values as keys. Since different keys
+can point to the same value, the new values will be lists of old keys.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">group_by_value</span><span class="p">({</span><span class="mi">0</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">42</span><span class="p">})</span>
+<span class="go">OrderedDict([(42, [0, 2]), (43, [1])])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.deduplicate">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">deduplicate</code><span class="sig-paren">(</span><em class="sig-param">seq</em>, <em class="sig-param">keep_last=True</em>, <em class="sig-param">key=&lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.deduplicate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deduplicate items in the given sequence and return a list.
+:param seq: Sequence to deduplicate
+:type Seq: collections.abc.Sequence</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.7)"><em>collections.abc.Callable</em></a>) – Key function that will be used to determine duplication.  It
+takes one item at a time, returning a hashable key value</p></li>
+<li><p><strong>keep_last</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If True, will keep the last occurence of each duplicated
+items. Otherwise, keep the first occurence.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.get_nested_key">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">get_nested_key</code><span class="sig-paren">(</span><em class="sig-param">mapping</em>, <em class="sig-param">key_path</em>, <em class="sig-param">getitem=&lt;built-in function getitem&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.get_nested_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a key in a nested mapping</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mapping</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><em>collections.abc.Mapping</em></a>) – The mapping to lookup in</p></li>
+<li><p><strong>key_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – Path to the key in the mapping, in the form of a list of
+keys.</p></li>
+<li><p><strong>getitem</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.7)"><em>collections.abc.Callable</em></a>) – Function used to get items on the mapping. Defaults to
+<a class="reference external" href="https://docs.python.org/3/library/operator.html#operator.getitem" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">operator.getitem()</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.set_nested_key">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">set_nested_key</code><span class="sig-paren">(</span><em class="sig-param">mapping</em>, <em class="sig-param">key_path</em>, <em class="sig-param">val</em>, <em class="sig-param">level=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.set_nested_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a key in a nested mapping</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mapping</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.7)"><em>collections.abc.MutableMapping</em></a>) – The mapping to update</p></li>
+<li><p><strong>key_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – Path to the key in the mapping, in the form of a list of
+keys.</p></li>
+<li><p><strong>level</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.7)"><em>collections.abc.Callable</em></a>) – Factory used when creating a level is needed. By default,
+<code class="docutils literal notranslate"><span class="pre">type(mapping)</span></code> will be called without any parameter.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.get_call_site">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">get_call_site</code><span class="sig-paren">(</span><em class="sig-param">levels=0</em>, <em class="sig-param">exclude_caller_module=False</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.get_call_site" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the location of the source that called that function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(caller, filename, lineno) tuples. Any component can be None if
+nothing was found. Caller is a string containing the function name.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>levels</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – How many levels to look at in the stack</p></li>
+<li><p><strong>exclude_caller_module</strong> – Return the first function in the stack that
+is not defined in the same module as the direct caller of
+<a class="reference internal" href="#lisa.utils.get_call_site" title="lisa.utils.get_call_site"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_call_site()</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>That function will exclude all source files that are not part
+of the <cite>lisa</cite> package. It will also exclude functions of
+<a class="reference internal" href="#module-lisa.utils" title="lisa.utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lisa.utils</span></code></a> module.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.is_running_sphinx">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">is_running_sphinx</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.is_running_sphinx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the module is imported when Sphinx is running, False
+otherwise.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.non_recursive_property">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">non_recursive_property</code><span class="sig-paren">(</span><em class="sig-param">f</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.non_recursive_property" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a property that raises an <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AttributeError" title="(in Python v3.7)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> if it is re-entered.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This only guards against single-thread accesses, it is not
+threadsafe.</p>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.utils.LayeredMapping">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">LayeredMapping</code><span class="sig-paren">(</span><em class="sig-param">base</em>, <em class="sig-param">top=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.LayeredMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.MutableMapping</span></code></a></p>
+<p>A layered mutable mapping that allows setting values in a <code class="docutils literal notranslate"><span class="pre">top</span></code> layer,
+while values from <code class="docutils literal notranslate"><span class="pre">base</span></code> layer cannot be modified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.7)"><em>collections.abc.MutableMapping</em></a>) – Base layer that will be read-only</p></li>
+<li><p><strong>top</strong> – Top layer that will be read-write and have priority over
+<code class="docutils literal notranslate"><span class="pre">base</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.get_short_doc">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">get_short_doc</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.get_short_doc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the short documentation paragraph at the beginning of docstrings.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.update_wrapper_doc">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">update_wrapper_doc</code><span class="sig-paren">(</span><em class="sig-param">func</em>, <em class="sig-param">added_by=None</em>, <em class="sig-param">description=None</em>, <em class="sig-param">remove_params=None</em>, <em class="sig-param">include_kwargs=False</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.update_wrapper_doc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equivalent to <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.wraps" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.wraps()</span></code></a> that updates the signature by taking
+into account the wrapper’s extra <em>keyword-only</em> parameters and the given
+description.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.7)"><em>collections.abc.Callable</em></a>) – callable to decorate</p></li>
+<li><p><strong>added_by</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Add some kind of reference to give a sense of where the
+new behaviour of the wraps function comes from.</p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Extra description output in the docstring.</p></li>
+<li><p><strong>remove_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>) or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Set of parameter names of <code class="docutils literal notranslate"><span class="pre">func</span></code> to not include in
+the decorated function signature. This can be used to hide parameters
+that are only used as part of a decorated/decorator protocol, and not
+exposed in the final decorated function.</p></li>
+<li><p><strong>include_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If <cite>True</cite>, variable keyword parameter (<code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>)
+of the decorator is kept in the signature. It is usually removed, since
+it’s mostly used to transparently forward arguments to the inner
+<code class="docutils literal notranslate"><span class="pre">func</span></code>, but can also serve other purposes.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.wraps" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.wraps()</span></code></a> is applied by this decorator, which will
+not work if you applied it yourself.</p>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="lisa.utils.DEPRECATED_MAP">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">DEPRECATED_MAP</code><em class="property"> = {'lisa.analysis.load_tracking.LoadTrackingAnalysis.df_cpus_signals': {'deprecated_in': '2.0', 'msg': None, 'obj': &lt;function LoadTrackingAnalysis.df_cpus_signals&gt;, 'removed_in': (2, 1), 'replaced_by': &lt;function LoadTrackingAnalysis.df_cpus_signal&gt;}, 'lisa.analysis.load_tracking.LoadTrackingAnalysis.df_tasks_signals': {'deprecated_in': '2.0', 'msg': None, 'obj': &lt;function LoadTrackingAnalysis.df_tasks_signals&gt;, 'removed_in': (2, 1), 'replaced_by': &lt;function LoadTrackingAnalysis.df_tasks_signal&gt;}, 'lisa.trace.Trace.ftrace': {'deprecated_in': '2.0', 'msg': 'Direct access to underlying ftrace object is discouraged as this is now an implementation detail of that class which could change in the future', 'obj': &lt;property object&gt;, 'removed_in': (2, 1), 'replaced_by': None}}</em><a class="headerlink" href="#lisa.utils.DEPRECATED_MAP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Global dictionary of deprecated classes, functions and so on.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.deprecate">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">deprecate</code><span class="sig-paren">(</span><em class="sig-param">msg=None</em>, <em class="sig-param">replaced_by=None</em>, <em class="sig-param">deprecated_in=None</em>, <em class="sig-param">removed_in=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.deprecate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark a class, method, function etc as deprecated and update its docstring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msg</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Message to tell more about this deprecation.</p></li>
+<li><p><strong>replaced_by</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) – Other object the deprecated object is replaced by.</p></li>
+<li><p><strong>deprecated_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Version in which the object was flagged as deprecated.</p></li>
+<li><p><strong>removed_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Version in which the deprecated object will be removed.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In order to decorate all the accessors of properties, apply the
+decorator once the property is fully built:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">C</span><span class="p">:</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@foo</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Once all getters/setter/deleters are set, apply the decorator</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="n">deprecate</span><span class="p">()(</span><span class="n">foo</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.get_doc_url">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">get_doc_url</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.get_doc_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an URL to the documentation about the given object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.show_doc">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">show_doc</code><span class="sig-paren">(</span><em class="sig-param">obj</em>, <em class="sig-param">iframe=False</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.show_doc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the online LISA documentation about the given object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) – Object to show the doc of. It can be anything, including
+instances.</p></li>
+<li><p><strong>iframe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, uses an IFrame, otherwise opens a web browser.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.split_paragraphs">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">split_paragraphs</code><span class="sig-paren">(</span><em class="sig-param">string</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.split_paragraphs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split <cite>string</cite> into a list of paragraphs.</p>
+<p>A paragraph is delimited by empty lines, or lines containing only
+whitespace characters.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.utils.guess_format">
+<code class="sig-prename descclassname">lisa.utils.</code><code class="sig-name descname">guess_format</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.utils.guess_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Guess the file format from a <cite>path</cite>, using the mime types database.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lisa.datautils">
+<span id="dataframe-and-series-handling-utilities"></span><h2>Dataframe and Series handling utilities<a class="headerlink" href="#module-lisa.datautils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="lisa.datautils.df_squash">
+<code class="sig-prename descclassname">lisa.datautils.</code><code class="sig-name descname">df_squash</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">start</em>, <em class="sig-param">end</em>, <em class="sig-param">column='delta'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.datautils.df_squash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slice a dataframe of deltas in [start:end] and ensure we have
+an event at exactly those boundaries.</p>
+<p>The input dataframe is expected to have a “column” which reports
+the time delta between consecutive rows, as for example dataframes
+generated by add_events_deltas().</p>
+<p>The returned dataframe is granted to have an initial and final
+event at the specified “start” (“end”) index values, which values
+are the same of the last event before (first event after) the
+specified “start” (“end”) time.</p>
+<p>Examples:</p>
+<p>Slice a dataframe to [start:end], and work on the time data so that it
+makes sense within the interval.</p>
+<p>Examples to make it clearer:</p>
+<p>df is:
+Time len state
+15    1   1
+16    1   0
+17    1   1
+18    1   0
+————-</p>
+<p>df_squash(df, 16.5, 17.5) =&gt;</p>
+<p>Time len state
+16.5  .5   0
+17    .5   1</p>
+<p>df_squash(df, 16.2, 16.8) =&gt;</p>
+<p>Time len state
+16.2  .6   0</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a new df that fits the above description</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.datautils.df_merge">
+<code class="sig-prename descclassname">lisa.datautils.</code><code class="sig-name descname">df_merge</code><span class="sig-paren">(</span><em class="sig-param">df_list</em>, <em class="sig-param">drop_columns=None</em>, <em class="sig-param">drop_inplace=False</em>, <em class="sig-param">filter_columns=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.datautils.df_merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge a list of <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.24.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>, keeping the index sorted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>drop_columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em>) – List of columns to drop prior to merging. This avoids
+ending up with extra renamed columns if some dataframes have column
+names in common.</p></li>
+<li><p><strong>drop_inplace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Drop columns in the original dataframes instead of
+creating copies.</p></li>
+<li><p><strong>filter_columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a><em>)</em>) – Dict of <cite>{“column”: value)</cite> used to filter each
+dataframe prior to dropping columns. The columns are then dropped as
+they have a constant value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.datautils.series_derivate">
+<code class="sig-prename descclassname">lisa.datautils.</code><code class="sig-name descname">series_derivate</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">x=None</em>, <em class="sig-param">order=1</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.datautils.series_derivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute a derivative of a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v0.24.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> with respect to another
+series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A series of <cite>dy/dx</cite>, where <cite>x</cite> is either the index of <cite>y</cite> or
+another series.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>y</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.24.2)"><em>pandas.DataFrame</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Series with the data to derivate.</p></li>
+<li><p><strong>x</strong> – Series with the <cite>x</cite> data. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the index of <cite>y</cite> will be
+used. Note that <cite>y</cite> and <cite>x</cite> are expected to have the same index.</p></li>
+<li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – Order of the derivative (1 is speed, 2 is acceleration etc).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.datautils.series_integrate">
+<code class="sig-prename descclassname">lisa.datautils.</code><code class="sig-name descname">series_integrate</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">x=None</em>, <em class="sig-param">sign=None</em>, <em class="sig-param">method='rect'</em>, <em class="sig-param">rect_step='post'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.datautils.series_integrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the integral of <cite>y</cite> with respect to <cite>x</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A scalar <span class="math notranslate nohighlight">\(\int_{x=A}^{x=B} y \, dx\)</span>, where <cite>x</cite> is either the
+index of <cite>y</cite> or another series.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>y</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.24.2)"><em>pandas.DataFrame</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Series with the data to integrate.</p></li>
+<li><p><strong>x</strong> – Series with the <cite>x</cite> data. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the index of <cite>y</cite> will be
+used. Note that <cite>y</cite> and <cite>x</cite> are expected to have the same index.</p></li>
+<li><p><strong>sign</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – <p>Clip the data for the area in positive
+or negative regions. Can be any of:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">+</span></code>: ignore negative data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-</span></code>: ignore positive data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: use all data</p></li>
+</ul>
+</p></li>
+<li><p><strong>method</strong> – The method for area calculation. This can
+be any of the integration methods supported in <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/index.html#module-numpy" title="(in NumPy v1.16)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a>
+or <cite>rect</cite></p></li>
+<li><p><strong>rect_step</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The step behaviour for <cite>rect</cite> method</p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Rectangular Method</em></p>
+<blockquote>
+<div><ul>
+<li><p>Step: Post</p>
+<blockquote>
+<div><p>Consider the following time series data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span>            <span class="o">*----*----*----+</span>
+             <span class="o">|</span>              <span class="o">|</span>
+<span class="mi">1</span>            <span class="o">|</span>              <span class="o">*----*----+</span>
+             <span class="o">|</span>
+<span class="mi">0</span>  <span class="o">*----*----+</span>
+   <span class="mi">0</span>    <span class="mi">1</span>    <span class="mi">2</span>    <span class="mi">3</span>    <span class="mi">4</span>    <span class="mi">5</span>    <span class="mi">6</span>    <span class="mi">7</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The area under the curve is:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\sum_{k=0}^{N-1} (x_{k+1} - {x_k}) \times f(x_k) \\
+(2 \times 3) + (1 \times 2) = 8\end{split}\]</div>
+</div></blockquote>
+</li>
+<li><p>Step: Pre</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span>       <span class="o">+----*----*----*</span>
+        <span class="o">|</span>              <span class="o">|</span>
+<span class="mi">1</span>       <span class="o">|</span>              <span class="o">+----*----*----+</span>
+        <span class="o">|</span>
+<span class="mi">0</span>  <span class="o">*----*</span>
+   <span class="mi">0</span>    <span class="mi">1</span>    <span class="mi">2</span>    <span class="mi">3</span>    <span class="mi">4</span>    <span class="mi">5</span>    <span class="mi">6</span>    <span class="mi">7</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The area under the curve is:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\sum_{k=1}^{N} (x_k - x_{k-1}) \times f(x_k) \\
+(2 \times 3) + (1 \times 3) = 9\end{split}\]</div>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.datautils.series_mean">
+<code class="sig-prename descclassname">lisa.datautils.</code><code class="sig-name descname">series_mean</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">x=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.datautils.series_mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the average of <cite>y</cite> by integrating with respect to <cite>x</cite> and dividing
+by the range of <cite>x</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A scalar <span class="math notranslate nohighlight">\(\int_{x=A}^{x=B} \frac{y}{| B - A |} \, dx\)</span>,
+where <cite>x</cite> is either the index of <cite>y</cite> or another series.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>y</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.24.2)"><em>pandas.DataFrame</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Series with the data to integrate.</p></li>
+<li><p><strong>x</strong> – Series with the <cite>x</cite> data. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the index of <cite>y</cite> will be
+used. Note that <cite>y</cite> and <cite>x</cite> are expected to have the same index.</p></li>
+<li><p><strong>arguments</strong> – Passed to <a class="reference internal" href="#lisa.datautils.series_integrate" title="lisa.datautils.series_integrate"><code class="xref py py-func docutils literal notranslate"><span class="pre">series_integrate()</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.datautils.series_window">
+<code class="sig-prename descclassname">lisa.datautils.</code><code class="sig-name descname">series_window</code><span class="sig-paren">(</span><em class="sig-param">series</em>, <em class="sig-param">window</em>, <em class="sig-param">method='inclusive'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.datautils.series_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select a portion of a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v0.24.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>series</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v0.24.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>) – series to slice</p></li>
+<li><p><strong>window</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a><em>)</em>) – two-tuple of index values for the start and end of the
+region to select.</p></li>
+<li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) – value of index at the end of the cropped series.</p></li>
+<li><p><strong>method</strong> – <p>Choose how edges are handled:</p>
+<ul>
+<li><p><cite>inclusive</cite>: corresponds to default pandas float slicing behaviour.</p></li>
+<li><dl class="simple">
+<dt><cite>exclusive</cite>: When no exact match is found, only index values within</dt><dd><p>the range are selected</p>
+</dd>
+</dl>
+</li>
+<li><p><cite>nearest</cite>: When no exact match is found, take the nearest index value.</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The index of <cite>series</cite> must be monotonic and without duplicates.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.datautils.series_align_signal">
+<code class="sig-prename descclassname">lisa.datautils.</code><code class="sig-name descname">series_align_signal</code><span class="sig-paren">(</span><em class="sig-param">ref</em>, <em class="sig-param">to_align</em>, <em class="sig-param">max_shift=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.datautils.series_align_signal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Align a signal to an expected reference signal using their
+cross-correlation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><cite>(ref, to_align)</cite> tuple, with <cite>to_align</cite> shifted by an amount
+computed to align as well as possible with <cite>ref</cite>. Both <cite>ref</cite> and
+<cite>to_align</cite> are resampled to have a fixed sample rate.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ref</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v0.24.2)"><em>pandas.Series</em></a>) – reference signal.</p></li>
+<li><p><strong>to_align</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v0.24.2)"><em>pandas.Series</em></a>) – signal to align</p></li>
+<li><p><strong>max_shift</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Maximum shift allowed to align signals, in index units.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-lisa.doc.helpers">
+<span id="sphinx-documentation"></span><h2>Sphinx documentation<a class="headerlink" href="#module-lisa.doc.helpers" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="lisa.doc.helpers.RecursiveDirective">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.doc.helpers.</code><code class="sig-name descname">RecursiveDirective</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">arguments</em>, <em class="sig-param">options</em>, <em class="sig-param">content</em>, <em class="sig-param">lineno</em>, <em class="sig-param">content_offset</em>, <em class="sig-param">block_text</em>, <em class="sig-param">state</em>, <em class="sig-param">state_machine</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.RecursiveDirective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">docutils.parsers.rst.Directive</span></code></p>
+<p>Base class helping nested parsing.</p>
+<p>Options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">literal</span></code>: If set, a literal block will be used, otherwise the text
+will be interpreted as reStructuredText.</p></li>
+</ul>
+<dl class="attribute">
+<dt id="lisa.doc.helpers.RecursiveDirective.option_spec">
+<code class="sig-name descname">option_spec</code><em class="property"> = {'literal': &lt;function flag&gt;}</em><a class="headerlink" href="#lisa.doc.helpers.RecursiveDirective.option_spec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.doc.helpers.RecursiveDirective.parse_nested">
+<code class="sig-name descname">parse_nested</code><span class="sig-paren">(</span><em class="sig-param">txt</em>, <em class="sig-param">source=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.RecursiveDirective.parse_nested" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse text as reStructuredText if the <code class="docutils literal notranslate"><span class="pre">literal</span></code> option is not set.</p>
+<p>Otherwise, interpret the text as a line block.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.doc.helpers.ExecDirective">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.doc.helpers.</code><code class="sig-name descname">ExecDirective</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">arguments</em>, <em class="sig-param">options</em>, <em class="sig-param">content</em>, <em class="sig-param">lineno</em>, <em class="sig-param">content_offset</em>, <em class="sig-param">block_text</em>, <em class="sig-param">state</em>, <em class="sig-param">state_machine</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.ExecDirective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.doc.helpers.RecursiveDirective" title="lisa.doc.helpers.RecursiveDirective"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.doc.helpers.RecursiveDirective</span></code></a></p>
+<p>reStructuredText directive to execute the specified python code and insert
+the output into the document:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">exec</span><span class="p">::</span>
+
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">literal</span></code>: If set, a literal block will be used, otherwise the text
+will be interpreted as reStructuredText.</p></li>
+</ul>
+<dl class="attribute">
+<dt id="lisa.doc.helpers.ExecDirective.has_content">
+<code class="sig-name descname">has_content</code><em class="property"> = True</em><a class="headerlink" href="#lisa.doc.helpers.ExecDirective.has_content" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.doc.helpers.ExecDirective.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.ExecDirective.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.doc.helpers.RunCommandDirective">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.doc.helpers.</code><code class="sig-name descname">RunCommandDirective</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">arguments</em>, <em class="sig-param">options</em>, <em class="sig-param">content</em>, <em class="sig-param">lineno</em>, <em class="sig-param">content_offset</em>, <em class="sig-param">block_text</em>, <em class="sig-param">state</em>, <em class="sig-param">state_machine</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.RunCommandDirective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.doc.helpers.RecursiveDirective" title="lisa.doc.helpers.RecursiveDirective"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.doc.helpers.RecursiveDirective</span></code></a></p>
+<p>reStructuredText directive to execute the specified command and insert
+the output into the document:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">run</span><span class="o">-</span><span class="n">command</span><span class="p">::</span>
+   <span class="p">:</span><span class="n">capture</span><span class="o">-</span><span class="n">stderr</span><span class="p">:</span>
+   <span class="p">:</span><span class="n">ignore</span><span class="o">-</span><span class="n">error</span><span class="p">:</span>
+   <span class="p">:</span><span class="n">literal</span><span class="p">:</span>
+
+   <span class="n">exekall</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+<p>Options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">literal</span></code>: If set, a literal block will be used, otherwise the text
+will be interpreted as reStructuredText.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">capture-stderr</span></code>: If set, stderr will be captured in addition to stdout.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ignore-error</span></code>: The return status of the command will be ignored.
+Otherwise, it will raise an exception and building the
+documentation will fail.</p></li>
+</ul>
+<dl class="attribute">
+<dt id="lisa.doc.helpers.RunCommandDirective.has_content">
+<code class="sig-name descname">has_content</code><em class="property"> = True</em><a class="headerlink" href="#lisa.doc.helpers.RunCommandDirective.has_content" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.doc.helpers.RunCommandDirective.option_spec">
+<code class="sig-name descname">option_spec</code><em class="property"> = {'capture-stderr': &lt;function flag&gt;, 'ignore-error': &lt;function flag&gt;, 'literal': &lt;function flag&gt;}</em><a class="headerlink" href="#lisa.doc.helpers.RunCommandDirective.option_spec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.doc.helpers.RunCommandDirective.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.RunCommandDirective.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.doc.helpers.is_test">
+<code class="sig-prename descclassname">lisa.doc.helpers.</code><code class="sig-name descname">is_test</code><span class="sig-paren">(</span><em class="sig-param">method</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.is_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a method is a test method.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.doc.helpers.autodoc_process_test_method">
+<code class="sig-prename descclassname">lisa.doc.helpers.</code><code class="sig-name descname">autodoc_process_test_method</code><span class="sig-paren">(</span><em class="sig-param">app</em>, <em class="sig-param">what</em>, <em class="sig-param">name</em>, <em class="sig-param">obj</em>, <em class="sig-param">options</em>, <em class="sig-param">lines</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.autodoc_process_test_method" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="lisa.doc.helpers.autodoc_process_analysis_events">
+<code class="sig-prename descclassname">lisa.doc.helpers.</code><code class="sig-name descname">autodoc_process_analysis_events</code><span class="sig-paren">(</span><em class="sig-param">app</em>, <em class="sig-param">what</em>, <em class="sig-param">name</em>, <em class="sig-param">obj</em>, <em class="sig-param">options</em>, <em class="sig-param">lines</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.autodoc_process_analysis_events" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="lisa.doc.helpers.DocPlotConf">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.doc.helpers.</code><code class="sig-name descname">DocPlotConf</code><span class="sig-paren">(</span><em class="sig-param">conf=None</em>, <em class="sig-param">src='user'</em>, <em class="sig-param">add_default_src=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.DocPlotConf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.conf.SimpleMultiSrcConf" title="lisa.conf.SimpleMultiSrcConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.SimpleMultiSrcConf</span></code></a></p>
+<p>Analysis plot method arguments configuration for the documentation.</p>
+<ul class="simple">
+<li><p>doc-plot-conf: Plot methods configuration</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>plots (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>): Mapping of function qualnames to their settings.</p></li>
+</ul>
+</div></blockquote>
+<dl class="attribute">
+<dt id="lisa.doc.helpers.DocPlotConf.STRUCTURE">
+<code class="sig-name descname">STRUCTURE</code><em class="property"> = &lt;lisa.conf.TopLevelKeyDesc object&gt;</em><a class="headerlink" href="#lisa.doc.helpers.DocPlotConf.STRUCTURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.doc.helpers.autodoc_process_analysis_plots">
+<code class="sig-prename descclassname">lisa.doc.helpers.</code><code class="sig-name descname">autodoc_process_analysis_plots</code><span class="sig-paren">(</span><em class="sig-param">app</em>, <em class="sig-param">what</em>, <em class="sig-param">name</em>, <em class="sig-param">obj</em>, <em class="sig-param">options</em>, <em class="sig-param">lines</em>, <em class="sig-param">plot_conf</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.autodoc_process_analysis_plots" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="lisa.doc.helpers.get_analysis_list">
+<code class="sig-prename descclassname">lisa.doc.helpers.</code><code class="sig-name descname">get_analysis_list</code><span class="sig-paren">(</span><em class="sig-param">meth_type</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.doc.helpers.get_analysis_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tools_separator.html" class="btn btn-neutral float-right" title="==== Tools documentation ====" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="energy_analysis.html" class="btn btn-neutral float-left" title="Energy analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,1606 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Energy analysis &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Miscellaneous utilities" href="misc_utilities.html" />
+    <link rel="prev" title="Kernel trace analysis" href="trace_analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lisa_shell/man/man.html">LISA shell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transition_guide.html">Transitioning from LISA legacy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows/index.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="target.html">Target</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workloads.html">Workloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Energy analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#energy-model">Energy model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#energy-meters">Energy meters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hwmon">HWMON</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#arm-energy-probe-aep">Arm Energy probe (AEP)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#equipment">Equipment</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#baylibre-acme-cape">Baylibre ACME cape</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#setting-up-the-board">Setting up the board</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#setting-up-iio-capture">Setting up iio-capture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#monsoon-power-monitor">Monsoon Power Monitor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#setup">Setup</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#api">API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Energy model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Energy meters</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="misc_utilities.html">Miscellaneous utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bisector/index.html">Bisector Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exekall/index.html">Exekall Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Energy analysis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/energy_analysis.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="energy-analysis">
+<h1>Energy analysis<a class="headerlink" href="#energy-analysis" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>As part of the <a class="reference external" href="https://community.arm.com/developer/ip-products/processors/b/processors-ip-blog/posts/energy-aware-scheduling-in-linux?_ga=2.199018799.1628257541.1552386902-104220551.1546441490">EAS</a>
+development efforts, support for CPU energy models and energy probes was added
+to LISA.</p>
+</div>
+<div class="section" id="energy-model">
+<h2>Energy model<a class="headerlink" href="#energy-model" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#lisa.energy_model.EnergyModel" title="lisa.energy_model.EnergyModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyModel</span></code></a> class mimics the energy model used
+by EAS, and lets us do some energy analysis.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>An <a class="reference internal" href="#lisa.energy_model.EnergyModel" title="lisa.energy_model.EnergyModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyModel</span></code></a> instance can be generated from a
+live target using <a class="reference internal" href="#lisa.energy_model.EnergyModel.from_target" title="lisa.energy_model.EnergyModel.from_target"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_target()</span></code></a>,
+providing this target does have an energy model.</p>
+</div>
+<p>Its most noteworthy use is in our <a class="reference internal" href="kernel_tests.html#lisa.tests.scheduler.eas_behaviour.EASBehaviour.test_task_placement" title="lisa.tests.scheduler.eas_behaviour.EASBehaviour.test_task_placement"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EAS</span> <span class="pre">behavioural</span> <span class="pre">tests</span></code></a>, as it lets us
+estimate the amount of energy consumed in an execution trace and compare this
+to an estimated energy-optimal placement.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>See <a class="reference internal" href="#lisa.energy_model.EnergyModel" title="lisa.energy_model.EnergyModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyModel</span></code></a> for more details.</p>
+</div>
+</div>
+<div class="section" id="energy-meters">
+<h2>Energy meters<a class="headerlink" href="#energy-meters" title="Permalink to this headline">¶</a></h2>
+<p>All energy meters inherit from <a class="reference internal" href="#lisa.energy_meter.EnergyMeter" title="lisa.energy_meter.EnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_meter.EnergyMeter</span></code></a>, and most
+of them use one of devlib’s <code class="xref py py-mod docutils literal notranslate"><span class="pre">devlib.instrument</span></code> under the hood.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>See <a class="reference internal" href="#lisa.energy_meter.EnergyMeter" title="lisa.energy_meter.EnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyMeter</span></code></a> for more details.</p>
+</div>
+<div class="section" id="hwmon">
+<h3>HWMON<a class="headerlink" href="#hwmon" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">hwmon</span></code> is a generic Linux kernel subsystem, providing access to hardware
+monitoring components like temperature or voltage/current sensors.</p>
+</div>
+<div class="section" id="arm-energy-probe-aep">
+<h3>Arm Energy probe (AEP)<a class="headerlink" href="#arm-energy-probe-aep" title="Permalink to this headline">¶</a></h3>
+<p>ARM Energy Probes are lightweight power measurement tools for software
+developers. They can monitor up to three voltage rails simultaneously.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Its related class is <a class="reference internal" href="#lisa.energy_meter.AEP" title="lisa.energy_meter.AEP"><code class="xref py py-class docutils literal notranslate"><span class="pre">AEP</span></code></a>.</p>
+</div>
+<div class="section" id="equipment">
+<h4>Equipment<a class="headerlink" href="#equipment" title="Permalink to this headline">¶</a></h4>
+<p>The required equipment is the following:</p>
+<ul>
+<li><p>An ARM Energy Probe</p></li>
+<li><p>A shunt resistor to be connected between the voltage rail and the probe. The voltage drop
+on the resistor must be at most 165 mv. Therefore depending on the maximum current required
+by the load, one can properly select the value of the shunt resistor</p></li>
+<li><p>Install <code class="docutils literal notranslate"><span class="pre">caiman</span></code> required libraries:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>sudo apt-get install libudev-dev
+</pre></div>
+</div>
+</li>
+<li><p>Clone, compile and install the <a class="reference external" href="https://github.com/ARM-software/caiman">caiman</a> tool.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/ARM-software/caiman.git
+<span class="nb">cd</span> caiman/caiman <span class="o">&amp;&amp;</span> cmake . <span class="o">&amp;&amp;</span> make <span class="o">&amp;&amp;</span> <span class="nb">cd</span> -
+cp caiman/caiman /usr/bin
+</pre></div>
+</div>
+</li>
+</ul>
+<img alt="Arm Energy Probe" src="https://developer.arm.com/-/media/developer/products/software-tools/ds-5-development-studio/images/ARM%20Energy%20Probe/ARM_Energy_Probe_4.png?h=378&amp;w=416&amp;hash=90D98087E80D9178CCC28026C1C8E476A6736D09&amp;hash=90D98087E80D9178CCC28026C1C8E476A6736D09&amp;la=en" />
+</div>
+</div>
+<div class="section" id="baylibre-acme-cape">
+<h3>Baylibre ACME cape<a class="headerlink" href="#baylibre-acme-cape" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">iiocapture</span></code> instrument exploits the <a class="reference external" href="http://baylibre.com/acme/">BayLibre ACME</a> solution for measuring power.</p>
+<p>To use this instrument you need the following hardware:</p>
+<ul class="simple">
+<li><p>A <a class="reference external" href="https://beagleboard.org/black">BeagleBone Black</a></p></li>
+<li><p>An <a class="reference external" href="http://sigrok.org/wiki/BayLibre_ACME">ACME Cape</a></p></li>
+<li><p>Power probes for the ACME Cape</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Its related class is <a class="reference internal" href="#lisa.energy_meter.ACME" title="lisa.energy_meter.ACME"><code class="xref py py-class docutils literal notranslate"><span class="pre">ACME</span></code></a>.</p>
+</div>
+<div class="section" id="setting-up-the-board">
+<h4>Setting up the board<a class="headerlink" href="#setting-up-the-board" title="Permalink to this headline">¶</a></h4>
+<p>First step is to get an <strong>IIO version</strong> of the ACME BeagleBone black image. The
+recommended way of using ACME is to use the <a class="reference external" href="https://github.com/baylibre-acme/ACME/releases/download/b1/acme-beaglebone-black_b1-sdcard-image.xz">pre-built image</a>
+provided by BayLibre.</p>
+<p>If you are using a MicroSD card, please ensure that the card is properly
+inserted in its slot and to keep pressed the power push-button while connecting
+the power (via the miniUSB cable). Here is an image of the configuration we
+usually use:</p>
+<img alt="_images/ACMECapeBoardConfiguration.png" src="_images/ACMECapeBoardConfiguration.png" />
+<p>To change the IP address and avoid a buggy route to a /8 to be added on your host,
+change the address of the board in <code class="docutils literal notranslate"><span class="pre">/usr/bin/acme-usbgadget-udhcpd</span></code>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use an address that does not clash with your existing networks</span>
+<span class="c1">#ifconfig usb0 up 10.65.34.1 netmask 255.255.255.0</span>
+ifconfig usb0 up <span class="m">192</span>.168.50.1 netmask <span class="m">255</span>.255.255.0
+</pre></div>
+</div>
+<p>Fix the DHCP server config on the ACME board to advertise a small subnet instead
+of a whole /8:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1">#start          10.65.34.20     #default: 192.168.0.20</span>
+<span class="c1">#end            10.65.34.254    #default: 192.168.0.254</span>
+
+<span class="c1"># Advertise a /24 subnet which contains both the</span>
+<span class="c1">#allocated addresses and the address of the board itself</span>
+option  subnet  <span class="m">255</span>.255.255.0
+start           <span class="m">192</span>.168.50.20
+end             <span class="m">192</span>.168.50.254
+</pre></div>
+</div>
+<p>Once the board is booted, by default it has its IP address associated with the
+<code class="docutils literal notranslate"><span class="pre">baylibre-acme.local</span></code> hostname. To check for the board being visible in your
+network, you can use this command</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>avahi-browse -a
+</pre></div>
+</div>
+<p>which will list all the reachable devices.</p>
+<p>If you do not want to use avahi, you can refer to it by the static IP of the
+ethernet-over-USB interface. That has the added benefit of not using the board
+of somebody else, since that IP is on the USB interface which can only be
+accessed from your local machine.</p>
+</div>
+<div class="section" id="setting-up-iio-capture">
+<h4>Setting up iio-capture<a class="headerlink" href="#setting-up-iio-capture" title="Permalink to this headline">¶</a></h4>
+<p>Install the <code class="docutils literal notranslate"><span class="pre">iio-capture</span></code> tool required libraries:</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">libiio-*</span></code> is available from the repositories in your <code class="docutils literal notranslate"><span class="pre">apt-get</span></code>, then run
+<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">libiio-utils</span> <span class="pre">libiio-dev</span></code></p></li>
+<li><p>Otherwise, follow the instructions on the <a class="reference external" href="https://wiki.analog.com/resources/tools-software/linux-software/libiio">libiio
+wiki</a>
+on how to build it</p></li>
+<li><p>Clone, compile and install the <a class="reference external" href="https://github.com/BayLibre/iio-capture">iio-capture tool</a></p></li>
+</ul>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/BayLibre/iio-capture.git
+<span class="nb">cd</span> iio-capture <span class="o">&amp;&amp;</span> make <span class="o">&amp;&amp;</span> sudo make install <span class="o">&amp;&amp;</span> <span class="nb">cd</span> -
+</pre></div>
+</div>
+<p>You can now verify your installation and check that the probes are correctly
+detected by the <code class="docutils literal notranslate"><span class="pre">iio</span> <span class="pre">daemon</span></code> running on the BeagleBone with a simple command:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>iio_info -n baylibre-acme.local
+</pre></div>
+</div>
+<p>If you have any issues, for example if <code class="docutils literal notranslate"><span class="pre">iio_info</span></code> hangs, or <code class="docutils literal notranslate"><span class="pre">iio-capture</span></code>
+reports “Unsupported write attribute ‘in_oversampling_ratio’”, try rebooting the
+ACME by SSH:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># (replace baylibre-acme.local if you changed the hostname)</span>
+ssh root@baylibre-acme.local reboot
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="monsoon-power-monitor">
+<h3>Monsoon Power Monitor<a class="headerlink" href="#monsoon-power-monitor" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Monsoon</span></code> energy meter allows collecting data from Monsoon Solutions Inc’s
+Power Monitor.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Its related class is <a class="reference internal" href="#lisa.energy_meter.Monsoon" title="lisa.energy_meter.Monsoon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Monsoon</span></code></a>.</p>
+</div>
+<div class="section" id="setup">
+<h4>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h4>
+<p>This meter depends on the monsoon.py script from AOSP. To set this up, download
+that script from <a class="reference external" href="https://android.googlesource.com/platform/cts/+/master/tools/utils/monsoon.py">here</a>
+and run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">gflags</span> <span class="pre">pyserial</span></code>.</p>
+<p>The Power Monitor acts as a power supply as well as an energy meter. LISA
+doesn’t currently automate setting this up. You’ll need to manually run these
+commands:</p>
+</div>
+</div>
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h3>Energy model<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-lisa.energy_model"></span><dl class="function">
+<dt id="lisa.energy_model.grouper">
+<code class="sig-prename descclassname">lisa.energy_model.</code><code class="sig-name descname">grouper</code><span class="sig-paren">(</span><em class="sig-param">iterable</em>, <em class="sig-param">n</em>, <em class="sig-param">fillvalue=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.grouper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect data into fixed-length chunks or blocks</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lisa.energy_model.read_multiple_oneline_files">
+<code class="sig-prename descclassname">lisa.energy_model.</code><code class="sig-name descname">read_multiple_oneline_files</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">glob_patterns</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.read_multiple_oneline_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quickly read many single-line files that match a glob pattern</p>
+<p>Finds all the files that match any of the glob patterns and, assuming that
+they each contain exactly 1 line of text, read them all at once. When the
+target or connection is slow this saves a lot of time when reading a large
+number of files.</p>
+<p>This will only work safely on stationary files, don’t try to use it where
+the glob expansion will change often - for example <code class="docutils literal notranslate"><span class="pre">/proc/**/autogroup</span></code> would
+not work because /proc/ entries will likely appear &amp; disappear while we’re
+reading them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – devlib target object to read from</p></li>
+<li><p><strong>glob_pattern</strong> – Unix glob pattern matching the files to read</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary mapping matched paths to the values read. <code class="docutils literal notranslate"><span class="pre">{}</span></code> if
+no paths matched the globs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="exception">
+<dt id="lisa.energy_model.EnergyModelCapacityError">
+<em class="property">exception </em><code class="sig-prename descclassname">lisa.energy_model.</code><code class="sig-name descname">EnergyModelCapacityError</code><a class="headerlink" href="#lisa.energy_model.EnergyModelCapacityError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Used by <a class="reference internal" href="#lisa.energy_model.EnergyModel.get_optimal_placements" title="lisa.energy_model.EnergyModel.get_optimal_placements"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnergyModel.get_optimal_placements()</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_model.ActiveState">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_model.</code><code class="sig-name descname">ActiveState</code><a class="headerlink" href="#lisa.energy_model.ActiveState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.energy_model.ActiveState" title="lisa.energy_model.ActiveState"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_model.ActiveState</span></code></a></p>
+<p>Represents power and compute capacity at a given frequency</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>capacity</strong> – Relative compute capacity at frequency</p></li>
+<li><p><strong>power</strong> – Power usage at frequency</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_model._CpuTree">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_model.</code><code class="sig-name descname">_CpuTree</code><span class="sig-paren">(</span><em class="sig-param">cpu</em>, <em class="sig-param">children</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model._CpuTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="misc_utilities.html#lisa.utils.Loggable" title="lisa.utils.Loggable"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.Loggable</span></code></a></p>
+<p>Internal class. Abstract representation of a CPU topology.</p>
+<p>Each node contains either a single CPU or a set of child nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cpus</strong> – CPUs contained in this node. Includes those of child nodes.</p></li>
+<li><p><strong>cpu</strong> – For convenience, this holds the single CPU contained by leaf
+nodes. <code class="docutils literal notranslate"><span class="pre">None</span></code> for non-leaf nodes.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="lisa.energy_model._CpuTree.cpu">
+<code class="sig-name descname">cpu</code><em class="property"> = None</em><a class="headerlink" href="#lisa.energy_model._CpuTree.cpu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test yolo</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_model._CpuTree.cpus">
+<code class="sig-name descname">cpus</code><em class="property"> = None</em><a class="headerlink" href="#lisa.energy_model._CpuTree.cpus" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is another thingie</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model._CpuTree._iter">
+<code class="sig-name descname">_iter</code><span class="sig-paren">(</span><em class="sig-param">include_non_leaves</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model._CpuTree._iter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model._CpuTree.iter_nodes">
+<code class="sig-name descname">iter_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model._CpuTree.iter_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over nodes depth-first, post-order</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model._CpuTree.iter_leaves">
+<code class="sig-name descname">iter_leaves</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model._CpuTree.iter_leaves" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over leaves</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_model.EnergyModelNode">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_model.</code><code class="sig-name descname">EnergyModelNode</code><span class="sig-paren">(</span><em class="sig-param">active_states</em>, <em class="sig-param">idle_states</em>, <em class="sig-param">cpu=None</em>, <em class="sig-param">children=None</em>, <em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModelNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.energy_model._CpuTree" title="lisa.energy_model._CpuTree"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_model._CpuTree</span></code></a></p>
+<p>Describes topology and energy data for an EnergyModel.</p>
+<p>Represents a CPU topology with energy data. The active and idle state data
+represents the power usage of just the hardware resources of this topology
+level, not its children. e.g. If the node represents a cluster, the power
+numbers should not include power used by the CPU - that power should be
+included the data of the child nodes.</p>
+<p>Exactly one of <code class="docutils literal notranslate"><span class="pre">cpu</span></code> and <code class="docutils literal notranslate"><span class="pre">children</span></code> must be given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_states</strong> – Dict mapping frequencies to <a class="reference internal" href="#lisa.energy_model.ActiveState" title="lisa.energy_model.ActiveState"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActiveState</span></code></a>
+values. Compute capacity data is optional for
+non-leaf nodes.</p></li>
+<li><p><strong>idle_states</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Dict mapping idle state names to power usage values</p></li>
+<li><p><strong>cpu</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>)</em>) – The CPU this node represents. If provided, this is a leaf node.</p></li>
+<li><p><strong>children</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference internal" href="#lisa.energy_model.EnergyModelNode" title="lisa.energy_model.EnergyModelNode"><em>EnergyModelNode</em></a><em>)</em>) – Non-empty list of child <a class="reference internal" href="#lisa.energy_model.EnergyModelNode" title="lisa.energy_model.EnergyModelNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyModelNode</span></code></a> objects</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Optional human-readable name for this node. Leaf (CPU) nodes
+have a default name of “cpuN” where N is the cpu number.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModelNode.max_capacity">
+<em class="property">property </em><code class="sig-name descname">max_capacity</code><a class="headerlink" href="#lisa.energy_model.EnergyModelNode.max_capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute capacity at highest frequency</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModelNode.idle_state_by_idx">
+<code class="sig-name descname">idle_state_by_idx</code><span class="sig-paren">(</span><em class="sig-param">idx</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModelNode.idle_state_by_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the idle state with index <code class="docutils literal notranslate"><span class="pre">idx</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_model.EnergyModelRoot">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_model.</code><code class="sig-name descname">EnergyModelRoot</code><span class="sig-paren">(</span><em class="sig-param">active_states=None</em>, <em class="sig-param">idle_states=None</em>, <em class="sig-param">cpu=None</em>, <em class="sig-param">children=None</em>, <em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModelRoot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.energy_model.EnergyModelNode" title="lisa.energy_model.EnergyModelNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_model.EnergyModelNode</span></code></a></p>
+<p>Convenience class for root of an EnergyModelNode tree.</p>
+<p>Just like EnergyModelNode except that <code class="docutils literal notranslate"><span class="pre">active_states</span></code> and <code class="docutils literal notranslate"><span class="pre">idle_states</span></code>
+aren’t required.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_model.PowerDomain">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_model.</code><code class="sig-name descname">PowerDomain</code><span class="sig-paren">(</span><em class="sig-param">idle_states</em>, <em class="sig-param">cpu=None</em>, <em class="sig-param">children=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.PowerDomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.energy_model._CpuTree" title="lisa.energy_model._CpuTree"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_model._CpuTree</span></code></a></p>
+<p>Describes the power domain hierarchy for an EnergyModel.</p>
+<p>Power domains are a description of the topological dependencies in hardware
+for entering idle states. “Composite” states such as cluster-sleep states
+require a set of CPUs to all be idle before that state can be entered. In
+that case those CPUs can be grouped into a power domain, and that composite
+state attached to the power domain. Note that cpuidle is not aware of these
+dependencies; they are typically handled by the platform firmware.</p>
+<p>Exactly one of <code class="docutils literal notranslate"><span class="pre">cpu</span></code> and <code class="docutils literal notranslate"><span class="pre">children</span></code> must be given. That is, leaves of
+the PowerDomain tree always contain exactly one CPU - each CPU is
+represented as being in a power domain of its own. This represents the
+assumption that all CPUs have at least one idle state (such as ARM WFI) that
+they can enter independently of other CPUs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idle_states</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em>) – List of names of idle states for this power domain. Does
+not store power data - these names are used as keys into
+the <code class="docutils literal notranslate"><span class="pre">idle_states</span></code> field of <a class="reference internal" href="#lisa.energy_model.EnergyModelNode" title="lisa.energy_model.EnergyModelNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyModelNode</span></code></a>
+objects.</p></li>
+<li><p><strong>cpu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – The CPU this node represents. If provided, this is a leaf node.</p></li>
+<li><p><strong>children</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference internal" href="#lisa.energy_model.PowerDomain" title="lisa.energy_model.PowerDomain"><em>PowerDomain</em></a><em>)</em>) – Non-empty list of child <a class="reference internal" href="#lisa.energy_model.PowerDomain" title="lisa.energy_model.PowerDomain"><code class="xref py py-class docutils literal notranslate"><span class="pre">PowerDomain</span></code></a> objects</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>cpus</strong> – CPUs contained in this node. Includes those of child nodes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_model.EnergyModel">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_model.</code><code class="sig-name descname">EnergyModel</code><span class="sig-paren">(</span><em class="sig-param">root_node</em>, <em class="sig-param">root_power_domain</em>, <em class="sig-param">freq_domains</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="misc_utilities.html#lisa.utils.Serializable" title="lisa.utils.Serializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.Serializable</span></code></a>, <a class="reference internal" href="misc_utilities.html#lisa.utils.Loggable" title="lisa.utils.Loggable"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.Loggable</span></code></a></p>
+<p>Represents hierarchical CPU topology with power and capacity data</p>
+<p>An energy model consists of</p>
+<ul class="simple">
+<li><p>A CPU topology, representing the physical (cache/interconnect) topology of
+the CPUs.  Each node stores the energy usage of that node’s hardware when
+it is in each active or idle state. They also store a compute capacity at
+each frequency, but this is only meaningful for leaf nodes (CPUs) and may
+be None at higher levels. These capacity values are relative; the maximum
+capacity would usually be 1024, the value of SCHED_CAPACITY_SCALE in the
+Linux kernel scheduler.  Use EnergyModelNodes to describe this.</p></li>
+<li><p>A power domain topology, representing the hierarchy of areas that can be
+powered down (idled).
+The power domains are a single tree. Leaf nodes must contain exactly one
+CPU and the root node must indirectly contain every CPU. Each power domain
+has a list (maybe empty) of names of idle states that that domain can
+enter.
+Use PowerDomains to describe this.</p></li>
+<li><p>A set of frequency domains, representing groups of CPUs whose clock
+frequencies must be equal (probably because they share a clock). The
+frequency domains must be a partition of the CPUs.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cpu_nodes</strong> – List of leaf (CPU) <a class="reference internal" href="#lisa.energy_model.EnergyModelNode" title="lisa.energy_model.EnergyModelNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyModelNode</span></code></a></p></li>
+<li><p><strong>cpus</strong> – List of logical CPU numbers in the system</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>root_node</strong> – Root of <a class="reference internal" href="#lisa.energy_model.EnergyModelNode" title="lisa.energy_model.EnergyModelNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyModelNode</span></code></a> tree</p></li>
+<li><p><strong>root_power_domain</strong> – Root of <a class="reference internal" href="#lisa.energy_model.PowerDomain" title="lisa.energy_model.PowerDomain"><code class="xref py py-class docutils literal notranslate"><span class="pre">PowerDomain</span></code></a> tree</p></li>
+<li><p><strong>freq_domains</strong> – Collection of collections of logical CPU numbers
+representing frequency (clock) domains.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The most signficant shortcomings of the model are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Voltage domains are assumed to be congruent to frequency domains</p></li>
+<li><p>Idle state power is assumed to be independent of voltage</p></li>
+<li><p>Temperature is ignored entirely</p></li>
+</ol>
+</div></blockquote>
+</div>
+<div class="admonition-cpu-utils-cpu-util-distributions admonition" id="cpu-utils">
+<p class="admonition-title"><code class="docutils literal notranslate"><span class="pre">cpu_utils</span></code>: CPU util distributions</p>
+<p>Used throughout this module: A <code class="docutils literal notranslate"><span class="pre">cpu_utils</span></code> is a list <code class="docutils literal notranslate"><span class="pre">u</span></code> where
+<code class="docutils literal notranslate"><span class="pre">u[N]</span></code> is the sum of the frequency-invariant, capacity-invariant
+utilization of tasks placed on CPU N. That is, the quantity represented
+by a CPU runqueue’s util_avg in the Linux kernel scheduler’s
+load-tracking system with EAS features enabled.</p>
+<p>The range of utilization values is 0 -
+<a class="reference internal" href="#lisa.energy_model.EnergyModel.capacity_scale" title="lisa.energy_model.EnergyModel.capacity_scale"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EnergyModel.capacity_scale</span></code></a>.</p>
+<p>This represents a static utilization, assuming that tasks don’t change
+in size (for example representing a set of fixed periodic RT-App
+workloads). For workloads that change over time, a series of
+<code class="docutils literal notranslate"><span class="pre">cpu_utils</span></code> items would be needed to describe the utilization, with a
+distinct estimation for each item in the series.</p>
+</div>
+<dl class="attribute">
+<dt id="lisa.energy_model.EnergyModel.capacity_scale">
+<code class="sig-name descname">capacity_scale</code><em class="property"> = 1024</em><a class="headerlink" href="#lisa.energy_model.EnergyModel.capacity_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>The relative computational capacity of the most powerful CPU at its
+highest available frequency.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel._cpus_with_capacity">
+<code class="sig-name descname">_cpus_with_capacity</code><span class="sig-paren">(</span><em class="sig-param">cap</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel._cpus_with_capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper method to find the CPUs whose max capacity equals cap</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.biggest_cpus">
+<em class="property">property </em><code class="sig-name descname">biggest_cpus</code><a class="headerlink" href="#lisa.energy_model.EnergyModel.biggest_cpus" title="Permalink to this definition">¶</a></dt>
+<dd><p>The CPUs with the highest compute capacity at their highest frequency</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.littlest_cpus">
+<em class="property">property </em><code class="sig-name descname">littlest_cpus</code><a class="headerlink" href="#lisa.energy_model.EnergyModel.littlest_cpus" title="Permalink to this definition">¶</a></dt>
+<dd><p>The CPUs with the lowest compute capacity at their highest frequency</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.is_heterogeneous">
+<em class="property">property </em><code class="sig-name descname">is_heterogeneous</code><a class="headerlink" href="#lisa.energy_model.EnergyModel.is_heterogeneous" title="Permalink to this definition">¶</a></dt>
+<dd><p>True iff CPUs do not all have the same efficiency and OPP range</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.cpu_groups">
+<em class="property">property </em><code class="sig-name descname">cpu_groups</code><a class="headerlink" href="#lisa.energy_model.EnergyModel.cpu_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of lists of CPUs who share the same active state values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.node_groups">
+<em class="property">property </em><code class="sig-name descname">node_groups</code><a class="headerlink" href="#lisa.energy_model.EnergyModel.node_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of lists of CPUs nodes who share the same active state values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel._deepest_idle_idxs">
+<code class="sig-name descname">_deepest_idle_idxs</code><span class="sig-paren">(</span><em class="sig-param">cpus_active</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel._deepest_idle_idxs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel._guess_idle_states">
+<code class="sig-name descname">_guess_idle_states</code><span class="sig-paren">(</span><em class="sig-param">cpus_active</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel._guess_idle_states" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.get_cpu_capacity">
+<code class="sig-name descname">get_cpu_capacity</code><span class="sig-paren">(</span><em class="sig-param">cpu</em>, <em class="sig-param">freq=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel.get_cpu_capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method to get the capacity of a CPU at a given frequency</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cpu</strong> – CPU to get capacity for</p></li>
+<li><p><strong>freq</strong> – Frequency to get the CPU capacity at. Default is max
+capacity.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.guess_idle_states">
+<code class="sig-name descname">guess_idle_states</code><span class="sig-paren">(</span><em class="sig-param">cpus_active</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel.guess_idle_states" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pessimistically guess the idle states that each CPU may enter</p>
+<p>If a CPU has any tasks it is estimated that it may only enter its
+shallowest idle state in between task activations. If all the CPUs
+within a power domain have no tasks, they will all be judged able to
+enter that domain’s deepest idle state. If any CPU in a domain has work,
+no CPUs in that domain are assumed to enter any domain shared state.</p>
+<p>e.g. Consider a system with</p>
+<ul class="simple">
+<li><p>two power domains PD0 and PD1</p></li>
+<li><p>4 CPUs, with CPUs [0, 1] in PD0 and CPUs [2, 3] in PD1</p></li>
+<li><p>4 idle states: “WFI”, “cpu-sleep”, “cluster-sleep-0” and
+“cluster-sleep-1”, where the “cluster-sleep-*” states domain states,
+i.e. a CPU can only enter those states when both CPUs in the domain
+are idle.</p></li>
+</ul>
+<p>Then here are some example inputs and outputs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># All CPUs idle:</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="s2">&quot;cluster-sleep-1&quot;</span><span class="p">,</span> <span class="s2">&quot;cluster-sleep-1&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;cluster-sleep-1&quot;</span><span class="p">,</span> <span class="s2">&quot;cluster-sleep-1&quot;</span><span class="p">]</span>
+
+<span class="c1"># All CPUs have work</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="s2">&quot;WFI&quot;</span><span class="p">,</span><span class="s2">&quot;WFI&quot;</span><span class="p">,</span><span class="s2">&quot;WFI&quot;</span><span class="p">,</span> <span class="s2">&quot;WFI&quot;</span><span class="p">]</span>
+
+<span class="c1"># One power domain active, the other idle</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="s2">&quot;cluster-sleep-1&quot;</span><span class="p">,</span> <span class="s2">&quot;cluster-sleep-1&quot;</span><span class="p">,</span> <span class="s2">&quot;WFI&quot;</span><span class="p">,</span><span class="s2">&quot;WFI&quot;</span><span class="p">]</span>
+
+<span class="c1"># One CPU active.</span>
+<span class="c1"># Note that CPU 2 has no work but is assumed to never be able to enter</span>
+<span class="c1"># any &quot;cluster&quot; state.</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="s2">&quot;cluster-sleep-1&quot;</span><span class="p">,</span> <span class="s2">&quot;cluster-sleep-1&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;cpu-sleep&quot;</span><span class="p">,</span><span class="s2">&quot;WFI&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cpus_active</strong> – list where bool(cpus_active[N]) is False iff no
+tasks will run on CPU N.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List <code class="docutils literal notranslate"><span class="pre">ret</span></code> where <code class="docutils literal notranslate"><span class="pre">ret[N]</span></code> is the name of the estimated
+idle state that CPU N can enter during idle periods.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel._guess_freqs">
+<code class="sig-name descname">_guess_freqs</code><span class="sig-paren">(</span><em class="sig-param">cpu_utils</em>, <em class="sig-param">capacity_margin_pct</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel._guess_freqs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.guess_freqs">
+<code class="sig-name descname">guess_freqs</code><span class="sig-paren">(</span><em class="sig-param">cpu_utils</em>, <em class="sig-param">capacity_margin_pct=0</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel.guess_freqs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Work out CPU frequencies required to execute a workload</p>
+<p>Find the lowest possible frequency for each CPU that provides enough
+capacity to satisfy the utilization, taking into account frequency
+domains.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cpu_utils</strong> – Utilization distribution, see
+<a class="reference internal" href="#cpu-utils"><span class="std std-ref">cpu_utils</span></a></p></li>
+<li><p><strong>capacity_margin_pct</strong> – Capacity margin before overutilizing a CPU</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List <code class="docutils literal notranslate"><span class="pre">ret</span></code> where <code class="docutils literal notranslate"><span class="pre">ret[N]</span></code> is the frequency that CPU N must
+run at</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel._estimate_from_active_time">
+<code class="sig-name descname">_estimate_from_active_time</code><span class="sig-paren">(</span><em class="sig-param">cpu_active_time</em>, <em class="sig-param">freqs</em>, <em class="sig-param">idle_states</em>, <em class="sig-param">combine</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel._estimate_from_active_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper for estimate_from_cpu_util</p>
+<p>Like estimate_from_cpu_util but uses active time i.e. proportion of time
+spent not-idle in the range 0.0 - 1.0.</p>
+<p>If combine=False, return idle and active power as separate components.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.estimate_from_cpu_util">
+<code class="sig-name descname">estimate_from_cpu_util</code><span class="sig-paren">(</span><em class="sig-param">cpu_utils</em>, <em class="sig-param">freqs=None</em>, <em class="sig-param">idle_states=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel.estimate_from_cpu_util" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the energy usage of the system under a utilization distribution</p>
+<p>Optionally also take freqs; a list of frequencies at which each CPU is
+assumed to run, and idle_states, the idle states that each CPU can enter
+between activations. If not provided, they will be estimated assuming an
+ideal selection system (i.e. perfect cpufreq &amp; cpuidle governors).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cpu_utils</strong> – Utilization distribution, see
+<a class="reference internal" href="#cpu-utils"><span class="std std-ref">cpu_utils</span></a></p></li>
+<li><p><strong>freqs</strong> – List of CPU frequencies. Got from <a class="reference internal" href="#lisa.energy_model.EnergyModel.guess_freqs" title="lisa.energy_model.EnergyModel.guess_freqs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">guess_freqs()</span></code></a> by
+default.</p></li>
+<li><p><strong>idle_states</strong> – List of CPU frequencies. Got from
+<a class="reference internal" href="#lisa.energy_model.EnergyModel.guess_idle_states" title="lisa.energy_model.EnergyModel.guess_idle_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">guess_idle_states()</span></code></a> by default.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Dict with power in bogo-Watts (bW), with contributions from
+each system component keyed with a tuple of the CPUs
+comprising that component (i.e. :attr:EnergyModelNode.cpus)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="p">(</span><span class="mi">0</span><span class="p">,)</span>    <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>    <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This represents CPUs 0 and 1 each using 10bW and their shared
+resources using 5bW for a total of 25bW.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.get_optimal_placements">
+<code class="sig-name descname">get_optimal_placements</code><span class="sig-paren">(</span><em class="sig-param">capacities</em>, <em class="sig-param">capacity_margin_pct=0</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel.get_optimal_placements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the optimal distribution of work for a set of tasks</p>
+<p>Find a list of candidates which are estimated to be optimal in terms of
+power consumption, but that do not result in any CPU becoming
+over-utilized.</p>
+<p>If no such candidates exist, i.e. the system being modeled cannot
+satisfy the workload’s throughput requirements, an
+<a class="reference internal" href="#lisa.energy_model.EnergyModelCapacityError" title="lisa.energy_model.EnergyModelCapacityError"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyModelCapacityError</span></code></a> is raised. For example, if e was an
+EnergyModel modeling two CPUs with capacity 1024, this error would be
+raised by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">e</span><span class="o">.</span><span class="n">get_optimal_placements</span><span class="p">({</span><span class="s2">&quot;t1&quot;</span><span class="p">:</span> <span class="mi">800</span><span class="p">,</span> <span class="s2">&quot;t2&quot;</span><span class="p">:</span> <span class="mi">800</span><span class="p">,</span> <span class="s2">&quot;t3: &quot;</span><span class="mi">800</span><span class="s2">&quot;})</span>
+</pre></div>
+</div>
+<p>This estimation assumes an ideal system of selecting OPPs and idle
+states for CPUs.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is a brute force search taking time exponential wrt. the number
+of tasks.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>capacities</strong> – Dict mapping tasks to expected utilization
+values. These tasks are assumed not to change; they
+have a single static utilization value. A set of
+single-phase periodic RT-App tasks is an example of a
+suitable workload for this model.</p></li>
+<li><p><strong>capacity_margin_pct</strong> – Capacity margin before overutilizing a CPU</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of <code class="docutils literal notranslate"><span class="pre">cpu_utils</span></code> items representing distributions of work
+under optimal task placements, see
+<a class="reference internal" href="#cpu-utils"><span class="std std-ref">cpu_utils</span></a>. Multiple task placements
+that result in the same CPU utilizations are considered
+equivalent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel._find_core_groups">
+<em class="property">classmethod </em><code class="sig-name descname">_find_core_groups</code><span class="sig-paren">(</span><em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel._find_core_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the core_siblings masks for each CPU from sysfs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>target</strong> – Devlib Target object to read masks from</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of tuples of ints, representing the partition of core
+siblings</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel._simple_em_root">
+<code class="sig-name descname">_simple_em_root</code><span class="sig-paren">(</span><em class="sig-param">pd_attr</em>, <em class="sig-param">cpu_to_pd</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel._simple_em_root" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel._simple_pd_root">
+<code class="sig-name descname">_simple_pd_root</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel._simple_pd_root" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.from_debugfsEM_target">
+<em class="property">classmethod </em><code class="sig-name descname">from_debugfsEM_target</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">directory='/sys/kernel/debug/energy_model'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel.from_debugfsEM_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an EnergyModel by reading a target filesystem on a device with
+the new Simplified Energy Model present in debugfs.</p>
+<p>This uses the energy_model debugfs used usptream to expose the
+performance domains, their frequencies and power costs. This feature is
+upstream as of Linux 5.1. It is also available on Android 4.19 and
+later.</p>
+<p>Wrt. idle states - the EnergyModel constructed won’t be aware of
+any power data or topological dependencies for entering “cluster”
+idle states since the simplified model has no such concept.</p>
+<p>Initialises only class:<cite>ActiveStates</cite> for CPUs and clears all other
+levels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>target</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">devlib.target.Target</span></code> object to read filesystem
+from. Must have cpufreq and cpuidle modules enabled.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Constructed EnergyModel object based on the parameters
+reported by the target.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.from_sysfsEM_target">
+<em class="property">classmethod </em><code class="sig-name descname">from_sysfsEM_target</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">directory='/sys/devices/system/cpu/energy_model'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel.from_sysfsEM_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an EnergyModel by reading a target filesystem on a device with
+the new Simplified Energy Model present in sysfs.</p>
+<p>The patches exposing the Energy Model in sysfs have been abandonned
+and this way of loading it is now deprecated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>target</strong> – Devlib target object to read filesystem from. Must have
+cpufreq and cpuidle modules enabled.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Constructed EnergyModel object based on the parameters
+reported by the target.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.from_sd_target">
+<em class="property">classmethod </em><code class="sig-name descname">from_sd_target</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">filename='/proc/sys/kernel/sched_domain/cpu{}/domain{}/group{}/energy/{}'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel.from_sd_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an EnergyModel by reading a target filesystem</p>
+<p>This uses the sysctl added by EAS pathces to exposes the cap_states and
+idle_states fields for each sched_group. This feature depends on
+CONFIG_SCHED_DEBUG, and is not upstream in mainline Linux (as of v4.11),
+so this method is only tested with Android kernels.</p>
+<p>The kernel doesn’t have an power domain data, so this method assumes
+that all CPUs are totally independent wrt. idle states - the EnergyModel
+constructed won’t be aware of the topological dependencies for entering
+“cluster” idle states.</p>
+<p>Assumes the energy model has two-levels (plus the root) - a level for
+CPUs and a level for ‘clusters’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>target</strong> – Devlib target object to read filesystem from. Must have
+cpufreq and cpuidle modules enabled.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Constructed EnergyModel object based on the parameters
+reported by the target.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.from_target">
+<em class="property">classmethod </em><code class="sig-name descname">from_target</code><span class="sig-paren">(</span><em class="sig-param">target</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel.from_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an EnergyModel by reading a target filesystem</p>
+<p>If present, load an EM provided via dt using from_sd_target, since these
+devices make the full EM available via the sched domain in sysfs. If
+there is no EM at this location, attempt to load the simplified EM
+made available via dedicated sysfs files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>target</strong> – Devlib target object to read filesystem from. Must have
+cpufreq and cpuidle modules enabled.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Constructed EnergyModel object based on the parameters
+reported by the target.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_model.EnergyModel.estimate_from_trace">
+<code class="sig-name descname">estimate_from_trace</code><span class="sig-paren">(</span><em class="sig-param">trace</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_model.EnergyModel.estimate_from_trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the energy consumption of the system by looking at a trace</p>
+<p>Usese the EAS energy model data, and the idle and DVFS conditions
+reported in the trace, to estimate the energy usage of the system at
+every given moment.</p>
+<p>Takes into account knowledge of power domains - where cpuidle makes
+impossible claims about idle states (e.g. a CPU in ‘cluster sleep’ while
+its cluster siblings are running), the states will be minimised.</p>
+<p>The accuracy of this is otherwise totally dependent on the accuracy of
+the EAS energy model and the kernel’s information. This does not take
+into account cost of idle state of DVFS transitions, nor any other
+conditions that are invisible to the kernel. The effect any power
+decisions that the platform makes independently of the kernel cannot be
+seen in this data. Examples of this _might_ include firmware thermal
+management invisibly restricting CPU frequencies, or secure-world
+software with real-time constraints preventing deep CPU idle states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>trace</strong> (<a class="reference internal" href="trace_analysis.html#lisa.trace.Trace" title="lisa.trace.Trace"><em>lisa.trace.Trace</em></a>) – The trace</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A DataFrame with a column for each node in the energy model,
+labelled with the CPU members of the node joined by  ‘-‘s.
+Shows the energy use by each node at each given moment.
+If you don’t care about those details, call <code class="docutils literal notranslate"><span class="pre">.sum(axis=1)</span></code> on
+the returned DataFrame to get a Series that shows overall
+estimated power usage over time.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="id3">
+<h3>Energy meters<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-lisa.energy_meter"></span><dl class="class">
+<dt id="lisa.energy_meter.EnergyReport">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">EnergyReport</code><span class="sig-paren">(</span><em class="sig-param">channels</em>, <em class="sig-param">report_file</em>, <em class="sig-param">data_frame</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.EnergyReport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<p>Create new instance of EnergyReport(channels, report_file, data_frame)</p>
+<dl class="method">
+<dt id="lisa.energy_meter.EnergyReport._asdict">
+<code class="sig-name descname">_asdict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.EnergyReport._asdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new OrderedDict which maps field names to their values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.EnergyReport._fields">
+<code class="sig-name descname">_fields</code><em class="property"> = ('channels', 'report_file', 'data_frame')</em><a class="headerlink" href="#lisa.energy_meter.EnergyReport._fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.EnergyReport._fields_defaults">
+<code class="sig-name descname">_fields_defaults</code><em class="property"> = {}</em><a class="headerlink" href="#lisa.energy_meter.EnergyReport._fields_defaults" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.EnergyReport._make">
+<em class="property">classmethod </em><code class="sig-name descname">_make</code><span class="sig-paren">(</span><em class="sig-param">iterable</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.EnergyReport._make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a new EnergyReport object from a sequence or iterable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.EnergyReport._replace">
+<code class="sig-name descname">_replace</code><span class="sig-paren">(</span><em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.EnergyReport._replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new EnergyReport object replacing specified fields with new values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.EnergyReport.channels">
+<em class="property">property </em><code class="sig-name descname">channels</code><a class="headerlink" href="#lisa.energy_meter.EnergyReport.channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.EnergyReport.data_frame">
+<em class="property">property </em><code class="sig-name descname">data_frame</code><a class="headerlink" href="#lisa.energy_meter.EnergyReport.data_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.EnergyReport.report_file">
+<em class="property">property </em><code class="sig-name descname">report_file</code><a class="headerlink" href="#lisa.energy_meter.EnergyReport.report_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter.EnergyMeter">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">EnergyMeter</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">res_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.EnergyMeter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="misc_utilities.html#lisa.utils.Loggable" title="lisa.utils.Loggable"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.Loggable</span></code></a>, <a class="reference internal" href="misc_utilities.html#lisa.conf.Configurable" title="lisa.conf.Configurable"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.Configurable</span></code></a></p>
+<p>Abstract Base Class of energy meters.</p>
+<dl class="method">
+<dt id="lisa.energy_meter.EnergyMeter.from_conf">
+<em class="property">classmethod </em><code class="sig-name descname">from_conf</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">conf</em>, <em class="sig-param">res_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.EnergyMeter.from_conf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build an instance of <a class="reference internal" href="#lisa.energy_meter.EnergyMeter" title="lisa.energy_meter.EnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnergyMeter</span></code></a> from a
+configuration object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<a class="reference internal" href="target.html#lisa.target.Target" title="lisa.target.Target"><em>lisa.target.Target</em></a>) – Target to use</p></li>
+<li><p><strong>conf</strong> – Configuration object to use</p></li>
+<li><p><strong>res_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – Result directory to use</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.EnergyMeter.name">
+<em class="property">abstract </em><code class="sig-name descname">name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.EnergyMeter.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.EnergyMeter.sample">
+<em class="property">abstract </em><code class="sig-name descname">sample</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.EnergyMeter.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a sample from the energy meter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.EnergyMeter.reset">
+<em class="property">abstract </em><code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.EnergyMeter.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the energy meter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.EnergyMeter.report">
+<em class="property">abstract </em><code class="sig-name descname">report</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.EnergyMeter.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get total energy consumption since last <a class="reference internal" href="#lisa.energy_meter.EnergyMeter.reset" title="lisa.energy_meter.EnergyMeter.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reset()</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.EnergyMeter._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter.EnergyMeter._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter.HWMonConf">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">HWMonConf</code><span class="sig-paren">(</span><em class="sig-param">conf=None</em>, <em class="sig-param">src='user'</em>, <em class="sig-param">add_default_src=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.HWMonConf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="misc_utilities.html#lisa.conf.SimpleMultiSrcConf" title="lisa.conf.SimpleMultiSrcConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.SimpleMultiSrcConf</span></code></a>, <a class="reference internal" href="misc_utilities.html#lisa.utils.HideExekallID" title="lisa.utils.HideExekallID"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.HideExekallID</span></code></a></p>
+<p>Configuration class for <a class="reference internal" href="#lisa.energy_meter.HWMon" title="lisa.energy_meter.HWMon"><code class="xref py py-class docutils literal notranslate"><span class="pre">HWMon</span></code></a>.</p>
+<ul class="simple">
+<li><p>hwmon-conf: HWMon Energy Meter configuration</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>channel-map (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>): Channels to use.</p></li>
+</ul>
+</div></blockquote>
+<dl class="attribute">
+<dt id="lisa.energy_meter.HWMonConf.STRUCTURE">
+<code class="sig-name descname">STRUCTURE</code><em class="property"> = &lt;lisa.conf.TopLevelKeyDesc object&gt;</em><a class="headerlink" href="#lisa.energy_meter.HWMonConf.STRUCTURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.HWMonConf.DEFAULT_SRC">
+<code class="sig-name descname">DEFAULT_SRC</code><em class="property"> = {}</em><a class="headerlink" href="#lisa.energy_meter.HWMonConf.DEFAULT_SRC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.HWMonConf._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter.HWMonConf._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter.HWMon">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">HWMon</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">channel_map</em>, <em class="sig-param">res_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.HWMon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.energy_meter.EnergyMeter" title="lisa.energy_meter.EnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_meter.EnergyMeter</span></code></a></p>
+<p>HWMon energy meter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>channel_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><em>collections.abc.Mapping</em></a>) – Channels to use</p>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="lisa.energy_meter.HWMon.CONF_CLASS">
+<code class="sig-name descname">CONF_CLASS</code><a class="headerlink" href="#lisa.energy_meter.HWMon.CONF_CLASS" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#lisa.energy_meter.HWMonConf" title="lisa.energy_meter.HWMonConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">HWMonConf</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.HWMon.name">
+<code class="sig-name descname">name</code><em class="property"> = 'hwmon'</em><a class="headerlink" href="#lisa.energy_meter.HWMon.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.HWMon.sample">
+<code class="sig-name descname">sample</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.HWMon.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a sample from the energy meter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.HWMon.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.HWMon.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the energy meter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.HWMon.report">
+<code class="sig-name descname">report</code><span class="sig-paren">(</span><em class="sig-param">out_dir</em>, <em class="sig-param">out_file='energy.json'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.HWMon.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get total energy consumption since last <a class="reference internal" href="#lisa.energy_meter.HWMon.reset" title="lisa.energy_meter.HWMon.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reset()</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.HWMon.INIT_KWARGS_KEY_MAP">
+<code class="sig-name descname">INIT_KWARGS_KEY_MAP</code><em class="property"> = {'channel_map': ['channel-map']}</em><a class="headerlink" href="#lisa.energy_meter.HWMon.INIT_KWARGS_KEY_MAP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.HWMon._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter.HWMon._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter._DevlibContinuousEnergyMeter">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">_DevlibContinuousEnergyMeter</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">res_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter._DevlibContinuousEnergyMeter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.energy_meter.EnergyMeter" title="lisa.energy_meter.EnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_meter.EnergyMeter</span></code></a></p>
+<p>Common functionality for devlib Instruments in CONTINUOUS mode</p>
+<dl class="method">
+<dt id="lisa.energy_meter._DevlibContinuousEnergyMeter.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter._DevlibContinuousEnergyMeter.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the energy meter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter._DevlibContinuousEnergyMeter.report">
+<code class="sig-name descname">report</code><span class="sig-paren">(</span><em class="sig-param">out_dir</em>, <em class="sig-param">out_energy='energy.json'</em>, <em class="sig-param">out_samples='samples.csv'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter._DevlibContinuousEnergyMeter.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get total energy consumption since last <a class="reference internal" href="#lisa.energy_meter._DevlibContinuousEnergyMeter.reset" title="lisa.energy_meter._DevlibContinuousEnergyMeter.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reset()</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter._DevlibContinuousEnergyMeter._read_csv">
+<code class="sig-name descname">_read_csv</code><span class="sig-paren">(</span><em class="sig-param">out_dir</em>, <em class="sig-param">out_samples</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter._DevlibContinuousEnergyMeter._read_csv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter._DevlibContinuousEnergyMeter._build_timeline">
+<code class="sig-name descname">_build_timeline</code><span class="sig-paren">(</span><em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter._DevlibContinuousEnergyMeter._build_timeline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter._DevlibContinuousEnergyMeter._compute_energy">
+<code class="sig-name descname">_compute_energy</code><span class="sig-paren">(</span><em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter._DevlibContinuousEnergyMeter._compute_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter._DevlibContinuousEnergyMeter._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter._DevlibContinuousEnergyMeter._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter.AEPConf">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">AEPConf</code><span class="sig-paren">(</span><em class="sig-param">conf=None</em>, <em class="sig-param">src='user'</em>, <em class="sig-param">add_default_src=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.AEPConf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="misc_utilities.html#lisa.conf.SimpleMultiSrcConf" title="lisa.conf.SimpleMultiSrcConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.SimpleMultiSrcConf</span></code></a>, <a class="reference internal" href="misc_utilities.html#lisa.utils.HideExekallID" title="lisa.utils.HideExekallID"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.HideExekallID</span></code></a></p>
+<p>Configuration class for <a class="reference internal" href="#lisa.energy_meter.AEP" title="lisa.energy_meter.AEP"><code class="xref py py-class docutils literal notranslate"><span class="pre">AEP</span></code></a>.</p>
+<ul class="simple">
+<li><p>aep-conf: AEP Energy Meter configuration</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>channel-map (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>): Channels to use.</p></li>
+<li><p>resistor-values (<a class="reference internal" href="misc_utilities.html#lisa.conf.FloatList" title="lisa.conf.FloatList"><code class="xref py py-class docutils literal notranslate"><span class="pre">FloatList</span></code></a>): Resistor values.</p></li>
+<li><p>labels (<a class="reference internal" href="misc_utilities.html#lisa.conf.StrList" title="lisa.conf.StrList"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrList</span></code></a>): List of labels.</p></li>
+<li><p>device-entry (<a class="reference internal" href="misc_utilities.html#lisa.conf.StrList" title="lisa.conf.StrList"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrList</span></code></a>): TTY device.</p></li>
+</ul>
+</div></blockquote>
+<dl class="attribute">
+<dt id="lisa.energy_meter.AEPConf.STRUCTURE">
+<code class="sig-name descname">STRUCTURE</code><em class="property"> = &lt;lisa.conf.TopLevelKeyDesc object&gt;</em><a class="headerlink" href="#lisa.energy_meter.AEPConf.STRUCTURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.AEPConf.DEFAULT_SRC">
+<code class="sig-name descname">DEFAULT_SRC</code><em class="property"> = {'device-entry': '/dev/ttyACM0'}</em><a class="headerlink" href="#lisa.energy_meter.AEPConf.DEFAULT_SRC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.AEPConf._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter.AEPConf._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter.AEP">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">AEP</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">resistor_values</em>, <em class="sig-param">labels=None</em>, <em class="sig-param">device_entry='/dev/ttyACM0'</em>, <em class="sig-param">res_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.AEP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.energy_meter._DevlibContinuousEnergyMeter" title="lisa.energy_meter._DevlibContinuousEnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_meter._DevlibContinuousEnergyMeter</span></code></a></p>
+<p>Arm Energy Probe energy meter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resistor_values</strong> (<a class="reference internal" href="misc_utilities.html#lisa.conf.FloatList" title="lisa.conf.FloatList"><em>lisa.conf.FloatList</em></a>) – Resistor values</p></li>
+<li><p><strong>labels</strong> (<a class="reference internal" href="misc_utilities.html#lisa.conf.StrList" title="lisa.conf.StrList"><em>lisa.conf.StrList</em></a>) – List of labels</p></li>
+<li><p><strong>device_entry</strong> (<a class="reference internal" href="misc_utilities.html#lisa.conf.StrList" title="lisa.conf.StrList"><em>lisa.conf.StrList</em></a>) – TTY device</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="lisa.energy_meter.AEP.name">
+<code class="sig-name descname">name</code><em class="property"> = 'aep'</em><a class="headerlink" href="#lisa.energy_meter.AEP.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.AEP.CONF_CLASS">
+<code class="sig-name descname">CONF_CLASS</code><a class="headerlink" href="#lisa.energy_meter.AEP.CONF_CLASS" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#lisa.energy_meter.AEPConf" title="lisa.energy_meter.AEPConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">AEPConf</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.AEP.INIT_KWARGS_KEY_MAP">
+<code class="sig-name descname">INIT_KWARGS_KEY_MAP</code><em class="property"> = {'device_entry': ['device-entry'], 'labels': ['labels'], 'resistor_values': ['resistor-values']}</em><a class="headerlink" href="#lisa.energy_meter.AEP.INIT_KWARGS_KEY_MAP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.AEP._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter.AEP._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter.MonsoonConf">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">MonsoonConf</code><span class="sig-paren">(</span><em class="sig-param">conf=None</em>, <em class="sig-param">src='user'</em>, <em class="sig-param">add_default_src=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.MonsoonConf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="misc_utilities.html#lisa.conf.SimpleMultiSrcConf" title="lisa.conf.SimpleMultiSrcConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.SimpleMultiSrcConf</span></code></a>, <a class="reference internal" href="misc_utilities.html#lisa.utils.HideExekallID" title="lisa.utils.HideExekallID"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.HideExekallID</span></code></a></p>
+<p>Configuration class for <a class="reference internal" href="#lisa.energy_meter.Monsoon" title="lisa.energy_meter.Monsoon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Monsoon</span></code></a>.</p>
+<ul class="simple">
+<li><p>monsoon-conf: Monsoon Energy Meter configuration</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>channel-map (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>): Channels to use.</p></li>
+<li><p>monsoon-bin (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>): monsoon binary path.</p></li>
+<li><p>tty-device (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>): TTY device to use.</p></li>
+</ul>
+</div></blockquote>
+<dl class="attribute">
+<dt id="lisa.energy_meter.MonsoonConf.STRUCTURE">
+<code class="sig-name descname">STRUCTURE</code><em class="property"> = &lt;lisa.conf.TopLevelKeyDesc object&gt;</em><a class="headerlink" href="#lisa.energy_meter.MonsoonConf.STRUCTURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.MonsoonConf.DEFAULT_SRC">
+<code class="sig-name descname">DEFAULT_SRC</code><em class="property"> = {}</em><a class="headerlink" href="#lisa.energy_meter.MonsoonConf.DEFAULT_SRC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.MonsoonConf._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter.MonsoonConf._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter.Monsoon">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">Monsoon</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">monsoon_bin=None</em>, <em class="sig-param">tty_device=None</em>, <em class="sig-param">res_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.Monsoon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.energy_meter._DevlibContinuousEnergyMeter" title="lisa.energy_meter._DevlibContinuousEnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_meter._DevlibContinuousEnergyMeter</span></code></a></p>
+<p>Monsoon Solutions energy meter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monsoon_bin</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – monsoon binary path</p></li>
+<li><p><strong>tty_device</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – TTY device to use</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="lisa.energy_meter.Monsoon.name">
+<code class="sig-name descname">name</code><em class="property"> = 'monsoon'</em><a class="headerlink" href="#lisa.energy_meter.Monsoon.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.Monsoon.CONF_CLASS">
+<code class="sig-name descname">CONF_CLASS</code><a class="headerlink" href="#lisa.energy_meter.Monsoon.CONF_CLASS" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#lisa.energy_meter.MonsoonConf" title="lisa.energy_meter.MonsoonConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">MonsoonConf</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.Monsoon.INIT_KWARGS_KEY_MAP">
+<code class="sig-name descname">INIT_KWARGS_KEY_MAP</code><em class="property"> = {'monsoon_bin': ['monsoon-bin'], 'tty_device': ['tty-device']}</em><a class="headerlink" href="#lisa.energy_meter.Monsoon.INIT_KWARGS_KEY_MAP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.Monsoon._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter.Monsoon._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter.ACMEConf">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">ACMEConf</code><span class="sig-paren">(</span><em class="sig-param">conf=None</em>, <em class="sig-param">src='user'</em>, <em class="sig-param">add_default_src=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.ACMEConf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="misc_utilities.html#lisa.conf.SimpleMultiSrcConf" title="lisa.conf.SimpleMultiSrcConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.SimpleMultiSrcConf</span></code></a>, <a class="reference internal" href="misc_utilities.html#lisa.utils.HideExekallID" title="lisa.utils.HideExekallID"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.HideExekallID</span></code></a></p>
+<p>Configuration class for <a class="reference internal" href="#lisa.energy_meter.ACME" title="lisa.energy_meter.ACME"><code class="xref py py-class docutils literal notranslate"><span class="pre">ACME</span></code></a>.</p>
+<ul class="simple">
+<li><p>acme-conf: ACME Energy Meter configuration</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>channel-map (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>): Channels to use.</p></li>
+<li><p>host (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>): Hostname or IP address of the ACME board.</p></li>
+<li><p>iio-capture-bin (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>): path to iio-capture binary.</p></li>
+</ul>
+</div></blockquote>
+<dl class="attribute">
+<dt id="lisa.energy_meter.ACMEConf.STRUCTURE">
+<code class="sig-name descname">STRUCTURE</code><em class="property"> = &lt;lisa.conf.TopLevelKeyDesc object&gt;</em><a class="headerlink" href="#lisa.energy_meter.ACMEConf.STRUCTURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.ACMEConf.DEFAULT_SRC">
+<code class="sig-name descname">DEFAULT_SRC</code><em class="property"> = {'channel-map': {'CH0': 0}, 'host': 'baylibre-acme.local', 'iio-capture-bin': 'iio-capture'}</em><a class="headerlink" href="#lisa.energy_meter.ACMEConf.DEFAULT_SRC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.ACMEConf._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter.ACMEConf._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter.ACME">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">ACME</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">channel_map={'CH0': 0}</em>, <em class="sig-param">host='baylibre-acme.local'</em>, <em class="sig-param">iio_capture_bin='iio-capture'</em>, <em class="sig-param">res_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.ACME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.energy_meter.EnergyMeter" title="lisa.energy_meter.EnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_meter.EnergyMeter</span></code></a></p>
+<p>BayLibre’s ACME board based EnergyMeter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channel_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><em>collections.abc.Mapping</em></a>) – Channels to use</p></li>
+<li><p><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Hostname or IP address of the ACME board</p></li>
+<li><p><strong>iio_capture_bin</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – path to iio-capture binary</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="lisa.energy_meter.ACME.name">
+<code class="sig-name descname">name</code><em class="property"> = 'acme'</em><a class="headerlink" href="#lisa.energy_meter.ACME.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.ACME.CONF_CLASS">
+<code class="sig-name descname">CONF_CLASS</code><a class="headerlink" href="#lisa.energy_meter.ACME.CONF_CLASS" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#lisa.energy_meter.ACMEConf" title="lisa.energy_meter.ACMEConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">ACMEConf</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.ACME.REPORT_DELAY_S">
+<code class="sig-name descname">REPORT_DELAY_S</code><em class="property"> = 2.0</em><a class="headerlink" href="#lisa.energy_meter.ACME.REPORT_DELAY_S" title="Permalink to this definition">¶</a></dt>
+<dd><p>iio-capture returns an empty string if killed right after its invocation,
+so we have to enforce a delay between reset() and report()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.ACME.sample">
+<code class="sig-name descname">sample</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.ACME.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a sample from the energy meter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.ACME._iio_device">
+<code class="sig-name descname">_iio_device</code><span class="sig-paren">(</span><em class="sig-param">channel</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.ACME._iio_device" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.ACME._str">
+<code class="sig-name descname">_str</code><span class="sig-paren">(</span><em class="sig-param">channel</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.ACME._str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.ACME.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.ACME.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset energy meter and start sampling from channels specified in the
+target configuration.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.ACME.report">
+<code class="sig-name descname">report</code><span class="sig-paren">(</span><em class="sig-param">out_dir</em>, <em class="sig-param">out_energy='energy.json'</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.ACME.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop iio-capture and collect sampled data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Output directory where to store results</p></li>
+<li><p><strong>out_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – File name where to save energy data</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.ACME.INIT_KWARGS_KEY_MAP">
+<code class="sig-name descname">INIT_KWARGS_KEY_MAP</code><em class="property"> = {'channel_map': ['channel-map'], 'host': ['host'], 'iio_capture_bin': ['iio-capture-bin']}</em><a class="headerlink" href="#lisa.energy_meter.ACME.INIT_KWARGS_KEY_MAP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.ACME._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter.ACME._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter.Gem5EnergyMeterConf">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">Gem5EnergyMeterConf</code><span class="sig-paren">(</span><em class="sig-param">conf=None</em>, <em class="sig-param">src='user'</em>, <em class="sig-param">add_default_src=True</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.Gem5EnergyMeterConf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="misc_utilities.html#lisa.conf.SimpleMultiSrcConf" title="lisa.conf.SimpleMultiSrcConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.conf.SimpleMultiSrcConf</span></code></a>, <a class="reference internal" href="misc_utilities.html#lisa.utils.HideExekallID" title="lisa.utils.HideExekallID"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.utils.HideExekallID</span></code></a></p>
+<p>Configuration class for <a class="reference internal" href="#lisa.energy_meter.Gem5EnergyMeter" title="lisa.energy_meter.Gem5EnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gem5EnergyMeter</span></code></a>.</p>
+<ul class="simple">
+<li><p>gem5-energy-meter-conf: Gem5 Energy Meter configuration</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>channel-map (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>): Channels to use.</p></li>
+</ul>
+</div></blockquote>
+<dl class="attribute">
+<dt id="lisa.energy_meter.Gem5EnergyMeterConf.STRUCTURE">
+<code class="sig-name descname">STRUCTURE</code><em class="property"> = &lt;lisa.conf.TopLevelKeyDesc object&gt;</em><a class="headerlink" href="#lisa.energy_meter.Gem5EnergyMeterConf.STRUCTURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.Gem5EnergyMeterConf.DEFAULT_SRC">
+<code class="sig-name descname">DEFAULT_SRC</code><em class="property"> = {}</em><a class="headerlink" href="#lisa.energy_meter.Gem5EnergyMeterConf.DEFAULT_SRC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.Gem5EnergyMeterConf._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter.Gem5EnergyMeterConf._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="lisa.energy_meter.Gem5EnergyMeter">
+<em class="property">class </em><code class="sig-prename descclassname">lisa.energy_meter.</code><code class="sig-name descname">Gem5EnergyMeter</code><span class="sig-paren">(</span><em class="sig-param">target</em>, <em class="sig-param">channel_map</em>, <em class="sig-param">res_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.Gem5EnergyMeter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#lisa.energy_meter._DevlibContinuousEnergyMeter" title="lisa.energy_meter._DevlibContinuousEnergyMeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">lisa.energy_meter._DevlibContinuousEnergyMeter</span></code></a></p>
+<p>Common functionality for devlib Instruments in CONTINUOUS mode</p>
+<dl class="attribute">
+<dt id="lisa.energy_meter.Gem5EnergyMeter.name">
+<code class="sig-name descname">name</code><em class="property"> = 'gem5'</em><a class="headerlink" href="#lisa.energy_meter.Gem5EnergyMeter.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.Gem5EnergyMeter.CONF_CLASS">
+<code class="sig-name descname">CONF_CLASS</code><a class="headerlink" href="#lisa.energy_meter.Gem5EnergyMeter.CONF_CLASS" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#lisa.energy_meter.Gem5EnergyMeterConf" title="lisa.energy_meter.Gem5EnergyMeterConf"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gem5EnergyMeterConf</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.Gem5EnergyMeter.INIT_KWARGS_KEY_MAP">
+<code class="sig-name descname">INIT_KWARGS_KEY_MAP</code><em class="property"> = {'channel_map': ['channel-map']}</em><a class="headerlink" href="#lisa.energy_meter.Gem5EnergyMeter.INIT_KWARGS_KEY_MAP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="lisa.energy_meter.Gem5EnergyMeter._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#lisa.energy_meter.Gem5EnergyMeter._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.Gem5EnergyMeter.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.Gem5EnergyMeter.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the energy meter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lisa.energy_meter.Gem5EnergyMeter._build_timeline">
+<code class="sig-name descname">_build_timeline</code><span class="sig-paren">(</span><em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#lisa.energy_meter.Gem5EnergyMeter._build_timeline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="misc_utilities.html" class="btn btn-neutral float-right" title="Miscellaneous utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="trace_analysis.html" class="btn btn-neutral float-left" title="Kernel trace analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

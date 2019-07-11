@@ -1,0 +1,4 @@
+<map id="inheritance2faf1eb476" name="inheritance2faf1eb476">
+<area shape="rect" id="node1" href="#lisa.tests.base.TestBundle" target="_top" title="A LISA test bundle." alt="" coords="5,5,99,31"/>
+<area shape="rect" id="node2" href="#lisa.tests.cpufreq.sanity.UserspaceSanity" target="_top" title="A class for making sure the userspace governor behaves sanely" alt="" coords="147,5,277,31"/>
+</map>

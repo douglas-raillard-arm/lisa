@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>LISA Documentation &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="==== Getting started ====" href="first_separator.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lisa_shell/man/man.html">LISA shell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transition_guide.html">Transitioning from LISA legacy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows/index.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="target.html">Target</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workloads.html">Workloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="energy_analysis.html">Energy analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc_utilities.html">Miscellaneous utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bisector/index.html">Bisector Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exekall/index.html">Exekall Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>LISA Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lisa-documentation">
+<h1>LISA Documentation<a class="headerlink" href="#lisa-documentation" title="Permalink to this headline">¶</a></h1>
+<p>LISA - “Linux Integrated System Analysis” is a toolkit for interactive analysis
+and automated regression testing of Linux kernel behaviour.</p>
+<ul class="simple">
+<li><p>See the README on the project’s <a class="reference external" href="https://github.com/ARM-software/lisa">Github home page</a> for an overview.</p></li>
+<li><p>Once you have LISA running, take a look at the tutorial and example notebooks
+included with the installation.</p></li>
+</ul>
+<p>Contributions to LISA and its documentation are very welcome, and handled
+via Github pull requests.</p>
+<p id="readme">Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="setup.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup.html#updating">Updating</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lisa_shell/man/man.html">LISA shell</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="lisa_shell/man/man.html#description">Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lisa_shell/man/man.html#activation">Activation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lisa_shell/man/man.html#commands">Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lisa_shell/man/man.html#environment-variables">Environment variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transition_guide.html">Transitioning from LISA legacy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transition_guide.html#global-changes">Global changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transition_guide.html#api-changes">API Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributors_guide.html">Contributor’s guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributors_guide.html#contribution-rules">Contribution rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributors_guide.html#subtrees">Subtrees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributors_guide.html#validating-your-changes">Validating your changes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflows/index.html">Workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflows/notebook.html">Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows/automated_testing.html">Automated testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflows/wltest.html">Wltest</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="target.html">Target</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="target.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="target.html#connecting-to-a-target">Connecting to a target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="target.html#platform-data">Platform data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="target.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workloads.html">Workloads</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workloads.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workloads.html#available-workloads">Available workloads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workloads.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kernel_tests.html">Kernel testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kernel_tests.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel_tests.html#available-tests">Available tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel_tests.html#running-tests">Running tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel_tests.html#writing-tests">Writing tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kernel_tests.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trace_analysis.html">Kernel trace analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trace_analysis.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trace_analysis.html#trace">Trace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trace_analysis.html#available-analysis">Available analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trace_analysis.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="energy_analysis.html">Energy analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="energy_analysis.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="energy_analysis.html#energy-model">Energy model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="energy_analysis.html#energy-meters">Energy meters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="energy_analysis.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="misc_utilities.html">Miscellaneous utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="misc_utilities.html#configuration-management">Configuration management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="misc_utilities.html#module-lisa.regression">Regression testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="misc_utilities.html#module-lisa.utils">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="misc_utilities.html#module-lisa.datautils">Dataframe and Series handling utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="misc_utilities.html#module-lisa.doc.helpers">Sphinx documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bisector/index.html">Bisector Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bisector/index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bisector/index.html#contents">Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bisector/index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="exekall/index.html">Exekall Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="exekall/index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exekall/index.html#contents">Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exekall/index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="building-this-documentation">
+<h1>Building this documentation<a class="headerlink" href="#building-this-documentation" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p>Install <code class="docutils literal notranslate"><span class="pre">sphinx-doc</span></code></p></li>
+<li><p>From the root of the LISA source tree: <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">doc</span> <span class="pre">&amp;&amp;</span> <span class="pre">make</span> <span class="pre">html</span></code></p></li>
+<li><p>Find the HTML in <code class="docutils literal notranslate"><span class="pre">doc/_build/html</span></code></p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="first_separator.html" class="btn btn-neutral float-right" title="==== Getting started ====" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

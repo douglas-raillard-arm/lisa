@@ -1,0 +1,12 @@
+<map id="inheritance6e1183da34" name="inheritance6e1183da34">
+<area shape="rect" id="node1" href="#lisa.tests.scheduler.load_tracking.CPUMigrationBase" target="_top" title="Base class for migration&#45;related load tracking tests" alt="" coords="378,4,474,21"/>
+<area shape="rect" id="node8" href="#lisa.tests.scheduler.load_tracking.OneTaskCPUMigration" target="_top" title="Some tasks on two big CPUs, one of them migrates in its second phase." alt="" coords="506,4,617,21"/>
+<area shape="rect" id="node2" href="#lisa.tests.scheduler.load_tracking.LoadTrackingBase" target="_top" title="Base class for shared functionality of load tracking tests" alt="" coords="252,37,345,54"/>
+<area shape="rect" id="node6" href="#lisa.tests.scheduler.load_tracking.InvarianceItem" target="_top" title="Basic check for CPU and frequency invariant load and utilization tracking" alt="" coords="385,37,466,54"/>
+<area shape="rect" id="node9" href="#lisa.tests.scheduler.load_tracking.PELTTask" target="_top" title="Basic checks for task related PELT signals behaviour" alt="" coords="399,70,453,87"/>
+<area shape="rect" id="node3" href="#lisa.tests.scheduler.load_tracking.Invariance" target="_top" title="Basic check for frequency invariant load and utilization tracking" alt="" coords="150,37,211,54"/>
+<area shape="rect" id="node4" href="#lisa.tests.base.TestBundle" target="_top" title="A LISA test bundle." alt="" coords="25,54,88,71"/>
+<area shape="rect" id="node7" href="#lisa.tests.base.RTATestBundle" target="_top" title="Abstract Base Class for :class:`lisa.wlgen.rta.RTA`&#45;powered TestBundles" alt="" coords="142,70,220,87"/>
+<area shape="rect" id="node5" href="#lisa.tests.scheduler.load_tracking.LoadTrackingHelpers" target="_top" title="Common bunch of helpers for load tracking tests." alt="" coords="4,12,109,29"/>
+<area shape="rect" id="node10" href="#lisa.tests.scheduler.load_tracking.TwoTasksCPUMigration" target="_top" title="Two tasks on two big CPUs, swap their CPU in the second phase" alt="" coords="650,4,764,21"/>
+</map>

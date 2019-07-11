@@ -1,0 +1,2314 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API Documentation &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Exekall Documentation" href="../exekall/index.html" />
+    <link rel="prev" title="Man page" href="man/man.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lisa_shell/man/man.html">LISA shell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../transition_guide.html">Transitioning from LISA legacy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributors_guide.html">Contributor’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/index.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../target.html">Target</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workloads.html">Workloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../energy_analysis.html">Energy analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc_utilities.html">Miscellaneous utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Bisector Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#overview">Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#contents">Contents</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="man/man.html">Man page</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">API Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../exekall/index.html">Exekall Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Bisector Documentation</a> &raquo;</li>
+        
+      <li>API Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/bisector/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api-documentation">
+<h1>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The API is for now considered completely internal and could change
+at any time</p>
+</div>
+<p>In order to support report edition (<code class="docutils literal notranslate"><span class="pre">bisector</span> <span class="pre">edit</span></code>) and more stable
+serialized format, new steps constructors must be written in a similar way to
+exisiting ones.</p>
+<span class="target" id="module-bisector.bisector"></span><dl class="function">
+<dt id="bisector.bisector.mask_signals">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">mask_signals</code><span class="sig-paren">(</span><em class="sig-param">unblock=False</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.mask_signals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.filter_keys">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">filter_keys</code><span class="sig-paren">(</span><em class="sig-param">mapping</em>, <em class="sig-param">remove=None</em>, <em class="sig-param">keep=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.filter_keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.natural_sort_key">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">natural_sort_key</code><span class="sig-paren">(</span><em class="sig-param">s</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.natural_sort_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key suitable for alphanumeric sort, but sorts numbers contained in the
+string as numbers.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.raise_sig_exception">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">raise_sig_exception</code><span class="sig-paren">(</span><em class="sig-param">sig</em>, <em class="sig-param">frame</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.raise_sig_exception" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn some signals into exceptions that can be caught by user code.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.MLString">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">MLString</code><span class="sig-paren">(</span><em class="sig-param">lines=None</em>, <em class="sig-param">empty=False</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MLString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Efficient multiline string, behaving mostly like an str.</p>
+<p>Such string can be called to append a line to it, and str methods can be
+used. Note that these methods will return a rendered string and will not
+modify the object itself.</p>
+<dl class="method">
+<dt id="bisector.bisector.MLString.tabulate">
+<code class="sig-name descname">tabulate</code><span class="sig-paren">(</span><em class="sig-param">separator=' '</em>, <em class="sig-param">filler=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MLString.tabulate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new MLString with the lines formatted so that the columns
+are properly aligned.</p>
+<p>separator is a regex so splitting on multiple delimiters at once is
+possible.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.BisectRet">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">BisectRet</code><a class="headerlink" href="#bisector.bisector.BisectRet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
+<p>Git bisect return code as described in git bisect run documentation.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.BisectRet.NA">
+<code class="sig-name descname">NA</code><em class="property"> = -1</em><a class="headerlink" href="#bisector.bisector.BisectRet.NA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BisectRet.UNTESTABLE">
+<code class="sig-name descname">UNTESTABLE</code><em class="property"> = 125</em><a class="headerlink" href="#bisector.bisector.BisectRet.UNTESTABLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BisectRet.GOOD">
+<code class="sig-name descname">GOOD</code><em class="property"> = 0</em><a class="headerlink" href="#bisector.bisector.BisectRet.GOOD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BisectRet.BAD">
+<code class="sig-name descname">BAD</code><em class="property"> = 1</em><a class="headerlink" href="#bisector.bisector.BisectRet.BAD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BisectRet.ABORT">
+<code class="sig-name descname">ABORT</code><em class="property"> = 253</em><a class="headerlink" href="#bisector.bisector.BisectRet.ABORT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BisectRet.YIELD">
+<code class="sig-name descname">YIELD</code><em class="property"> = 252</em><a class="headerlink" href="#bisector.bisector.BisectRet.YIELD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.BisectRet.lower_name">
+<em class="property">property </em><code class="sig-name descname">lower_name</code><a class="headerlink" href="#bisector.bisector.BisectRet.lower_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make the lowercase name available through a property so that it can be
+used directly from format strings (they cannot call functions).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BisectRet.to_yaml">
+<code class="sig-name descname">to_yaml</code><em class="property"> = &lt;bound method BisectRet.to_yaml of &lt;enum 'BisectRet'&gt;&gt;</em><a class="headerlink" href="#bisector.bisector.BisectRet.to_yaml" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BisectRet.from_yaml">
+<code class="sig-name descname">from_yaml</code><em class="property"> = &lt;bound method BisectRet.from_yaml of &lt;enum 'BisectRet'&gt;&gt;</em><a class="headerlink" href="#bisector.bisector.BisectRet.from_yaml" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BisectRet.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!git-bisect'</em><a class="headerlink" href="#bisector.bisector.BisectRet.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.parse_step_options">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">parse_step_options</code><span class="sig-paren">(</span><em class="sig-param">opts_seq</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.parse_step_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the steps options passed with -o command line parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>opts_seq</strong> – sequence of command line options as returned by argparse.
+Their format is: &lt;name or category pattern&gt;.&lt;key&gt;=&lt;value&gt;
+If &lt;name or cat pattern&gt; is missing, ‘*’ is assumed. It
+will also be passed to all functions. The pattern is
+matched using fnmatch.  If &lt;value&gt; is missing, True is
+assumed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An OrderedDict that maps steps name pattern to a dict of key and
+values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.parse_iterations">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">parse_iterations</code><span class="sig-paren">(</span><em class="sig-param">opt</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.parse_iterations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string representing the number of iterations to be run.
+Special value “inf” means infinite number of iterations.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.parse_timeout">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">parse_timeout</code><span class="sig-paren">(</span><em class="sig-param">timeout</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.parse_timeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string representing a timeout.</p>
+<p>It handles “inf” for infinite timeout (i.e. no timeout), and the s, m, h
+suffixes.  Default unit is seconds.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.Param">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">Param</code><span class="sig-paren">(</span><em class="sig-param">desc=''</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.Param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<p>Abstract Base Class of steps parameter.</p>
+<p>Such parameters take care of parsing strings specified on the command line
+and convert them to the right type before they are passed to the method.</p>
+<p>When no value is specified for such parameter, True boolean is assumed.
+Subclasses need to handle that with a default value, or raise an
+argparse.ArgumentTypeError exception as appropriate.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.Param.type_desc">
+<code class="sig-name descname">type_desc</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.Param.type_desc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short description of the type. It will be displayed in the help.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.Param.parse">
+<code class="sig-name descname">parse</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.Param.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse an arbitrary value.</p>
+<p>Some types will be accepted without modification, str will undergo
+parsing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.Param.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.Param.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate an object to be used as the value of the parameter.</p>
+<p>The validation is done after string parsing. That will catch non-string
+objects passed to the function, or non-string objects coming from the
+YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the object satisfies the properties, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.Param.parse_str">
+<em class="property">abstract </em><code class="sig-name descname">parse_str</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.Param.parse_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string argument.</p>
+<p>Strings are passed when the option is specified on the command line so
+that it is converted to the right type before being handled to the
+methods.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.TimeoutParam">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">TimeoutParam</code><span class="sig-paren">(</span><em class="sig-param">desc=''</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.TimeoutParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Param" title="bisector.bisector.Param"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Param</span></code></a></p>
+<p>Step parameter holding a timeout value.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.TimeoutParam.type_desc">
+<code class="sig-name descname">type_desc</code><em class="property"> = 'int or &quot;inf&quot;'</em><a class="headerlink" href="#bisector.bisector.TimeoutParam.type_desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.TimeoutParam.parse_str">
+<code class="sig-name descname">parse_str</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.TimeoutParam.parse_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string argument.</p>
+<p>Strings are passed when the option is specified on the command line so
+that it is converted to the right type before being handled to the
+methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.TimeoutParam.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.TimeoutParam.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate an object to be used as the value of the parameter.</p>
+<p>The validation is done after string parsing. That will catch non-string
+objects passed to the function, or non-string objects coming from the
+YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the object satisfies the properties, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.IterationParam">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">IterationParam</code><span class="sig-paren">(</span><em class="sig-param">desc=''</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.IterationParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Param" title="bisector.bisector.Param"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Param</span></code></a></p>
+<p>Step parameter holding a number of iterations.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.IterationParam.type_desc">
+<code class="sig-name descname">type_desc</code><em class="property"> = 'int or &quot;inf&quot;'</em><a class="headerlink" href="#bisector.bisector.IterationParam.type_desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.IterationParam.parse_str">
+<code class="sig-name descname">parse_str</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.IterationParam.parse_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string argument.</p>
+<p>Strings are passed when the option is specified on the command line so
+that it is converted to the right type before being handled to the
+methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.IterationParam.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.IterationParam.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate an object to be used as the value of the parameter.</p>
+<p>The validation is done after string parsing. That will catch non-string
+objects passed to the function, or non-string objects coming from the
+YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the object satisfies the properties, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.BoolOrStrParam">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">BoolOrStrParam</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">allow_empty=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BoolOrStrParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Param" title="bisector.bisector.Param"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Param</span></code></a></p>
+<p>Step parameter holding a string.</p>
+<dl class="method">
+<dt id="bisector.bisector.BoolOrStrParam.type_desc">
+<em class="property">property </em><code class="sig-name descname">type_desc</code><a class="headerlink" href="#bisector.bisector.BoolOrStrParam.type_desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.BoolOrStrParam.parse_str">
+<code class="sig-name descname">parse_str</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BoolOrStrParam.parse_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string argument.</p>
+<p>Strings are passed when the option is specified on the command line so
+that it is converted to the right type before being handled to the
+methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.BoolOrStrParam.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BoolOrStrParam.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate an object to be used as the value of the parameter.</p>
+<p>The validation is done after string parsing. That will catch non-string
+objects passed to the function, or non-string objects coming from the
+YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the object satisfies the properties, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.CommaListParam">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">CommaListParam</code><span class="sig-paren">(</span><em class="sig-param">desc=''</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.CommaListParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Param" title="bisector.bisector.Param"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Param</span></code></a></p>
+<p>Step parameter holding a comma-separated list of strings.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.CommaListParam.type_desc">
+<code class="sig-name descname">type_desc</code><em class="property"> = 'comma-separated list'</em><a class="headerlink" href="#bisector.bisector.CommaListParam.type_desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.CommaListParam.parse_str">
+<code class="sig-name descname">parse_str</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.CommaListParam.parse_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string argument.</p>
+<p>Strings are passed when the option is specified on the command line so
+that it is converted to the right type before being handled to the
+methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.CommaListParam.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.CommaListParam.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate an object to be used as the value of the parameter.</p>
+<p>The validation is done after string parsing. That will catch non-string
+objects passed to the function, or non-string objects coming from the
+YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the object satisfies the properties, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.CommaListRangesParam">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">CommaListRangesParam</code><span class="sig-paren">(</span><em class="sig-param">desc=''</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.CommaListRangesParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.CommaListParam" title="bisector.bisector.CommaListParam"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.CommaListParam</span></code></a></p>
+<dl class="attribute">
+<dt id="bisector.bisector.CommaListRangesParam.type_desc">
+<code class="sig-name descname">type_desc</code><em class="property"> = 'comma-separated list of integer ranges'</em><a class="headerlink" href="#bisector.bisector.CommaListRangesParam.type_desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.CommaListRangesParam.parse_str">
+<code class="sig-name descname">parse_str</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.CommaListRangesParam.parse_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string argument.</p>
+<p>Strings are passed when the option is specified on the command line so
+that it is converted to the right type before being handled to the
+methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.CommaListRangesParam.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.CommaListRangesParam.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate an object to be used as the value of the parameter.</p>
+<p>The validation is done after string parsing. That will catch non-string
+objects passed to the function, or non-string objects coming from the
+YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the object satisfies the properties, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.EnvListParam">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">EnvListParam</code><span class="sig-paren">(</span><em class="sig-param">desc=''</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.EnvListParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Param" title="bisector.bisector.Param"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Param</span></code></a></p>
+<p>Step parameter holding a list of environment variables values.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.EnvListParam.type_desc">
+<code class="sig-name descname">type_desc</code><em class="property"> = 'env var list'</em><a class="headerlink" href="#bisector.bisector.EnvListParam.type_desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.EnvListParam.parse">
+<code class="sig-name descname">parse</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.EnvListParam.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse an arbitrary value.</p>
+<p>Some types will be accepted without modification, str will undergo
+parsing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.EnvListParam.parse_str">
+<code class="sig-name descname">parse_str</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.EnvListParam.parse_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string argument.</p>
+<p>Strings are passed when the option is specified on the command line so
+that it is converted to the right type before being handled to the
+methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.EnvListParam.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.EnvListParam.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate an object to be used as the value of the parameter.</p>
+<p>The validation is done after string parsing. That will catch non-string
+objects passed to the function, or non-string objects coming from the
+YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the object satisfies the properties, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.IntParam">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">IntParam</code><span class="sig-paren">(</span><em class="sig-param">desc=''</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.IntParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Param" title="bisector.bisector.Param"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Param</span></code></a></p>
+<p>Step parameter holding an integer.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.IntParam.type_desc">
+<code class="sig-name descname">type_desc</code><em class="property"> = 'int'</em><a class="headerlink" href="#bisector.bisector.IntParam.type_desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.IntParam.parse_str">
+<code class="sig-name descname">parse_str</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.IntParam.parse_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string argument.</p>
+<p>Strings are passed when the option is specified on the command line so
+that it is converted to the right type before being handled to the
+methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.IntParam.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.IntParam.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate an object to be used as the value of the parameter.</p>
+<p>The validation is done after string parsing. That will catch non-string
+objects passed to the function, or non-string objects coming from the
+YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the object satisfies the properties, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.BoolParam">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">BoolParam</code><span class="sig-paren">(</span><em class="sig-param">desc=''</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BoolParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Param" title="bisector.bisector.Param"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Param</span></code></a></p>
+<p>Step parameter holding a boolean value.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.BoolParam.type_desc">
+<code class="sig-name descname">type_desc</code><em class="property"> = 'bool'</em><a class="headerlink" href="#bisector.bisector.BoolParam.type_desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.BoolParam.parse_str">
+<code class="sig-name descname">parse_str</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BoolParam.parse_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string argument.</p>
+<p>Strings are passed when the option is specified on the command line so
+that it is converted to the right type before being handled to the
+methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.BoolParam.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BoolParam.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate an object to be used as the value of the parameter.</p>
+<p>The validation is done after string parsing. That will catch non-string
+objects passed to the function, or non-string objects coming from the
+YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the object satisfies the properties, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.ChoiceOrBoolParam">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">ChoiceOrBoolParam</code><span class="sig-paren">(</span><em class="sig-param">choices</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ChoiceOrBoolParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Param" title="bisector.bisector.Param"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Param</span></code></a></p>
+<p>Step parameter holding a boolean value or an item chosen among a predefined
+set.</p>
+<dl class="method">
+<dt id="bisector.bisector.ChoiceOrBoolParam.type_desc">
+<em class="property">property </em><code class="sig-name descname">type_desc</code><a class="headerlink" href="#bisector.bisector.ChoiceOrBoolParam.type_desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.ChoiceOrBoolParam.parse_str">
+<code class="sig-name descname">parse_str</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ChoiceOrBoolParam.parse_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string argument.</p>
+<p>Strings are passed when the option is specified on the command line so
+that it is converted to the right type before being handled to the
+methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.ChoiceOrBoolParam.validate_val">
+<code class="sig-name descname">validate_val</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ChoiceOrBoolParam.validate_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate an object to be used as the value of the parameter.</p>
+<p>The validation is done after string parsing. That will catch non-string
+objects passed to the function, or non-string objects coming from the
+YAML file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the object satisfies the properties, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.info">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">info</code><span class="sig-paren">(</span><em class="sig-param">msg</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a log message at the INFO level.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.debug">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">debug</code><span class="sig-paren">(</span><em class="sig-param">msg</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a log message at the DEBUG level.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.warn">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">warn</code><span class="sig-paren">(</span><em class="sig-param">msg</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.warn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a log message at the WARNING level.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.error">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">error</code><span class="sig-paren">(</span><em class="sig-param">msg</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a log message at the ERROR level.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.SerializableMeta">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">SerializableMeta</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.SerializableMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a></p>
+<p>Metaclass for all serializable classes.</p>
+<p>It ensures the class will always have a <code class="docutils literal notranslate"><span class="pre">name</span></code> and <code class="docutils literal notranslate"><span class="pre">cat</span></code>
+attributes, as well as constructing a ChainMap from the <code class="docutils literal notranslate"><span class="pre">attr_init</span></code>
+dictionaries of its base classes. That means that usual inheritance rules
+will apply to the content of <code class="docutils literal notranslate"><span class="pre">attr_init</span></code> .</p>
+<dl class="method">
+<dt id="bisector.bisector.SerializableMeta.set_attr_init">
+<code class="sig-name descname">set_attr_init</code><span class="sig-paren">(</span><em class="sig-param">attr</em>, <em class="sig-param">val</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.SerializableMeta.set_attr_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set an initial value for instance attributes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.Serializable">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">Serializable</code><a class="headerlink" href="#bisector.bisector.Serializable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base class of all serializable classes.</p>
+<p>Subclasses MUST implement a <code class="docutils literal notranslate"><span class="pre">yaml_tag</span></code> class attribute, in order to
+have a stable tag associated with them that can survive accross class
+renames and refactoring.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.Serializable.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'name': None})</em><a class="headerlink" href="#bisector.bisector.Serializable.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>All keys of this dictionary will be copied into fresh instance attributes
+when the class is instantiated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.Serializable.dont_save">
+<code class="sig-name descname">dont_save</code><em class="property"> = []</em><a class="headerlink" href="#bisector.bisector.Serializable.dont_save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attributes that will not be saved to the Pickle or YAML file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.Serializable.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.Serializable.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.Serializable.name">
+<code class="sig-name descname">name</code><em class="property"> = 'Serializable'</em><a class="headerlink" href="#bisector.bisector.Serializable.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.StepResultBase">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">StepResultBase</code><a class="headerlink" href="#bisector.bisector.StepResultBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Serializable" title="bisector.bisector.Serializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Serializable</span></code></a></p>
+<p>Base class of all step results.</p>
+<p>Step results are returned by the <a class="reference internal" href="#bisector.bisector.StepBase.run" title="bisector.bisector.StepBase.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">StepBase.run()</span></code></a> method of steps.
+It must implement <code class="docutils literal notranslate"><span class="pre">bisect_ret</span></code> containing a value of <a class="reference internal" href="#bisector.bisector.BisectRet" title="bisector.bisector.BisectRet"><code class="xref py py-class docutils literal notranslate"><span class="pre">BisectRet</span></code></a> .</p>
+<dl class="method">
+<dt id="bisector.bisector.StepResultBase.filtered_bisect_ret">
+<code class="sig-name descname">filtered_bisect_ret</code><span class="sig-paren">(</span><em class="sig-param">steps_filter=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepResultBase.filtered_bisect_ret" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dummy implementation to simplify bisect status aggreagation code.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepResultBase.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.StepResultBase.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepResultBase.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.StepResultBase.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepResultBase.name">
+<code class="sig-name descname">name</code><em class="property"> = 'StepResultBase'</em><a class="headerlink" href="#bisector.bisector.StepResultBase.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.StepResult">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">StepResult</code><span class="sig-paren">(</span><em class="sig-param">step</em>, <em class="sig-param">res_list</em>, <em class="sig-param">bisect_ret</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.StepResultBase" title="bisector.bisector.StepResultBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.StepResultBase</span></code></a></p>
+<p>Basic step result.</p>
+<p>This step results support storing the return values of multiple trials of a
+step, along its corresponding logs.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.StepResult.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!basic-step-result'</em><a class="headerlink" href="#bisector.bisector.StepResult.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.StepResult.ret">
+<em class="property">property </em><code class="sig-name descname">ret</code><a class="headerlink" href="#bisector.bisector.StepResult.ret" title="Permalink to this definition">¶</a></dt>
+<dd><p>The meaningful return value is the one from the last trial.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.StepResult.log">
+<em class="property">property </em><code class="sig-name descname">log</code><a class="headerlink" href="#bisector.bisector.StepResult.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the log that goes with the return code.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepResult.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.StepResult.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepResult.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.StepResult.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepResult.name">
+<code class="sig-name descname">name</code><em class="property"> = 'StepResult'</em><a class="headerlink" href="#bisector.bisector.StepResult.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.terminate_process">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">terminate_process</code><span class="sig-paren">(</span><em class="sig-param">p</em>, <em class="sig-param">kill_timeout</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.terminate_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to terminate a process <cite>p</cite>, and kill it after
+<cite>kill_timeout</cite> if it is not dead yet.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.read_stdout">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">read_stdout</code><span class="sig-paren">(</span><em class="sig-param">p</em>, <em class="sig-param">timeout=None</em>, <em class="sig-param">kill_timeout=3</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.read_stdout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the standard output of a given process, and terminates it when the
+timeout expires.</p>
+<p>Note that it will not close stdout file descriptor, so
+the caller needs to take care of that, since it created the process.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.write_stdout">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">write_stdout</code><span class="sig-paren">(</span><em class="sig-param">txt</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.write_stdout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.call_process">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">call_process</code><span class="sig-paren">(</span><em class="sig-param">cmd</em>, <em class="sig-param">*args</em>, <em class="sig-param">merge_stderr=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.call_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call a given command with the given arguments and return its standard
+output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmd</strong> – name of the command to run</p></li>
+<li><p><strong>args</strong> – command line arguments passed to the command</p></li>
+<li><p><strong>merge_stderr</strong> – merge stderr with stdout.</p></li>
+<li><p><strong>kwargs</strong> – parameters passed to <a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.check_output" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">subprocess.check_output()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.git_cleanup">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">git_cleanup</code><span class="sig-paren">(</span><em class="sig-param">repo='./'</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.git_cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forcefully clean and reset a git repository.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.enforce_git_cleanup">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">enforce_git_cleanup</code><span class="sig-paren">(</span><em class="sig-param">do_cleanup=True</em>, <em class="sig-param">repo='./'</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.enforce_git_cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context manager allowing to cleanup a git repository at entry and exit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>do_cleanup</strong> – does the cleanup if True, otherwise does nothing.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.get_git_sha1">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">get_git_sha1</code><span class="sig-paren">(</span><em class="sig-param">repo='./'</em>, <em class="sig-param">ref='HEAD'</em>, <em class="sig-param">abbrev=12</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.get_git_sha1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the SHA1 of given ref in the given git repository.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>abbrev</strong> – length of the SHA1 returned.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.get_steps_kwarg_parsers">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">get_steps_kwarg_parsers</code><span class="sig-paren">(</span><em class="sig-param">cls</em>, <em class="sig-param">method_name</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.get_steps_kwarg_parsers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analyze a method to extract the parameters with command line parsers.</p>
+<p>The parser must be a <a class="reference internal" href="#bisector.bisector.Param" title="bisector.bisector.Param"><code class="xref py py-class docutils literal notranslate"><span class="pre">Param</span></code></a> so it handles parsing of arguments
+coming from the command line. It must be specified in the <code class="docutils literal notranslate"><span class="pre">options</span></code>
+class attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method_name</strong> – name of the method to analyze</p></li>
+<li><p><strong>cls</strong> – class of the method to analyze</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>map of parameter names to their Param object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.get_step_kwargs">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">get_step_kwargs</code><span class="sig-paren">(</span><em class="sig-param">step_cat</em>, <em class="sig-param">step_name</em>, <em class="sig-param">cls</em>, <em class="sig-param">method_name</em>, <em class="sig-param">user_options</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.get_step_kwargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the keyword arguments map for a given method that belongs to a
+specific step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>step_cat</strong> – category of the step the method belongs to</p></li>
+<li><p><strong>step_name</strong> – name of the step the method belongs to</p></li>
+<li><p><strong>user_options</strong> – Map of steps categories or names patterns to options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A map suitable to pass as <cite>**kwargs</cite> to the method. Note that the
+option values are not modified, the method is expected to apply
+its own processing to convert strings to the expected types if
+necessary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.StepMeta">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">StepMeta</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABCMeta</span></code></a>, <a class="reference internal" href="#bisector.bisector.SerializableMeta" title="bisector.bisector.SerializableMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.SerializableMeta</span></code></a></p>
+<p>Metaclass of all steps.</p>
+<p>Wraps <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> and <code class="docutils literal notranslate"><span class="pre">report()</span></code> to preprocess the values of the
+parameters annotated with a command line option parser.</p>
+<dl class="method">
+<dt id="bisector.bisector.StepMeta.wrap_method">
+<em class="property">static </em><code class="sig-name descname">wrap_method</code><span class="sig-paren">(</span><em class="sig-param">dct</em>, <em class="sig-param">method_name</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepMeta.wrap_method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap a method to preprocess argument values using the parser given
+in dct[‘options’].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.IterationCounterStack">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">IterationCounterStack</code><a class="headerlink" href="#bisector.bisector.IterationCounterStack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a></p>
+<p>list subclass that can be pretty printed as dot-separated list.
+This is intended to be used for nested iteration counters.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.StepABC">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">StepABC</code><a class="headerlink" href="#bisector.bisector.StepABC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Serializable" title="bisector.bisector.Serializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Serializable</span></code></a></p>
+<p>Abstract Base Class of all steps.</p>
+<p>Keyword-only parameters can be annotated with an instance of
+<a class="reference internal" href="#bisector.bisector.Param" title="bisector.bisector.Param"><code class="xref py py-class docutils literal notranslate"><span class="pre">Param</span></code></a> in order to support step-specific cmd-line parameters.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.StepABC.options">
+<code class="sig-name descname">options</code><em class="property"> = {'__init__': {}, 'report': {'verbose': BoolParam&lt;bool&gt;}}</em><a class="headerlink" href="#bisector.bisector.StepABC.options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.StepABC.run">
+<em class="property">abstract </em><code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">i_stack</em>, <em class="sig-param">service_hub</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepABC.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the step.</p>
+<p>The return values of this method will be collected and stored.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.StepABC.report">
+<em class="property">abstract </em><code class="sig-name descname">report</code><span class="sig-paren">(</span><em class="sig-param">step_res_seq</em>, <em class="sig-param">verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepABC.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display the list of results gathered when executing <a class="reference internal" href="#bisector.bisector.StepABC.run" title="bisector.bisector.StepABC.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>.</p>
+<p>Keyword-only parameters are supported as for <code class="docutils literal notranslate"><span class="pre">__init__()</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepABC.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.StepABC.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepABC.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.StepABC.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepABC.name">
+<code class="sig-name descname">name</code><em class="property"> = 'StepABC'</em><a class="headerlink" href="#bisector.bisector.StepABC.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.StepBase">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">StepBase</code><span class="sig-paren">(</span><em class="sig-param">name=Default</em>, <em class="sig-param">cat=Default</em>, <em class="sig-param">cmd=Default</em>, <em class="sig-param">shell=Default</em>, <em class="sig-param">trials=Default</em>, <em class="sig-param">timeout=Default</em>, <em class="sig-param">kill_timeout=Default</em>, <em class="sig-param">bail_out=Default</em>, <em class="sig-param">use_systemd_run=Default</em>, <em class="sig-param">env=Default</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.StepABC" title="bisector.bisector.StepABC"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.StepABC</span></code></a></p>
+<p>Base class of most steps.</p>
+<p>It supports running shell commands, saving their stdout and stderr as well
+as their exit status.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.StepBase.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'cat': '&lt;no category&gt;', 'name': '&lt;no name&gt;', 'shell': '/bin/bash', 'trials': 1, 'cmd': '', 'timeout': 0, 'kill_timeout': 3, 'bail_out': True, 'use_systemd_run': False, 'env': OrderedDict()}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.StepBase.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepBase.options">
+<code class="sig-name descname">options</code><em class="property"> = {'__init__': {'bail_out': BoolParam&lt;bool&gt;, 'cmd': BoolOrStrParam&lt;non-empty str&gt;, 'env': EnvListParam&lt;env var list&gt;, 'kill_timeout': TimeoutParam&lt;int or &quot;inf&quot;&gt;, 'shell': BoolOrStrParam&lt;non-empty str&gt;, 'timeout': TimeoutParam&lt;int or &quot;inf&quot;&gt;, 'trials': IntParam&lt;int&gt;, 'use_systemd_run': BoolParam&lt;bool&gt;}, 'report': {'export_logs': BoolOrStrParam&lt;non-empty str&gt;, 'ignore_non_issue': BoolParam&lt;bool&gt;, 'iterations': CommaListRangesParam&lt;comma-separated list of integer ranges&gt;, 'show_basic': BoolParam&lt;bool&gt;, 'verbose': BoolParam&lt;bool&gt;}}</em><a class="headerlink" href="#bisector.bisector.StepBase.options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepBase.cat">
+<code class="sig-name descname">cat</code><em class="property"> = '&lt;no category&gt;'</em><a class="headerlink" href="#bisector.bisector.StepBase.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepBase.name">
+<code class="sig-name descname">name</code><em class="property"> = '&lt;no name&gt;'</em><a class="headerlink" href="#bisector.bisector.StepBase.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.StepBase.reinit">
+<code class="sig-name descname">reinit</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepBase.reinit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.StepBase.help">
+<em class="property">classmethod </em><code class="sig-name descname">help</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepBase.help" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.StepBase.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">i_stack</em>, <em class="sig-param">service_hub</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepBase.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the step.</p>
+<p>The return values of this method will be collected and stored.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.StepBase.report">
+<code class="sig-name descname">report</code><span class="sig-paren">(</span><em class="sig-param">step_res_seq</em>, <em class="sig-param">service_hub</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">show_basic=True</em>, <em class="sig-param">ignore_non_issue=False</em>, <em class="sig-param">iterations=[]</em>, <em class="sig-param">export_logs=False</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepBase.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print out a report for a list of executions results created using
+the run() method.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.YieldStep">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">YieldStep</code><span class="sig-paren">(</span><em class="sig-param">every_n_iterations=Default</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.YieldStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.StepBase" title="bisector.bisector.StepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.StepBase</span></code></a></p>
+<p>Abort current iteration with the yield return code.</p>
+<p>If the specified command returns a non-zero return code, bisector will
+abort the current iteration with the yield return code.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This step can only be used under the main macrostep (it cannot be
+used in nested macrosteps).</p>
+</div>
+<dl class="attribute">
+<dt id="bisector.bisector.YieldStep.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!yield-step'</em><a class="headerlink" href="#bisector.bisector.YieldStep.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.YieldStep.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'cat': 'yield', 'name': 'yield', 'every_n_iterations': 1, 'cmd': 'exit 1'}, {'cat': '&lt;no category&gt;', 'name': '&lt;no name&gt;', 'shell': '/bin/bash', 'trials': 1, 'cmd': '', 'timeout': 0, 'kill_timeout': 3, 'bail_out': True, 'use_systemd_run': False, 'env': OrderedDict()}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.YieldStep.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.YieldStep.options">
+<code class="sig-name descname">options</code><em class="property"> = {'__init__': {'bail_out': BoolParam&lt;bool&gt;, 'cmd': BoolOrStrParam&lt;non-empty str&gt;, 'env': EnvListParam&lt;env var list&gt;, 'every_n_iterations': IntParam&lt;int&gt;, 'kill_timeout': TimeoutParam&lt;int or &quot;inf&quot;&gt;, 'shell': BoolOrStrParam&lt;non-empty str&gt;, 'timeout': TimeoutParam&lt;int or &quot;inf&quot;&gt;, 'trials': IntParam&lt;int&gt;, 'use_systemd_run': BoolParam&lt;bool&gt;}}</em><a class="headerlink" href="#bisector.bisector.YieldStep.options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.YieldStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">i_stack</em>, <em class="sig-param">service_hub</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.YieldStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the step.</p>
+<p>The return values of this method will be collected and stored.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.YieldStep.cat">
+<code class="sig-name descname">cat</code><em class="property"> = 'yield'</em><a class="headerlink" href="#bisector.bisector.YieldStep.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.YieldStep.name">
+<code class="sig-name descname">name</code><em class="property"> = 'yield'</em><a class="headerlink" href="#bisector.bisector.YieldStep.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.ShellStep">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">ShellStep</code><span class="sig-paren">(</span><em class="sig-param">name=Default</em>, <em class="sig-param">cat=Default</em>, <em class="sig-param">cmd=Default</em>, <em class="sig-param">shell=Default</em>, <em class="sig-param">trials=Default</em>, <em class="sig-param">timeout=Default</em>, <em class="sig-param">kill_timeout=Default</em>, <em class="sig-param">bail_out=Default</em>, <em class="sig-param">use_systemd_run=Default</em>, <em class="sig-param">env=Default</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ShellStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.StepBase" title="bisector.bisector.StepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.StepBase</span></code></a></p>
+<p>Execute a command in a shell.</p>
+<p>Stdout and stderr are merged and logged. The exit status of the command
+will have no influence of the bisect status.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.ShellStep.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!shell-step'</em><a class="headerlink" href="#bisector.bisector.ShellStep.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.ShellStep.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'cat': 'shell', 'name': 'shell'}, {'cat': '&lt;no category&gt;', 'name': '&lt;no name&gt;', 'shell': '/bin/bash', 'trials': 1, 'cmd': '', 'timeout': 0, 'kill_timeout': 3, 'bail_out': True, 'use_systemd_run': False, 'env': OrderedDict()}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.ShellStep.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.ShellStep.cat">
+<code class="sig-name descname">cat</code><em class="property"> = 'shell'</em><a class="headerlink" href="#bisector.bisector.ShellStep.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.ShellStep.name">
+<code class="sig-name descname">name</code><em class="property"> = 'shell'</em><a class="headerlink" href="#bisector.bisector.ShellStep.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.TestShellStep">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">TestShellStep</code><span class="sig-paren">(</span><em class="sig-param">name=Default</em>, <em class="sig-param">cat=Default</em>, <em class="sig-param">cmd=Default</em>, <em class="sig-param">shell=Default</em>, <em class="sig-param">trials=Default</em>, <em class="sig-param">timeout=Default</em>, <em class="sig-param">kill_timeout=Default</em>, <em class="sig-param">bail_out=Default</em>, <em class="sig-param">use_systemd_run=Default</em>, <em class="sig-param">env=Default</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.TestShellStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.ShellStep" title="bisector.bisector.ShellStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.ShellStep</span></code></a></p>
+<p>Similar to <a class="reference internal" href="#bisector.bisector.ShellStep" title="bisector.bisector.ShellStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShellStep</span></code></a> .</p>
+<p>Non-zero exit status of the command will be interpreted as a bisect bad
+status, and zero exit status as bisect good.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.TestShellStep.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!test-step'</em><a class="headerlink" href="#bisector.bisector.TestShellStep.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.TestShellStep.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'cat': 'test', 'name': 'test'}, {'cat': 'shell', 'name': 'shell'}, {'cat': '&lt;no category&gt;', 'name': '&lt;no name&gt;', 'shell': '/bin/bash', 'trials': 1, 'cmd': '', 'timeout': 0, 'kill_timeout': 3, 'bail_out': True, 'use_systemd_run': False, 'env': OrderedDict()}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.TestShellStep.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.TestShellStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">i_stack</em>, <em class="sig-param">service_hub</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.TestShellStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the step.</p>
+<p>The return values of this method will be collected and stored.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.TestShellStep.cat">
+<code class="sig-name descname">cat</code><em class="property"> = 'test'</em><a class="headerlink" href="#bisector.bisector.TestShellStep.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.TestShellStep.name">
+<code class="sig-name descname">name</code><em class="property"> = 'test'</em><a class="headerlink" href="#bisector.bisector.TestShellStep.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.BuildStep">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">BuildStep</code><span class="sig-paren">(</span><em class="sig-param">name=Default</em>, <em class="sig-param">cat=Default</em>, <em class="sig-param">cmd=Default</em>, <em class="sig-param">shell=Default</em>, <em class="sig-param">trials=Default</em>, <em class="sig-param">timeout=Default</em>, <em class="sig-param">kill_timeout=Default</em>, <em class="sig-param">bail_out=Default</em>, <em class="sig-param">use_systemd_run=Default</em>, <em class="sig-param">env=Default</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BuildStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.ShellStep" title="bisector.bisector.ShellStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.ShellStep</span></code></a></p>
+<p>Similar to <a class="reference internal" href="#bisector.bisector.ShellStep" title="bisector.bisector.ShellStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShellStep</span></code></a> .</p>
+<p>Non-zero exit status of the command will be interpreted as a bisect
+untestable status, and zero exit status as bisect good.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.BuildStep.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!build-step'</em><a class="headerlink" href="#bisector.bisector.BuildStep.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BuildStep.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'cat': 'build', 'name': 'build'}, {'cat': 'shell', 'name': 'shell'}, {'cat': '&lt;no category&gt;', 'name': '&lt;no name&gt;', 'shell': '/bin/bash', 'trials': 1, 'cmd': '', 'timeout': 0, 'kill_timeout': 3, 'bail_out': True, 'use_systemd_run': False, 'env': OrderedDict()}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.BuildStep.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.BuildStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">i_stack</em>, <em class="sig-param">service_hub</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BuildStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the step.</p>
+<p>The return values of this method will be collected and stored.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BuildStep.cat">
+<code class="sig-name descname">cat</code><em class="property"> = 'build'</em><a class="headerlink" href="#bisector.bisector.BuildStep.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BuildStep.name">
+<code class="sig-name descname">name</code><em class="property"> = 'build'</em><a class="headerlink" href="#bisector.bisector.BuildStep.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.FlashStep">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">FlashStep</code><span class="sig-paren">(</span><em class="sig-param">name=Default</em>, <em class="sig-param">cat=Default</em>, <em class="sig-param">cmd=Default</em>, <em class="sig-param">shell=Default</em>, <em class="sig-param">trials=Default</em>, <em class="sig-param">timeout=Default</em>, <em class="sig-param">kill_timeout=Default</em>, <em class="sig-param">bail_out=Default</em>, <em class="sig-param">use_systemd_run=Default</em>, <em class="sig-param">env=Default</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.FlashStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.ShellStep" title="bisector.bisector.ShellStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.ShellStep</span></code></a></p>
+<p>Similar to <a class="reference internal" href="#bisector.bisector.ShellStep" title="bisector.bisector.ShellStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShellStep</span></code></a> .</p>
+<p>Non-zero exit status of the command will be interpreted as a bisect
+abort, and zero exit status ignored.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.FlashStep.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!flash-step'</em><a class="headerlink" href="#bisector.bisector.FlashStep.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.FlashStep.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'cat': 'flash', 'name': 'flash'}, {'cat': 'shell', 'name': 'shell'}, {'cat': '&lt;no category&gt;', 'name': '&lt;no name&gt;', 'shell': '/bin/bash', 'trials': 1, 'cmd': '', 'timeout': 0, 'kill_timeout': 3, 'bail_out': True, 'use_systemd_run': False, 'env': OrderedDict()}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.FlashStep.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.FlashStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">i_stack</em>, <em class="sig-param">service_hub</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.FlashStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the step.</p>
+<p>The return values of this method will be collected and stored.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.FlashStep.cat">
+<code class="sig-name descname">cat</code><em class="property"> = 'flash'</em><a class="headerlink" href="#bisector.bisector.FlashStep.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.FlashStep.name">
+<code class="sig-name descname">name</code><em class="property"> = 'flash'</em><a class="headerlink" href="#bisector.bisector.FlashStep.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.RebootStep">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">RebootStep</code><span class="sig-paren">(</span><em class="sig-param">name=Default</em>, <em class="sig-param">cat=Default</em>, <em class="sig-param">cmd=Default</em>, <em class="sig-param">shell=Default</em>, <em class="sig-param">trials=Default</em>, <em class="sig-param">timeout=Default</em>, <em class="sig-param">kill_timeout=Default</em>, <em class="sig-param">bail_out=Default</em>, <em class="sig-param">use_systemd_run=Default</em>, <em class="sig-param">env=Default</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.RebootStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.ShellStep" title="bisector.bisector.ShellStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.ShellStep</span></code></a></p>
+<p>Similar to <a class="reference internal" href="#bisector.bisector.ShellStep" title="bisector.bisector.ShellStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShellStep</span></code></a> .</p>
+<p>Non-zero exit status of the command will be interpreted as a bisect
+abort, and zero exit status as bisect good.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.RebootStep.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!reboot-step'</em><a class="headerlink" href="#bisector.bisector.RebootStep.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.RebootStep.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'cat': 'boot', 'name': 'reboot'}, {'cat': 'shell', 'name': 'shell'}, {'cat': '&lt;no category&gt;', 'name': '&lt;no name&gt;', 'shell': '/bin/bash', 'trials': 1, 'cmd': '', 'timeout': 0, 'kill_timeout': 3, 'bail_out': True, 'use_systemd_run': False, 'env': OrderedDict()}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.RebootStep.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.RebootStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">i_stack</em>, <em class="sig-param">service_hub</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.RebootStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the step.</p>
+<p>The return values of this method will be collected and stored.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.RebootStep.cat">
+<code class="sig-name descname">cat</code><em class="property"> = 'boot'</em><a class="headerlink" href="#bisector.bisector.RebootStep.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.RebootStep.name">
+<code class="sig-name descname">name</code><em class="property"> = 'reboot'</em><a class="headerlink" href="#bisector.bisector.RebootStep.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.ExekallStepResult">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">ExekallStepResult</code><span class="sig-paren">(</span><em class="sig-param">results_path</em>, <em class="sig-param">db</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ExekallStepResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.StepResult" title="bisector.bisector.StepResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.StepResult</span></code></a></p>
+<p>Result of a LISA (exekall) step.</p>
+<p>It collects an <a class="reference internal" href="../exekall/internal_api.html#exekall.engine.ValueDB" title="exekall.engine.ValueDB"><code class="xref py py-class docutils literal notranslate"><span class="pre">exekall.engine.ValueDB</span></code></a>, as well as the path of the
+LISA result directory in addition than to what is collected by
+<a class="reference internal" href="#bisector.bisector.StepResult" title="bisector.bisector.StepResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepResult</span></code></a> .</p>
+<dl class="attribute">
+<dt id="bisector.bisector.ExekallStepResult.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!exekall-step-result'</em><a class="headerlink" href="#bisector.bisector.ExekallStepResult.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.ExekallStepResult.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'name': 'LISA-test'}, {}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.ExekallStepResult.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.ExekallStepResult.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.ExekallStepResult.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.ExekallStepResult.name">
+<code class="sig-name descname">name</code><em class="property"> = 'LISA-test'</em><a class="headerlink" href="#bisector.bisector.ExekallStepResult.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.Deprecated">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">Deprecated</code><a class="headerlink" href="#bisector.bisector.Deprecated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base class to inherit from to mark a subclass as deprecated.</p>
+<p>This removes it from the documented classes, and will generally mask it.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.LISATestStepResult">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">LISATestStepResult</code><span class="sig-paren">(</span><em class="sig-param">results_path</em>, <em class="sig-param">db</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.LISATestStepResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.ExekallStepResult" title="bisector.bisector.ExekallStepResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.ExekallStepResult</span></code></a>, <a class="reference internal" href="#bisector.bisector.Deprecated" title="bisector.bisector.Deprecated"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Deprecated</span></code></a></p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 1.0: </span>Deprecated alias for <a class="reference internal" href="#bisector.bisector.ExekallStepResult" title="bisector.bisector.ExekallStepResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExekallStepResult</span></code></a>, it is only kept around
+to be able to reload old YAML and pickle reports.</p>
+</div>
+<dl class="attribute">
+<dt id="bisector.bisector.LISATestStepResult.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!LISA-test-step-result'</em><a class="headerlink" href="#bisector.bisector.LISATestStepResult.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.LISATestStepResult.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({}, {'name': 'LISA-test'}, {}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.LISATestStepResult.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.LISATestStepResult.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.LISATestStepResult.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.LISATestStepResult.name">
+<code class="sig-name descname">name</code><em class="property"> = 'LISATestStepResult'</em><a class="headerlink" href="#bisector.bisector.LISATestStepResult.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.LISATestStep">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">LISATestStep</code><span class="sig-paren">(</span><em class="sig-param">compress_artifact=Default</em>, <em class="sig-param">upload_artifact=Default</em>, <em class="sig-param">delete_artifact=Default</em>, <em class="sig-param">prune_db=Default</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.LISATestStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.ShellStep" title="bisector.bisector.ShellStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.ShellStep</span></code></a></p>
+<p>Execute an exekall LISA test command and collect
+<a class="reference internal" href="../exekall/internal_api.html#exekall.engine.ValueDB" title="exekall.engine.ValueDB"><code class="xref py py-class docutils literal notranslate"><span class="pre">exekall.engine.ValueDB</span></code></a>. Also compress the result directory and
+record its path. It will also define some environment variables that are
+expected to be used by the command to be able to locate resources to
+collect.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.LISATestStep.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!exekall-LISA-test-step'</em><a class="headerlink" href="#bisector.bisector.LISATestStep.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.LISATestStep.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'cat': 'test', 'name': 'LISA-test', 'compress_artifact': True, 'upload_artifact': False, 'delete_artifact': False, 'prune_db': True, 'cmd': 'lisa-test'}, {'cat': 'shell', 'name': 'shell'}, {'cat': '&lt;no category&gt;', 'name': '&lt;no name&gt;', 'shell': '/bin/bash', 'trials': 1, 'cmd': '', 'timeout': 0, 'kill_timeout': 3, 'bail_out': True, 'use_systemd_run': False, 'env': OrderedDict()}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.LISATestStep.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.LISATestStep.options">
+<code class="sig-name descname">options</code><em class="property"> = {'__init__': {'bail_out': BoolParam&lt;bool&gt;, 'cmd': BoolOrStrParam&lt;non-empty str&gt;, 'compress_artifact': BoolParam&lt;bool&gt;, 'delete_artifact': BoolParam&lt;bool&gt;, 'env': EnvListParam&lt;env var list&gt;, 'kill_timeout': TimeoutParam&lt;int or &quot;inf&quot;&gt;, 'prune_db': BoolParam&lt;bool&gt;, 'shell': BoolOrStrParam&lt;non-empty str&gt;, 'timeout': TimeoutParam&lt;int or &quot;inf&quot;&gt;, 'upload_artifact': BoolParam&lt;bool&gt;, 'use_systemd_run': BoolParam&lt;bool&gt;}, 'report': {'download': BoolParam&lt;bool&gt;, 'dump_artifact_dirs': BoolOrStrParam&lt;non-empty str&gt;, 'export_db': BoolOrStrParam&lt;non-empty str&gt;, 'export_logs': BoolOrStrParam&lt;non-empty str&gt;, 'ignore_excep': CommaListParam&lt;comma-separated list&gt;, 'ignore_non_error': BoolParam&lt;bool&gt;, 'ignore_non_issue': BoolParam&lt;bool&gt;, 'ignore_testcase': CommaListParam&lt;comma-separated list&gt;, 'iterations': CommaListRangesParam&lt;comma-separated list of integer ranges&gt;, 'result_uuid': CommaListParam&lt;comma-separated list&gt;, 'show_artifact_dirs': BoolParam&lt;bool&gt;, 'show_basic': BoolParam&lt;bool&gt;, 'show_details': ChoiceOrBoolParam&lt;&quot;msg&quot; or bool&gt;, 'show_dist': BoolParam&lt;bool&gt;, 'show_pass_rate': BoolParam&lt;bool&gt;, 'show_rates': BoolParam&lt;bool&gt;, 'testcase': CommaListParam&lt;comma-separated list&gt;, 'upload_artifact': BoolParam&lt;bool&gt;, 'verbose': BoolParam&lt;bool&gt;}}</em><a class="headerlink" href="#bisector.bisector.LISATestStep.options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.LISATestStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">i_stack</em>, <em class="sig-param">service_hub</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.LISATestStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the step.</p>
+<p>The return values of this method will be collected and stored.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.LISATestStep.report">
+<code class="sig-name descname">report</code><span class="sig-paren">(</span><em class="sig-param">step_res_seq</em>, <em class="sig-param">service_hub</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">show_basic=False</em>, <em class="sig-param">show_rates=True</em>, <em class="sig-param">show_dist=False</em>, <em class="sig-param">show_details=False</em>, <em class="sig-param">show_pass_rate=False</em>, <em class="sig-param">show_artifact_dirs=False</em>, <em class="sig-param">testcase=[]</em>, <em class="sig-param">result_uuid=[]</em>, <em class="sig-param">ignore_testcase=[]</em>, <em class="sig-param">iterations=[]</em>, <em class="sig-param">ignore_non_issue=False</em>, <em class="sig-param">ignore_non_error=False</em>, <em class="sig-param">ignore_excep=[]</em>, <em class="sig-param">dump_artifact_dirs=False</em>, <em class="sig-param">export_db=False</em>, <em class="sig-param">export_logs=False</em>, <em class="sig-param">download=True</em>, <em class="sig-param">upload_artifact=False</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.LISATestStep.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print out a report for a list of executions artifact created using
+the run() method.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.LISATestStep.cat">
+<code class="sig-name descname">cat</code><em class="property"> = 'test'</em><a class="headerlink" href="#bisector.bisector.LISATestStep.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.LISATestStep.name">
+<code class="sig-name descname">name</code><em class="property"> = 'LISA-test'</em><a class="headerlink" href="#bisector.bisector.LISATestStep.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.ExekallLISATestStep">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">ExekallLISATestStep</code><span class="sig-paren">(</span><em class="sig-param">compress_artifact=Default</em>, <em class="sig-param">upload_artifact=Default</em>, <em class="sig-param">delete_artifact=Default</em>, <em class="sig-param">prune_db=Default</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ExekallLISATestStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.LISATestStep" title="bisector.bisector.LISATestStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.LISATestStep</span></code></a>, <a class="reference internal" href="#bisector.bisector.Deprecated" title="bisector.bisector.Deprecated"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Deprecated</span></code></a></p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 1.0: </span>Deprecated alias for <a class="reference internal" href="#bisector.bisector.LISATestStep" title="bisector.bisector.LISATestStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">LISATestStep</span></code></a>, it is only kept around to
+be able to reload old pickle reports.</p>
+</div>
+<dl class="attribute">
+<dt id="bisector.bisector.ExekallLISATestStep.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap(ChainMap({'cat': 'test', 'name': 'exekall-LISA-test', 'compress_artifact': True, 'upload_artifact': False, 'delete_artifact': False, 'prune_db': True, 'cmd': 'lisa-test'}, {'cat': 'shell', 'name': 'shell'}, {'cat': '&lt;no category&gt;', 'name': '&lt;no name&gt;', 'shell': '/bin/bash', 'trials': 1, 'cmd': '', 'timeout': 0, 'kill_timeout': 3, 'bail_out': True, 'use_systemd_run': False, 'env': OrderedDict()}, {}, {'name': None}), {'cat': 'test', 'name': 'LISA-test', 'compress_artifact': True, 'upload_artifact': False, 'delete_artifact': False, 'prune_db': True, 'cmd': 'lisa-test'}, {'cat': 'shell', 'name': 'shell'}, {'cat': '&lt;no category&gt;', 'name': '&lt;no name&gt;', 'shell': '/bin/bash', 'trials': 1, 'cmd': '', 'timeout': 0, 'kill_timeout': 3, 'bail_out': True, 'use_systemd_run': False, 'env': OrderedDict()}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.ExekallLISATestStep.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.ExekallLISATestStep.cat">
+<code class="sig-name descname">cat</code><em class="property"> = 'test'</em><a class="headerlink" href="#bisector.bisector.ExekallLISATestStep.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.ExekallLISATestStep.name">
+<code class="sig-name descname">name</code><em class="property"> = 'exekall-LISA-test'</em><a class="headerlink" href="#bisector.bisector.ExekallLISATestStep.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.StepNotifService">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">StepNotifService</code><span class="sig-paren">(</span><em class="sig-param">slave_manager</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepNotifService" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Allows steps to send notifications.</p>
+<dl class="method">
+<dt id="bisector.bisector.StepNotifService.notif">
+<code class="sig-name descname">notif</code><span class="sig-paren">(</span><em class="sig-param">step</em>, <em class="sig-param">msg</em>, <em class="sig-param">display_time=3</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepNotifService.notif" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.UploadService">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">UploadService</code><a class="headerlink" href="#bisector.bisector.UploadService" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<dl class="method">
+<dt id="bisector.bisector.UploadService.upload">
+<em class="property">abstract </em><code class="sig-name descname">upload</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.UploadService.upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload a file</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.urlretrieve">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">urlretrieve</code><span class="sig-paren">(</span><em class="sig-param">url</em>, <em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.urlretrieve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.ArtifactorialService">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">ArtifactorialService</code><span class="sig-paren">(</span><em class="sig-param">url=None</em>, <em class="sig-param">token=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ArtifactorialService" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.UploadService" title="bisector.bisector.UploadService"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.UploadService</span></code></a></p>
+<p>Upload files to Artifactorial.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – URL of the Artifactorial folder to upload to,
+or env var ARTIFACTORIAL_FOLDER</p></li>
+<li><p><strong>token</strong> – Token granting the write access to the folder,
+or env var ARTIFACTORIAL_TOKEN</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="bisector.bisector.ArtifactorialService.upload">
+<code class="sig-name descname">upload</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ArtifactorialService.upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload a file to Artifactorial.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – path to the file to Uploading</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.update_json">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">update_json</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">mapping</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.update_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update a JSON file with the given mapping.</p>
+<p>That allows accumulation of keys coming from different sources in one file.
+Newly inserted keys will override existing keys with the same name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.load_steps_list">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">load_steps_list</code><span class="sig-paren">(</span><em class="sig-param">yaml_path</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.load_steps_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.load_yaml">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">load_yaml</code><span class="sig-paren">(</span><em class="sig-param">yaml_path</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.load_yaml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the sequence of steps from a YAML file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.get_class">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">get_class</code><span class="sig-paren">(</span><em class="sig-param">full_qual_name</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.get_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the class name of an entry in a YAML steps map file and return the
+module name and the class name. It will also append the necessary
+directories to PYTHONPATH if the class comes from another module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>full_qual_name</strong> – The qualified name of the class that is suitable
+for serialization, e.g.:
+/path/to/mod.py:mymodule.LISA-step
+Note: the name is not the Python class name, but the
+value of the <code class="docutils literal notranslate"><span class="pre">name</span></code> attribute of the class.
+The path to the script can be omitted if the module
+is directly importable (i.e. in sys.path). The module
+can be omitted for class names that are already
+imported in the script namespace.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.import_file">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">import_file</code><span class="sig-paren">(</span><em class="sig-param">script_name</em>, <em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.import_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.import_files">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">import_files</code><span class="sig-paren">(</span><em class="sig-param">src_files</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.import_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.get_subclasses">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">get_subclasses</code><span class="sig-paren">(</span><em class="sig-param">cls</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.get_subclasses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the subclasses recursively.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.get_step_by_name">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">get_step_by_name</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.get_step_by_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.instantiate_step">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">instantiate_step</code><span class="sig-paren">(</span><em class="sig-param">spec</em>, <em class="sig-param">step_options</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.instantiate_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the right Step* class using Step*.name attribute and build an instance
+of it.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.StepSeqResult">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">StepSeqResult</code><span class="sig-paren">(</span><em class="sig-param">step</em>, <em class="sig-param">steps_res</em>, <em class="sig-param">run_time=0</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepSeqResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.StepResultBase" title="bisector.bisector.StepResultBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.StepResultBase</span></code></a></p>
+<p>Result of a sequence of steps.</p>
+<p>The main purpose is to store the results of one iteration of a
+<a class="reference internal" href="#bisector.bisector.MacroStep" title="bisector.bisector.MacroStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">MacroStep</span></code></a> .</p>
+<dl class="attribute">
+<dt id="bisector.bisector.StepSeqResult.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!step-seq-result'</em><a class="headerlink" href="#bisector.bisector.StepSeqResult.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.StepSeqResult.bisect_ret">
+<em class="property">property </em><code class="sig-name descname">bisect_ret</code><a class="headerlink" href="#bisector.bisector.StepSeqResult.bisect_ret" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepSeqResult.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.StepSeqResult.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepSeqResult.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.StepSeqResult.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StepSeqResult.name">
+<code class="sig-name descname">name</code><em class="property"> = 'StepSeqResult'</em><a class="headerlink" href="#bisector.bisector.StepSeqResult.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.ServiceHub">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">ServiceHub</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ServiceHub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="bisector.bisector.ServiceHub.register_service">
+<code class="sig-name descname">register_service</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">service</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ServiceHub.register_service" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.ServiceHub.unregister_service">
+<code class="sig-name descname">unregister_service</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ServiceHub.unregister_service" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.MacroStepResult">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">MacroStepResult</code><span class="sig-paren">(</span><em class="sig-param">step</em>, <em class="sig-param">res_list</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MacroStepResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.StepResultBase" title="bisector.bisector.StepResultBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.StepResultBase</span></code></a></p>
+<p>Result of the execution of a <a class="reference internal" href="#bisector.bisector.MacroStep" title="bisector.bisector.MacroStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">MacroStep</span></code></a> .</p>
+<p>It mainly contains a sequence of <a class="reference internal" href="#bisector.bisector.StepSeqResult" title="bisector.bisector.StepSeqResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepSeqResult</span></code></a> instances, each of them
+corresponding to one iteration of the <a class="reference internal" href="#bisector.bisector.MacroStep" title="bisector.bisector.MacroStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">MacroStep</span></code></a> .</p>
+<dl class="attribute">
+<dt id="bisector.bisector.MacroStepResult.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!macro-step-result'</em><a class="headerlink" href="#bisector.bisector.MacroStepResult.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.MacroStepResult.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'name': 'macro'}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.MacroStepResult.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.MacroStepResult.avg_run_time">
+<em class="property">property </em><code class="sig-name descname">avg_run_time</code><a class="headerlink" href="#bisector.bisector.MacroStepResult.avg_run_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.MacroStepResult.bisect_ret">
+<em class="property">property </em><code class="sig-name descname">bisect_ret</code><a class="headerlink" href="#bisector.bisector.MacroStepResult.bisect_ret" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.MacroStepResult.filtered_bisect_ret">
+<code class="sig-name descname">filtered_bisect_ret</code><span class="sig-paren">(</span><em class="sig-param">steps_filter=None</em>, <em class="sig-param">ignore_yield=False</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MacroStepResult.filtered_bisect_ret" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dummy implementation to simplify bisect status aggreagation code.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.MacroStepResult.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.MacroStepResult.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.MacroStepResult.name">
+<code class="sig-name descname">name</code><em class="property"> = 'macro'</em><a class="headerlink" href="#bisector.bisector.MacroStepResult.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.match_step_name">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">match_step_name</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">pattern_list</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.match_step_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the patterns matching the step name, and return them in a list.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.StepFilter">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">StepFilter</code><span class="sig-paren">(</span><em class="sig-param">skip={}</em>, <em class="sig-param">only={}</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Filter the steps of a <a class="reference internal" href="#bisector.bisector.MacroStep" title="bisector.bisector.MacroStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">MacroStep</span></code></a> . This allows restricting the display
+to a subset of steps.</p>
+<dl class="method">
+<dt id="bisector.bisector.StepFilter.filter">
+<code class="sig-name descname">filter</code><span class="sig-paren">(</span><em class="sig-param">steps_list</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StepFilter.filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.MacroStep">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">MacroStep</code><span class="sig-paren">(</span><em class="sig-param">*</em>, <em class="sig-param">steps=None</em>, <em class="sig-param">name=Default</em>, <em class="sig-param">cat=Default</em>, <em class="sig-param">stat_test=Default</em>, <em class="sig-param">step_options=None</em>, <em class="sig-param">iterations=Default</em>, <em class="sig-param">timeout=Default</em>, <em class="sig-param">bail_out_early=Default</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MacroStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.StepBase" title="bisector.bisector.StepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.StepBase</span></code></a></p>
+<p>Provide a loop-like construct to the steps definitions.</p>
+<p>All sub-steps will be executed in order. This sequence will be repeated
+for the given number of iterations or until it times out. The steps
+definition YAML configuration file is interpreted assuming an implicit
+toplevel <a class="reference internal" href="#bisector.bisector.MacroStep" title="bisector.bisector.MacroStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">MacroStep</span></code></a> that is parameterized using command line options.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.MacroStep.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!macro-step'</em><a class="headerlink" href="#bisector.bisector.MacroStep.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.MacroStep.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'name': 'macro', 'cat': 'macro', 'timeout': 0, 'iterations': 'inf', 'steps_list': [], 'bail_out_early': False}, {'cat': '&lt;no category&gt;', 'name': '&lt;no name&gt;', 'shell': '/bin/bash', 'trials': 1, 'cmd': '', 'timeout': 0, 'kill_timeout': 3, 'bail_out': True, 'use_systemd_run': False, 'env': OrderedDict()}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.MacroStep.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.MacroStep.options">
+<code class="sig-name descname">options</code><em class="property"> = {'__init__': {'bail_out_early': BoolParam&lt;bool&gt;, 'iterations': IterationParam&lt;int or &quot;inf&quot;&gt;, 'timeout': TimeoutParam&lt;int or &quot;inf&quot;&gt;}, 'report': {}}</em><a class="headerlink" href="#bisector.bisector.MacroStep.options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Groups a set of steps in a logical sequence.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.MacroStep.name">
+<code class="sig-name descname">name</code><em class="property"> = 'macro'</em><a class="headerlink" href="#bisector.bisector.MacroStep.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.MacroStep.cat">
+<code class="sig-name descname">cat</code><em class="property"> = 'macro'</em><a class="headerlink" href="#bisector.bisector.MacroStep.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.MacroStep.reinit">
+<code class="sig-name descname">reinit</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">steps=None</em>, <em class="sig-param">step_options=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MacroStep.reinit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.MacroStep.iteration_range">
+<code class="sig-name descname">iteration_range</code><span class="sig-paren">(</span><em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MacroStep.iteration_range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.MacroStep.filter_steps">
+<code class="sig-name descname">filter_steps</code><span class="sig-paren">(</span><em class="sig-param">steps_filter=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MacroStep.filter_steps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.MacroStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">i_stack</em>, <em class="sig-param">service_hub</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MacroStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the step.</p>
+<p>The return values of this method will be collected and stored.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.MacroStep.toplevel_run">
+<code class="sig-name descname">toplevel_run</code><span class="sig-paren">(</span><em class="sig-param">report_options</em>, <em class="sig-param">slave_manager=None</em>, <em class="sig-param">previous_res=None</em>, <em class="sig-param">service_hub=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MacroStep.toplevel_run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equivalent of <a class="reference internal" href="#bisector.bisector.MacroStep.run" title="bisector.bisector.MacroStep.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> method with additional signal handling and
+report generation at every step. Must only be called once for the root
+<a class="reference internal" href="#bisector.bisector.MacroStep" title="bisector.bisector.MacroStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">MacroStep</span></code></a> .</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.MacroStep.report">
+<code class="sig-name descname">report</code><span class="sig-paren">(</span><em class="sig-param">macrostep_res_seq</em>, <em class="sig-param">service_hub</em>, <em class="sig-param">steps_filter=None</em>, <em class="sig-param">step_options={}</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MacroStep.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Report the results of nested steps.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.MacroStep.get_step_src_files">
+<code class="sig-name descname">get_step_src_files</code><span class="sig-paren">(</span><em class="sig-param">src_file_set=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.MacroStep.get_step_src_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.StatTestMeta">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">StatTestMeta</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StatTestMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABCMeta</span></code></a>, <a class="reference internal" href="#bisector.bisector.SerializableMeta" title="bisector.bisector.SerializableMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.SerializableMeta</span></code></a></p>
+<p>Metaclass of all statistical tests.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.StatTestABC">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">StatTestABC</code><a class="headerlink" href="#bisector.bisector.StatTestABC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Serializable" title="bisector.bisector.Serializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Serializable</span></code></a></p>
+<p>Abstract Base Class of all statistical tests.</p>
+<dl class="method">
+<dt id="bisector.bisector.StatTestABC.test">
+<em class="property">abstract </em><code class="sig-name descname">test</code><span class="sig-paren">(</span><em class="sig-param">failure_rate</em>, <em class="sig-param">iteration_n</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.StatTestABC.test" title="Permalink to this definition">¶</a></dt>
+<dd><p>failure_rate ranges in [0;1] and is the number of failed iterations
+divided by the number of properly executed iterations.
+iteration_n is the number of iterations that executed with a clear
+bisect return value (GOOD or BAD). It returns a BisectRet value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StatTestABC.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.StatTestABC.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StatTestABC.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.StatTestABC.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.StatTestABC.name">
+<code class="sig-name descname">name</code><em class="property"> = 'StatTestABC'</em><a class="headerlink" href="#bisector.bisector.StatTestABC.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.BasicStatTest">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">BasicStatTest</code><span class="sig-paren">(</span><em class="sig-param">allowed_bad_percent=0</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BasicStatTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.StatTestABC" title="bisector.bisector.StatTestABC"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.StatTestABC</span></code></a></p>
+<p>Basic statistical test using a threshold for the failure rate.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.BasicStatTest.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!bad-percentage-stat-test'</em><a class="headerlink" href="#bisector.bisector.BasicStatTest.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.BasicStatTest.test">
+<code class="sig-name descname">test</code><span class="sig-paren">(</span><em class="sig-param">failure_rate</em>, <em class="sig-param">iteration_n</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BasicStatTest.test" title="Permalink to this definition">¶</a></dt>
+<dd><p>failure_rate ranges in [0;1] and is the number of failed iterations
+divided by the number of properly executed iterations.
+iteration_n is the number of iterations that executed with a clear
+bisect return value (GOOD or BAD). It returns a BisectRet value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BasicStatTest.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.BasicStatTest.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BasicStatTest.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.BasicStatTest.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BasicStatTest.name">
+<code class="sig-name descname">name</code><em class="property"> = 'BasicStatTest'</em><a class="headerlink" href="#bisector.bisector.BasicStatTest.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.BinomStatTest">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">BinomStatTest</code><span class="sig-paren">(</span><em class="sig-param">good_failure</em>, <em class="sig-param">good_sample_size</em>, <em class="sig-param">bad_failure</em>, <em class="sig-param">commit_n</em>, <em class="sig-param">overall_failure</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BinomStatTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.BasicStatTest" title="bisector.bisector.BasicStatTest"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.BasicStatTest</span></code></a></p>
+<p>Binomial test on the failure rate.</p>
+<p>TODO: replace that with a Fisher exact test</p>
+<dl class="attribute">
+<dt id="bisector.bisector.BinomStatTest.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!binomial-stat-test'</em><a class="headerlink" href="#bisector.bisector.BinomStatTest.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.BinomStatTest.test">
+<code class="sig-name descname">test</code><span class="sig-paren">(</span><em class="sig-param">failure_rate</em>, <em class="sig-param">iteration_n</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.BinomStatTest.test" title="Permalink to this definition">¶</a></dt>
+<dd><p>failure_rate ranges in [0;1] and is the number of failed iterations
+divided by the number of properly executed iterations.
+iteration_n is the number of iterations that executed with a clear
+bisect return value (GOOD or BAD). It returns a BisectRet value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BinomStatTest.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({}, {}, {}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.BinomStatTest.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BinomStatTest.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.BinomStatTest.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.BinomStatTest.name">
+<code class="sig-name descname">name</code><em class="property"> = 'BinomStatTest'</em><a class="headerlink" href="#bisector.bisector.BinomStatTest.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.do_steps_help">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">do_steps_help</code><span class="sig-paren">(</span><em class="sig-param">cls_list</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.do_steps_help" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print out the help for the given steps classes.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.do_run">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">do_run</code><span class="sig-paren">(</span><em class="sig-param">slave_manager</em>, <em class="sig-param">iteration_n</em>, <em class="sig-param">stat_test</em>, <em class="sig-param">steps_filter=None</em>, <em class="sig-param">bail_out_early=False</em>, <em class="sig-param">inline_step_list=[]</em>, <em class="sig-param">steps_path=None</em>, <em class="sig-param">report_options=None</em>, <em class="sig-param">overall_timeout=0</em>, <em class="sig-param">step_options=None</em>, <em class="sig-param">git_clean=False</em>, <em class="sig-param">resume_path=None</em>, <em class="sig-param">service_hub=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.do_run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the specified list of steps.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.ReportPreamble">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">ReportPreamble</code><span class="sig-paren">(</span><em class="sig-param">report_version</em>, <em class="sig-param">src_files</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ReportPreamble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Serializable" title="bisector.bisector.Serializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Serializable</span></code></a></p>
+<p>Informations split out from the <a class="reference internal" href="#bisector.bisector.Report" title="bisector.bisector.Report"><code class="xref py py-class docutils literal notranslate"><span class="pre">Report</span></code></a> so that they can be used to
+prepare the environment before loading the report body. It is useful to
+make sure all the modules are imported prior to steps results
+restoration.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.ReportPreamble.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!report-preamble'</em><a class="headerlink" href="#bisector.bisector.ReportPreamble.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.ReportPreamble.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({'src_files': []}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.ReportPreamble.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.ReportPreamble.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.ReportPreamble.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.ReportPreamble.name">
+<code class="sig-name descname">name</code><em class="property"> = 'ReportPreamble'</em><a class="headerlink" href="#bisector.bisector.ReportPreamble.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.check_report_path">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">check_report_path</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">probe_file</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.check_report_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.disable_gc">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">disable_gc</code><span class="sig-paren">(</span><em class="sig-param">f</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.disable_gc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to disable garbage collection during the execution of the
+decorated function.</p>
+<p>This can speed-up code that creates a lot of objects in a short amount of
+time.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.Report">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">Report</code><span class="sig-paren">(</span><em class="sig-param">macrostep_res</em>, <em class="sig-param">description=''</em>, <em class="sig-param">path=None</em>, <em class="sig-param">src_files=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.Report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bisector.bisector.Serializable" title="bisector.bisector.Serializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">bisector.bisector.Serializable</span></code></a></p>
+<p>Report body containg the result of the top level <a class="reference internal" href="#bisector.bisector.MacroStep" title="bisector.bisector.MacroStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">MacroStep</span></code></a> .</p>
+<dl class="attribute">
+<dt id="bisector.bisector.Report.yaml_tag">
+<code class="sig-name descname">yaml_tag</code><em class="property"> = '!report'</em><a class="headerlink" href="#bisector.bisector.Report.yaml_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.Report.dont_save">
+<code class="sig-name descname">dont_save</code><em class="property"> = ['preamble', 'path']</em><a class="headerlink" href="#bisector.bisector.Report.dont_save" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.Report.yaml">
+<code class="sig-name descname">yaml</code><em class="property"> = &lt;ruamel.yaml.main.YAML object&gt;</em><a class="headerlink" href="#bisector.bisector.Report.yaml" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.Report.REPORT_CACHE_TEMPLATE">
+<code class="sig-name descname">REPORT_CACHE_TEMPLATE</code><em class="property"> = '{report_filename}.cache.pickle'</em><a class="headerlink" href="#bisector.bisector.Report.REPORT_CACHE_TEMPLATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.Report.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param">path=None</em>, <em class="sig-param">upload_service=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.Report.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the report to the specified path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – Used to save the report is not None, otherwise use the
+existing <code class="docutils literal notranslate"><span class="pre">path</span></code> attribute.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.Report.load">
+<em class="property">classmethod </em><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">steps_path=None</em>, <em class="sig-param">use_cache=False</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.Report.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore a serialized <a class="reference internal" href="#bisector.bisector.Report" title="bisector.bisector.Report"><code class="xref py py-class docutils literal notranslate"><span class="pre">Report</span></code></a> from the given file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Path to the Report to load. Can be an http URL or a local
+filename.</p></li>
+<li><p><strong>steps_path</strong> – Path to the steps definition YAML file. It is only
+needed if the report contains foreign classes that
+must be imported before restoring the report.</p></li>
+<li><p><strong>use_cache</strong> – If True, will generate a cached version of the report
+using the fastest on-disk format available. The cache
+is invalidated if the modification time of the file
+is newer than that of the cache.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.Report.bisect_ret">
+<em class="property">property </em><code class="sig-name descname">bisect_ret</code><a class="headerlink" href="#bisector.bisector.Report.bisect_ret" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.Report.filtered_bisect_ret">
+<code class="sig-name descname">filtered_bisect_ret</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.Report.filtered_bisect_ret" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.Report.show">
+<code class="sig-name descname">show</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">service_hub=None</em>, <em class="sig-param">stat_test=None</em>, <em class="sig-param">steps_filter=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.Report.show" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the report results.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.Report.attr_init">
+<code class="sig-name descname">attr_init</code><em class="property"> = ChainMap({}, {'name': None})</em><a class="headerlink" href="#bisector.bisector.Report.attr_init" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.Report.cat">
+<code class="sig-name descname">cat</code><em class="property"> = None</em><a class="headerlink" href="#bisector.bisector.Report.cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.Report.name">
+<code class="sig-name descname">name</code><em class="property"> = 'Report'</em><a class="headerlink" href="#bisector.bisector.Report.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.ensure_dir">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">ensure_dir</code><span class="sig-paren">(</span><em class="sig-param">file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.ensure_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure that the parent directory of the <cite>file_path</cite> exists and creates if
+necessary.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.format_placeholders">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">format_placeholders</code><span class="sig-paren">(</span><em class="sig-param">string</em>, <em class="sig-param">placeholder_map</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.format_placeholders" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="bisector.bisector.DBUS_SERVER_BUS_NAME">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">DBUS_SERVER_BUS_NAME</code><em class="property"> = 'org.bisector.Server'</em><a class="headerlink" href="#bisector.bisector.DBUS_SERVER_BUS_NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Well-known DBus name used by the monitor-server.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="bisector.bisector.DBUS_SLAVE_BOOK_PATH">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">DBUS_SLAVE_BOOK_PATH</code><em class="property"> = '/org/bisector/SlaveBook'</em><a class="headerlink" href="#bisector.bisector.DBUS_SLAVE_BOOK_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>DBus path under which the <a class="reference internal" href="#bisector.bisector.DBusSlaveBook" title="bisector.bisector.DBusSlaveBook"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBusSlaveBook</span></code></a> is published by the monitor-server.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="bisector.bisector.DBUS_SLAVE_BUS_NAME_TEMPLATE">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">DBUS_SLAVE_BUS_NAME_TEMPLATE</code><em class="property"> = 'org.bisector.Slave-{id}'</em><a class="headerlink" href="#bisector.bisector.DBUS_SLAVE_BUS_NAME_TEMPLATE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Template of the DBus well-known name used by slaves.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="bisector.bisector.DBUS_SLAVE_MANAGER_PATH">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">DBUS_SLAVE_MANAGER_PATH</code><em class="property"> = '/org/bisector/SlaveManager'</em><a class="headerlink" href="#bisector.bisector.DBUS_SLAVE_MANAGER_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>DBus path under which the <a class="reference internal" href="#bisector.bisector.DBusSlaveManager" title="bisector.bisector.DBusSlaveManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">DBusSlaveManager</span></code></a> is published by the slaves.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.get_dbus_bus">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">get_dbus_bus</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.get_dbus_bus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.dbus_variant">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">dbus_variant</code><span class="sig-paren">(</span><em class="sig-param">v</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.dbus_variant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a <code class="xref py py-class docutils literal notranslate"><span class="pre">gi.repository.Glib.Variant</span></code> instance out of a Python
+object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.dbus_variant_dict">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">dbus_variant_dict</code><span class="sig-paren">(</span><em class="sig-param">dct</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.dbus_variant_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a dictionary with <code class="xref py py-class docutils literal notranslate"><span class="pre">gi.repository.GLib.Variant</span></code> values, so it
+can be used to create DBus types a{sv} objects.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.dbus_property">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">dbus_property</code><a class="headerlink" href="#bisector.bisector.dbus_property" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#property" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">property</span></code></a></p>
+<p>Like standard property decorator, except that signal_prop_change(&lt;prop
+name&gt;) will be called when the setter function returns, to automatically
+emit the PropertiesChanged signal.</p>
+<dl class="method">
+<dt id="bisector.bisector.dbus_property.setter">
+<code class="sig-name descname">setter</code><span class="sig-paren">(</span><em class="sig-param">content=True</em>, <em class="sig-param">iface=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.dbus_property.setter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unlike property.setter, this is a decorator with parameters.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.PipeSetter">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">PipeSetter</code><span class="sig-paren">(</span><em class="sig-param">pipe</em>, <em class="sig-param">attrs</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.PipeSetter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Write to a pipe when an attribute is set.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.DBusSlaveManager">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">DBusSlaveManager</code><span class="sig-paren">(</span><em class="sig-param">desc</em>, <em class="sig-param">pid</em>, <em class="sig-param">start_ts</em>, <em class="sig-param">start_monotonic_ts</em>, <em class="sig-param">report_path</em>, <em class="sig-param">log_path</em>, <em class="sig-param">path='/org/bisector/SlaveManager'</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Object shared between the main process and the DBus slave thread.</p>
+<p>It interacts with the bus to influence the execution of the main thread.</p>
+<dl class="attribute">
+<dt id="bisector.bisector.DBusSlaveManager.prop_iface">
+<code class="sig-name descname">prop_iface</code><em class="property"> = 'org.bisector.SlaveManager'</em><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.prop_iface" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.DBusSlaveManager.dbus">
+<code class="sig-name descname">dbus</code><em class="property"> = '\n    &lt;node&gt;\n      &lt;interface name=\'org.bisector.SlaveManager\'&gt;\n        &lt;method name=\'Control\'&gt;\n          &lt;arg type=\'s\' name=\'cmd\' direction=\'in\' /&gt;\n          &lt;arg type=\'b\' name=\'response\' direction=\'out\' /&gt;\n        &lt;/method&gt;\n\n        &lt;property name=&quot;State&quot; type=&quot;(ss)&quot; access=&quot;read&quot;&gt;\n          &lt;annotation name=&quot;org.freedesktop.DBus.Property.EmitsChangedSignal&quot; value=&quot;true&quot;/&gt;\n        &lt;/property&gt;\n\n        &lt;property name=&quot;Iteration&quot; type=&quot;t&quot; access=&quot;read&quot;&gt;\n          &lt;annotation name=&quot;org.freedesktop.DBus.Property.EmitsChangedSignal&quot; value=&quot;true&quot;/&gt;\n        &lt;/property&gt;\n\n        &lt;property name=&quot;StepNotif&quot; type=&quot;(sst)&quot; access=&quot;read&quot;&gt;\n          &lt;annotation name=&quot;org.freedesktop.DBus.Property.EmitsChangedSignal&quot; value=&quot;true&quot;/&gt;\n        &lt;/property&gt;\n\n        &lt;property name=&quot;Description&quot; type=&quot;s&quot; access=&quot;read&quot; /&gt;\n        &lt;property name=&quot;PID&quot; type=&quot;t&quot; access=&quot;read&quot; /&gt;\n        &lt;property name=&quot;RunTime&quot; type=&quot;t&quot; access=&quot;read&quot; /&gt;\n        &lt;property name=&quot;StartTs&quot; type=&quot;t&quot; access=&quot;read&quot; /&gt;\n        &lt;property name=&quot;StartMonotonicTs&quot; type=&quot;t&quot; access=&quot;read&quot; /&gt;\n        &lt;property name=&quot;ReportPath&quot; type=&quot;s&quot; access=&quot;read&quot; /&gt;\n        &lt;property name=&quot;LogPath&quot; type=&quot;s&quot; access=&quot;read&quot; /&gt;\n        &lt;property name=&quot;SupportedCommands&quot; type=&quot;as&quot; access=&quot;read&quot; /&gt;\n      &lt;/interface&gt;\n    &lt;/node&gt;\n    '</em><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.dbus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.DBusSlaveManager.PropertiesChanged">
+<code class="sig-name descname">PropertiesChanged</code><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.PropertiesChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveManager.ReportPath">
+<em class="property">property </em><code class="sig-name descname">ReportPath</code><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.ReportPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveManager.RunTime">
+<em class="property">property </em><code class="sig-name descname">RunTime</code><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.RunTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveManager.State">
+<em class="property">property </em><code class="sig-name descname">State</code><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.State" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveManager.Iteration">
+<em class="property">property </em><code class="sig-name descname">Iteration</code><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.Iteration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveManager.StepNotif">
+<em class="property">property </em><code class="sig-name descname">StepNotif</code><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.StepNotif" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveManager.publish">
+<code class="sig-name descname">publish</code><span class="sig-paren">(</span><em class="sig-param">bus</em>, <em class="sig-param">bus_name_template='org.bisector.Slave-{id}'</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.publish" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveManager.consume_prop">
+<code class="sig-name descname">consume_prop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.consume_prop" title="Permalink to this definition">¶</a></dt>
+<dd><p>This must only be called from the DBus thread, since it emits a
+DBus signal.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bisector.bisector.DBusSlaveManager.SupportedCommands">
+<code class="sig-name descname">SupportedCommands</code><em class="property"> = ('pause', 'stop', 'continue', 'kill')</em><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.SupportedCommands" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveManager.Control">
+<code class="sig-name descname">Control</code><span class="sig-paren">(</span><em class="sig-param">cmd</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveManager.Control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.DBusSlaveThread">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">DBusSlaveThread</code><span class="sig-paren">(</span><em class="sig-param">properties</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveThread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveThread.thread_main">
+<code class="sig-name descname">thread_main</code><span class="sig-paren">(</span><em class="sig-param">init_done</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveThread.thread_main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveThread.quit_thread">
+<code class="sig-name descname">quit_thread</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveThread.quit_thread" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.parse_slave_props">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">parse_slave_props</code><span class="sig-paren">(</span><em class="sig-param">slave_props</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.parse_slave_props" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.send_cmd">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">send_cmd</code><span class="sig-paren">(</span><em class="sig-param">slave_id</em>, <em class="sig-param">slave_manager</em>, <em class="sig-param">cmd</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.send_cmd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.do_monitor">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">do_monitor</code><span class="sig-paren">(</span><em class="sig-param">slave_id</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.do_monitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.do_monitor_server">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">do_monitor_server</code><span class="sig-paren">(</span><em class="sig-param">default_notif</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.do_monitor_server" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.DBusSlaveBook">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">DBusSlaveBook</code><span class="sig-paren">(</span><em class="sig-param">bus</em>, <em class="sig-param">name_lost_callback</em>, <em class="sig-param">bus_name='org.bisector.Server'</em>, <em class="sig-param">path='/org/bisector/SlaveBook'</em>, <em class="sig-param">default_notif=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveBook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="attribute">
+<dt id="bisector.bisector.DBusSlaveBook.dbus">
+<code class="sig-name descname">dbus</code><em class="property"> = &quot;\n    &lt;node&gt;\n      &lt;interface name='org.bisector.SlaveBook'&gt;\n        &lt;method name='RegisterSlave'&gt;\n          &lt;arg type='(so)' name='location' direction='in' /&gt;\n        &lt;/method&gt;\n\n        &lt;method name='GetSlavesLocation'&gt;\n          &lt;arg type='a(so)' name='locations' direction='out' /&gt;\n        &lt;/method&gt;\n\n        &lt;method name='SetDesktopNotif'&gt;\n          &lt;arg type='(so)' name='location' direction='in' /&gt;\n          &lt;arg type='s' name='prop' direction='in' /&gt;\n          &lt;arg type='b' name='enable' direction='in' /&gt;\n        &lt;/method&gt;\n\n      &lt;/interface&gt;\n    &lt;/node&gt;\n    &quot;</em><a class="headerlink" href="#bisector.bisector.DBusSlaveBook.dbus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveBook.get_slave_manager">
+<code class="sig-name descname">get_slave_manager</code><span class="sig-paren">(</span><em class="sig-param">location</em>, <em class="sig-param">timeout=1</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveBook.get_slave_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the SlaveManager instance of a slave.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveBook.unregister_slave">
+<code class="sig-name descname">unregister_slave</code><span class="sig-paren">(</span><em class="sig-param">location</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveBook.unregister_slave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveBook.prune_slaves">
+<code class="sig-name descname">prune_slaves</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveBook.prune_slaves" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveBook.GetSlavesLocation">
+<code class="sig-name descname">GetSlavesLocation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveBook.GetSlavesLocation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveBook.SetDesktopNotif">
+<code class="sig-name descname">SetDesktopNotif</code><span class="sig-paren">(</span><em class="sig-param">location</em>, <em class="sig-param">prop</em>, <em class="sig-param">enable</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveBook.SetDesktopNotif" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveBook.consume_slave_prop">
+<code class="sig-name descname">consume_slave_prop</code><span class="sig-paren">(</span><em class="sig-param">location</em>, <em class="sig-param">slave_manager</em>, <em class="sig-param">changed</em>, <em class="sig-param">invalidated</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveBook.consume_slave_prop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveBook.RegisterSlave">
+<code class="sig-name descname">RegisterSlave</code><span class="sig-paren">(</span><em class="sig-param">location</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveBook.RegisterSlave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bisector.bisector.DBusSlaveBook.get_slaves_manager">
+<em class="property">static </em><code class="sig-name descname">get_slaves_manager</code><span class="sig-paren">(</span><em class="sig-param">bus</em>, <em class="sig-param">slave_book</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.DBusSlaveBook.get_slaves_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper to get the list of SlaveManager out of a list of slaves
+location, requesting it from a SlaveBook (DBus object proxy).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bisector.bisector.YAMLCLIOptionsAction">
+<em class="property">class </em><code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">YAMLCLIOptionsAction</code><span class="sig-paren">(</span><em class="sig-param">option_strings</em>, <em class="sig-param">dest</em>, <em class="sig-param">nargs=None</em>, <em class="sig-param">const=None</em>, <em class="sig-param">default=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">choices=None</em>, <em class="sig-param">required=False</em>, <em class="sig-param">help=None</em>, <em class="sig-param">metavar=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.YAMLCLIOptionsAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Action" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">argparse.Action</span></code></a></p>
+<p>Custom argparse.Action that extracts command line options from a YAML
+file. Using “required=True” for any argument will break that since the
+parser needs to parse partial command lines.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bisector.bisector.main">
+<code class="sig-prename descclassname">bisector.bisector.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><em class="sig-param">argv=['-M', 'html', '.', '_build', '-n', '--no-color']</em><span class="sig-paren">)</span><a class="headerlink" href="#bisector.bisector.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../exekall/index.html" class="btn btn-neutral float-right" title="Exekall Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="man/man.html" class="btn btn-neutral float-left" title="Man page" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

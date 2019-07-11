@@ -1,0 +1,6 @@
+<map id="inheritance0816c41381" name="inheritance0816c41381">
+<area shape="rect" id="node1" href="#lisa.tests.scheduler.misfit.MisfitMigrationBase" target="_top" title="Abstract class for Misfit behavioural testing" alt="" coords="311,5,461,31"/>
+<area shape="rect" id="node4" href="#lisa.tests.scheduler.misfit.StaggeredFinishes" target="_top" title="One 100% task per CPU, with staggered completion times." alt="" coords="509,5,649,31"/>
+<area shape="rect" id="node2" href="#lisa.tests.base.RTATestBundle" target="_top" title="Abstract Base Class for :class:`lisa.wlgen.rta.RTA`&#45;powered TestBundles" alt="" coords="147,5,263,31"/>
+<area shape="rect" id="node3" href="#lisa.tests.base.TestBundle" target="_top" title="A LISA test bundle." alt="" coords="5,5,99,31"/>
+</map>

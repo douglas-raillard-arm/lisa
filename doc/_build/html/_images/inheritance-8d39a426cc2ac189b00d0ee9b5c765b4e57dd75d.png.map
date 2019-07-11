@@ -1,0 +1,12 @@
+<map id="inheritance50a1f7921c" name="inheritance50a1f7921c">
+<area shape="rect" id="node1" href="#lisa.tests.scheduler.eas_behaviour.EASBehaviour" target="_top" title="Abstract class for EAS behavioural testing." alt="" coords="311,153,424,179"/>
+<area shape="rect" id="node3" href="#lisa.tests.scheduler.eas_behaviour.EnergyModelWakeMigration" target="_top" title="One task per big CPU, alternating between two phases:" alt="" coords="472,5,675,31"/>
+<area shape="rect" id="node4" href="#lisa.tests.scheduler.eas_behaviour.OneSmallTask" target="_top" title="A single &#39;small&#39; task" alt="" coords="516,55,631,80"/>
+<area shape="rect" id="node6" href="#lisa.tests.scheduler.eas_behaviour.RampDown" target="_top" title="A single task whose utilization slowly ramps down" alt="" coords="525,104,622,129"/>
+<area shape="rect" id="node7" href="#lisa.tests.scheduler.eas_behaviour.RampUp" target="_top" title="A single task whose utilization slowly ramps up" alt="" coords="534,153,613,179"/>
+<area shape="rect" id="node8" href="#lisa.tests.scheduler.eas_behaviour.ThreeSmallTasks" target="_top" title="Three &#39;small&#39; tasks" alt="" coords="507,203,639,228"/>
+<area shape="rect" id="node9" href="#lisa.tests.scheduler.eas_behaviour.TwoBigTasks" target="_top" title="Two &#39;big&#39; tasks" alt="" coords="521,252,625,277"/>
+<area shape="rect" id="node10" href="#lisa.tests.scheduler.eas_behaviour.TwoBigThreeSmall" target="_top" title="A mix of &#39;big&#39; and &#39;small&#39; tasks" alt="" coords="502,301,645,327"/>
+<area shape="rect" id="node2" href="#lisa.tests.base.RTATestBundle" target="_top" title="Abstract Base Class for :class:`lisa.wlgen.rta.RTA`&#45;powered TestBundles" alt="" coords="147,153,263,179"/>
+<area shape="rect" id="node5" href="#lisa.tests.base.TestBundle" target="_top" title="A LISA test bundle." alt="" coords="5,153,99,179"/>
+</map>

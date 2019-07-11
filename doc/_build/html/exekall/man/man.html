@@ -1,0 +1,682 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Man page &mdash; LISA 2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Public API" href="../public_api.html" />
+    <link rel="prev" title="Exekall Documentation" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> LISA
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../first_separator.html">==== Getting started ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lisa_shell/man/man.html">LISA shell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides_separator.html">==== Guides &amp; workflows ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transition_guide.html">Transitioning from LISA legacy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributors_guide.html">Contributor’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../workflows/index.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_separator.html">==== API documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../target.html">Target</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../workloads.html">Workloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kernel_tests.html">Kernel testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../trace_analysis.html">Kernel trace analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../energy_analysis.html">Energy analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc_utilities.html">Miscellaneous utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools_separator.html">==== Tools documentation ====</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bisector/index.html">Bisector Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Exekall Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#overview">Overview</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#contents">Contents</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Man page</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#executing-expressions">Executing expressions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#expression-engine">Expression engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exploiting-artifacts">Exploiting artifacts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#adding-new-expressions">Adding new expressions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#customizing-exekall">Customizing exekall</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../public_api.html">Public API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../internal_api.html">Internal API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../self_tests.html">Self tests</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">LISA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Exekall Documentation</a> &raquo;</li>
+        
+      <li>Man page</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/exekall/man/man.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="man-page">
+<h1>Man page<a class="headerlink" href="#man-page" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">exekall</span></code> is a python-based test runner. The expressions it executes are
+discovered from Python PEP 484 parameter and return value annotations.</p>
+</div>
+<div class="section" id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="exekall">
+<h3>exekall<a class="headerlink" href="#exekall" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: exekall [-h] [--debug] {run,merge,compare,show} ...
+
+Test runner
+
+PATTERNS
+    All patterns are fnmatch pattern, following basic shell globbing syntax.
+    A pattern starting with &quot;!&quot; is used as a negative pattern.
+    
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --debug               Show complete Python backtrace when exekall crashes.
+
+subcommands:
+  {run,merge,compare,show}
+</pre></div>
+</div>
+</div>
+<div class="section" id="exekall-run">
+<h3>exekall run<a class="headerlink" href="#exekall-run" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: exekall run [-h] [-s ID_PATTERN] [--list]
+                   [--log-level {debug,info,warn,error,critical}] [--verbose]
+                   [--artifact-root ARTIFACT_ROOT | --artifact-dir ARTIFACT_DIR]
+                   [--symlink-artifact-dir-to SYMLINK_ARTIFACT_DIR_TO]
+                   [--load-db LOAD_DB] [--load-type TYPE_PATTERN]
+                   [--load-uuid LOAD_UUID | --replay REPLAY]
+                   [--restrict CALLABLE_PATTERN] [--forbid TYPE_PATTERN]
+                   [--allow CALLABLE_PATTERN]
+                   [--goal TYPE_PATTERN | --callable-goal CALLABLE_PATTERN]
+                   [--sweep CALLABLE_PATTERN PARAM START STOP STEP]
+                   [--param CALLABLE_PATTERN PARAM VALUE]
+                   [--template-scripts SCRIPT_FOLDER] [--adaptor ADAPTOR]
+                   [-n N] [--share TYPE_PATTERN] [--random-order]
+                   [--conf CONF] [--inject SERIALIZED_OBJECT_PATH]
+                   PYTHON_SRC [PYTHON_SRC ...]
+
+Run expressions
+
+Note that the adaptor in the customization module is able to add more
+parameters to ``exekall run``. In order to get the complete set of options,
+please run ``exekall run YOUR_SOURCES --help``.
+    
+
+positional arguments:
+  PYTHON_SRC            Python modules files. If passed a folder, all contained files
+                        recursively are selected. By default, the current directory is
+                        selected.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s ID_PATTERN, --select ID_PATTERN
+                        Only run the expressions with an ID matching any of the supplied
+                        filters.
+  --list                List the expressions that will be run without running them.
+  --log-level {debug,info,warn,error,critical}
+                        Change the default log level of the standard logging module.
+  --verbose, -v         More verbose output. Can be repeated for even more verbosity. This
+                        only impacts exekall output, --log-level for more global settings.
+  --artifact-root ARTIFACT_ROOT
+                        Root folder under which the artifact folders will be created. Defaults
+                        to EXEKALL_ARTIFACT_ROOT env var.
+  --artifact-dir ARTIFACT_DIR
+                        Folder in which the artifacts will be stored. Defaults to
+                        EXEKALL_ARTIFACT_DIR env var.
+  --symlink-artifact-dir-to SYMLINK_ARTIFACT_DIR_TO
+                        Create a symlink pointing at the artifact dir.
+  --load-db LOAD_DB     Reload a database to use some of its objects. The DB and its artifact
+                        directory will be merged in the produced DB at the end of the
+                        execution, to form a self-contained artifact directory.
+  --load-type TYPE_PATTERN
+                        Load the (indirect) instances of the given class from the database
+                        instead of the root objects.
+  --load-uuid LOAD_UUID
+                        Load the given UUID from the database.
+  --replay REPLAY       Replay the execution of the given UUID, loading as much prerequisite
+                        from the DB as possible.
+  --restrict CALLABLE_PATTERN
+                        Callable names patterns. Types produced by these callables will only
+                        be produced by these (other callables will be excluded).
+  --forbid TYPE_PATTERN
+                        Fully qualified type names patterns. Callable returning these types or
+                        any subclass will not be called.
+  --allow CALLABLE_PATTERN
+                        Allow using callable with a fully qualified name matching these
+                        patterns, even if they have been not selected for various reasons.
+  --goal TYPE_PATTERN   Compute expressions leading to an instance of a class with name
+                        matching this pattern (or a subclass of it).
+  --callable-goal CALLABLE_PATTERN
+                        Compute expressions ending with a callable which name is matching this
+                        pattern.
+  --sweep CALLABLE_PATTERN PARAM START STOP STEP
+                        Parametric sweep on a function parameter. It needs five fields:
+                            * pattern matching qualified name of the callable
+                            * name of the parameter
+                            * start value
+                            * stop value
+                            * step size.
+  --param CALLABLE_PATTERN PARAM VALUE
+                        Set a function parameter. It needs three fields:
+                            * pattern matching qualified name of the callable
+                            * name of the parameter
+                            * value
+  --template-scripts SCRIPT_FOLDER
+                        Only create the template scripts of the expressions without running
+                        them.
+  --adaptor ADAPTOR     Adaptor to use from the customization module, if there is more than
+                        one to choose from.
+  -n N                  Run the tests for a number of iterations.
+  --share TYPE_PATTERN  Class name pattern to share between multiple iterations.
+  --random-order        Run the expressions in a random order, instead of sorting by name.
+
+LISA:
+  LISA custom options.
+  Can only be specified *after* positional parameters.
+
+  --conf CONF           LISA configuration file. If multiple configurations of a given type
+                        are found, they are merged (last one can override keys in previous
+                        ones)
+  --inject SERIALIZED_OBJECT_PATH
+                        Serialized object to inject when building expressions
+</pre></div>
+</div>
+</div>
+<div class="section" id="exekall-compare">
+<h3>exekall compare<a class="headerlink" href="#exekall-compare" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: exekall compare [-h] db db
+
+Compare two DBs produced by exekall run.
+
+Note that the adaptor in the customization module recorded in the database
+is able to add more parameters to ``exekall compare``. In order to get the
+complete set of options, please run ``exekall compare DB1 DB2 --help``.
+
+Options part of a custom group will need to be passed after positional
+arguments.
+    
+
+positional arguments:
+  db          DBs created using exekall run to compare.
+
+optional arguments:
+  -h, --help  show this help message and exit
+</pre></div>
+</div>
+</div>
+<div class="section" id="exekall-show">
+<h3>exekall show<a class="headerlink" href="#exekall-show" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: exekall show [-h] db
+
+Show the content of a ValueDB created by exekall ``run``
+
+Note that the adaptor in the customization module recorded in the database
+is able to add more parameters to ``exekall show``. In order to get the
+complete set of options, please run ``exekall show DB --help``.
+
+Options part of a custom group will need to be passed after positional
+arguments.
+    
+
+positional arguments:
+  db          DB created using exekall run to show.
+
+optional arguments:
+  -h, --help  show this help message and exit
+</pre></div>
+</div>
+</div>
+<div class="section" id="exekall-merge">
+<h3>exekall merge<a class="headerlink" href="#exekall-merge" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: exekall merge [-h] -o OUTPUT [--copy] artifact_dirs [artifact_dirs ...]
+
+Merge artifact directories of &quot;exekall run&quot; executions.
+
+By default, it will use hardlinks instead of copies to improve speed and
+avoid eating up large amount of space, but that means that artifact
+directories should be treated as read-only.
+    
+
+positional arguments:
+  artifact_dirs         Artifact directories created using &quot;exekall run&quot;, or value databases
+                        to merge.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        
+                        Output merged artifacts directory or value database. If the
+                        output already exists, the merged DB will only contain the same roots
+                        as this one. This allows patching-up a pruned DB with other DBs that
+                        contains subexpression&#39;s values.
+  --copy                Force copying files, instead of using hardlinks.
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="executing-expressions">
+<h2>Executing expressions<a class="headerlink" href="#executing-expressions" title="Permalink to this headline">¶</a></h2>
+<p>Expressions are built by scanning the python source code passed to <code class="docutils literal notranslate"><span class="pre">exekall</span>
+<span class="pre">run</span></code>. Selecting which expression to execute using <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> can be
+achieved in several ways:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--select</span></code>/<code class="docutils literal notranslate"><span class="pre">-s</span></code> with a pattern matching an expression ID. Pattern
+prefixed with <strong>!</strong> can be used to exclude some expressions.</p></li>
+<li><p>Pointing <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> at a subset of python source files. Only files
+(directly or indirectly) imported from these python modules will be
+scanned for callables.</p></li>
+</ul>
+</div></blockquote>
+<p>Once the expressions are selected, multiple iterations of it can be executed
+using <code class="docutils literal notranslate"><span class="pre">-n</span></code>. <code class="docutils literal notranslate"><span class="pre">--share</span> <span class="pre">TYPE_PATTERN</span></code> can be used to share part of the expression
+graph between all iterations, to avoid re-executing some parts of the
+expression. Be aware that all parameters of what is shared will also be shared
+implicitly to keep consistent expressions.</p>
+<p>The adaptor found in the customization module of the python sources you are
+using can add extra options to <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code>, which are shown in <code class="docutils literal notranslate"><span class="pre">--help</span></code>
+only when these sources are specified as well.</p>
+</div>
+<div class="section" id="expression-engine">
+<h2>Expression engine<a class="headerlink" href="#expression-engine" title="Permalink to this headline">¶</a></h2>
+<p>At the core of <code class="docutils literal notranslate"><span class="pre">exekall</span></code> is the expression engine. It is in charge of
+building sensible sequences of calls out of python-level annotations (see PEP
+484), and then executing them. An expression is a graph where each node has
+named <em>parameters</em> that point to other nodes.</p>
+<div class="section" id="expression-id">
+<h3>Expression ID<a class="headerlink" href="#expression-id" title="Permalink to this headline">¶</a></h3>
+<p>Each expression has an associated ID that is derived from its structure. The rules are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>The ID of the first parameter of a given node is prepended to the ID of
+the node, separated with <strong>:</strong>.  The code <code class="code docutils literal notranslate"><span class="pre">f(g())</span></code> has the ID
+<code class="docutils literal notranslate"><span class="pre">g:f</span></code>.</p></li>
+<li><p>The ID of the node is composed of the name of the operator of that node
+(name of a Python callable), followed by a
+parenthesis-enclosed list of parameters ID, excluding the first
+parameter. The code <code class="code docutils literal notranslate"><span class="pre">f(p1=g(),</span> <span class="pre">p2=h(k()))</span></code> has the ID
+<code class="docutils literal notranslate"><span class="pre">g:f(p2=k:h)</span></code>.</p></li>
+<li><p>Expression values can have named tags attached to them. When displaying
+the ID of such a value, the tag would be inserted right after the
+operator name, inside brackets. The value returned by <code class="docutils literal notranslate"><span class="pre">g</span></code> tagged with a
+tag named <code class="docutils literal notranslate"><span class="pre">mytag</span></code> with value <code class="docutils literal notranslate"><span class="pre">42</span></code> would give:
+<code class="docutils literal notranslate"><span class="pre">g[mytag=42]:f(p2=k:h)</span></code>. Note that tags are only relevant when using
+expression values, since the tags are attached to values, not operators.</p></li>
+</ol>
+</div></blockquote>
+<p>The first rule allows seamless composition of simple pipeline stages and is
+especially suited to object oriented programming, since the first parameter of
+methods will be <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
+<p>Tags can be used to add attach some important metadata to the return value of
+an operator, so it can be easily distinguished when taken out of context.</p>
+</div>
+<div class="section" id="sharing-subexpressions">
+<h3>Sharing subexpressions<a class="headerlink" href="#sharing-subexpressions" title="Permalink to this headline">¶</a></h3>
+<p>When multiple expressions are to be executed, <code class="docutils literal notranslate"><span class="pre">exekall</span></code> will eliminate common
+subexpressions. That will apply both inside an expression and between different
+expressions. That avoids re-executing the same operator multiple times if it
+can be reused and if it would have been called with the same parameters. That
+also ensures that referring to a given type for a parameter will give back the
+same object within any given expression. Executing the IDs <code class="docutils literal notranslate"><span class="pre">g:f(p2=g)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">g:h</span></code> will translate to an expression graph equivalent to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">g</span><span class="p">()</span>
+<span class="n">res1</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+<span class="n">res2</span> <span class="o">=</span> <span class="n">h</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The expression execution engine logs when a given value is computed or reused.</p>
+</div>
+<div class="section" id="execution">
+<h3>Execution<a class="headerlink" href="#execution" title="Permalink to this headline">¶</a></h3>
+<p>Executing an expression means evaluating each node if it has not already been
+evaluated. If an operator is not reusable, it will always be called when a
+value is requested from it, even if some existing values computed with the same
+parameters exist. By default, all operators are reusable, but some types can be
+flagged as non-reusable by the customization module (see <a class="reference internal" href="#customize"><span class="std std-ref">Customizing exekall</span></a>).</p>
+<p>Operators are allowed to be generator functions as well. In that case, the
+engine will iterate over the generator, and will execute the downstream
+expressions for each value it provides. Multiple generator functions can be
+chained, leading to a cascade of values for the same expression.</p>
+<p>Once an expression has been executed, all its values will get a UUID that can
+be used to uniquely refer to it, and track where it was used in the logs.</p>
+</div>
+</div>
+<div class="section" id="exploiting-artifacts">
+<h2>Exploiting artifacts<a class="headerlink" href="#exploiting-artifacts" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> produces an artifact folder. The location can be set using
+<code class="docutils literal notranslate"><span class="pre">--artifact-dir</span></code> and other options.</p>
+<div class="section" id="folder-hierarchy">
+<h3>Folder hierarchy<a class="headerlink" href="#folder-hierarchy" title="Permalink to this headline">¶</a></h3>
+<p>The artifact folder contains the following files:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>INFO.log</strong> and <strong>DEBUG.log</strong> contain logs for info and debug levels of the
+<code class="docutils literal notranslate"><span class="pre">logging</span></code> standard module. Note that standard output is not included in
+this log, as it does not go through the <code class="docutils literal notranslate"><span class="pre">logging</span></code> module</p></li>
+<li><p><strong>ValueDB.pickle.xz</strong> contains a serialized objects graph for each
+expression that was executed. The value of each subexpression is included
+if the object was serializable.</p></li>
+<li><p><strong>BY_UUID</strong> contains symlinks named after UUIDs, and pointing to a
+relevant subfolder in the artifacts. That allows quick lookup of the
+artifacts of a given expression if one has its UUID.</p></li>
+<li><p>A folder for each expression.</p></li>
+<li><p>Optionally, an <strong>ORIGIN</strong> folder if the artifact folder is the result of
+<strong>exekall merge</strong>, or <strong>exekall run –load-db</strong>. It contains the hierarchy
+of each original artifact folder by using folders and symlinks pointing
+inside the artifact folder.</p></li>
+</ul>
+</div></blockquote>
+<p>Inside each expression’s folder, there is a folder with the UUID of the
+expression itself. Having that level allows merging artifact folders together
+and avoids conflict in case two different expressions share the same ID.</p>
+<p>Inside that folder, the following files can be found:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>STRUCTURE</strong> which contains the structure of the expression. Each
+operator is described by its callable name, its return type, and its
+parameters. Parameters are recursively defined the same way. An <strong>svg</strong> or
+<strong>.dot</strong> (graphviz) variant may exist as well.</p></li>
+<li><p><strong>EXPRESSION.py</strong> and <strong>TEMPLATE_EXPRESSION.py</strong> files are executable
+Python script that are equivalent to what was executed by <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code>.
+The template one is created before execution and contains some
+placeholders for the sparks. The other one is updated after execution to
+add commented code that reloads any given value from the database. That
+gives the option to the user to not re-execute some part of the code, but
+load a serialized value instead.</p></li>
+<li><p>Artifact folders allocated by some operators.</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id1">
+<h3>exekall compare<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p><strong>ValueDB.pickle.xz</strong> can be compared using <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">compare</span></code>. This will call the
+comparison method of the adaptor that was used when <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> was
+executed. That function is expected to compare the expression values found in
+the databases, by matching values that have the same ID on both databases.</p>
+</div>
+</div>
+<div class="section" id="adding-new-expressions">
+<h2>Adding new expressions<a class="headerlink" href="#adding-new-expressions" title="Permalink to this headline">¶</a></h2>
+<p>Since <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> will discover expressions based on type annotations of
+callable parameters and return value, all that is needed to extend an existing
+package is to write new callables with such annotations. It is possible to use
+a base class in an annotation, in which case the engine will be free to pick
+all the subclasses it can, and produce an expression with each. A dummy example
+would be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">abc</span>
+<span class="k">class</span> <span class="nc">BaseConf</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+   <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+   <span class="k">def</span> <span class="nf">get_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">Conf</span><span class="p">(</span><span class="n">BaseConf</span><span class="p">):</span>
+   <span class="c1"># By default, callables with an empty parameter list are ignored. They</span>
+   <span class="c1"># can be explicitly be used with &quot;exekall run --allow &#39;*Conf&#39;&quot;</span>
+   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">42</span>
+
+   <span class="k">def</span> <span class="nf">get_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">return</span> <span class="n">x</span>
+
+<span class="k">class</span> <span class="nc">Stage1</span><span class="p">:</span>
+   <span class="c1"># exekall recognizes classes as a special case: the parameter annotations</span>
+   <span class="c1"># are taken from __init__ and the return type is the class</span>
+   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf</span><span class="p">:</span><span class="n">BaseConf</span><span class="p">):</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;building stage1&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">conf</span> <span class="o">=</span> <span class="n">conf</span>
+
+   <span class="c1"># first parameter of methods is automatically annotated with the right</span>
+   <span class="c1"># class.</span>
+   <span class="c1"># &quot;forward-references are possible by using a string to annotate.</span>
+   <span class="k">def</span> <span class="nf">process_method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Stage2&#39;</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">Stage2</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="mi">42</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Stage2</span><span class="p">:</span>
+   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">passed</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">passed</span> <span class="o">=</span> <span class="n">passed</span>
+
+<span class="k">def</span> <span class="nf">process1</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="n">Stage1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stage2</span><span class="p">:</span>
+   <span class="k">return</span> <span class="n">Stage2</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="mi">42</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">process2</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="n">Stage1</span><span class="p">,</span> <span class="n">conf</span><span class="p">:</span><span class="n">BaseConf</span><span class="p">,</span> <span class="n">has_default_val</span><span class="o">=</span><span class="mi">33</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stage2</span><span class="p">:</span>
+   <span class="k">return</span> <span class="n">Stage2</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>From that, <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span> <span class="pre">--allow</span> <span class="pre">'*Conf'</span> <span class="pre">--goal</span> <span class="pre">'*Stage2'</span></code> would infer the
+expressions <code class="docutils literal notranslate"><span class="pre">Conf:Stage1:process_method</span></code>, <code class="docutils literal notranslate"><span class="pre">Conf:Stage1:process1</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Conf:Stage1:process2(conf=Conf)</span></code>. The common subexpression <code class="docutils literal notranslate"><span class="pre">Conf:Stage1</span></code> would be
+shared between these two by default.</p>
+<p>If a parameter has a default value, its annotation can be omitted. If a
+parameter has both a default value and an annotation, <code class="docutils literal notranslate"><span class="pre">exekall</span></code> will try to
+provide a value for it, or use the default value if no subexpression has the right
+type.</p>
+<p>When an expression is not detected correctly, <code class="docutils literal notranslate"><span class="pre">--verbose</span></code>/<code class="docutils literal notranslate"><span class="pre">-v</span></code> can be used and
+repeated twice to get more information on what callables are being ignored and
+why. Most common issues are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Partial annotations: all parameters and return values need to be either
+annotated or have a default value.</p></li>
+<li><p>Abstract Base Classes (see <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a>) with missing implementation
+of some attributes.</p></li>
+<li><p>Cycles in the expression graphs. Considering types as pipeline stages
+helps avoiding cycles in expression graphs when architecturing a module.
+Not all classes need to be considered as such, only the ones that will be
+used in annotations.</p></li>
+<li><p>Missing “spark”, i.e. operator that can provide values without any
+parameter. The adaptor in the customization module usually takes care of
+doing that based on domain-specific command line options, but some ignored
+callables may be forcefully selected using <code class="docutils literal notranslate"><span class="pre">--allow</span></code> if needed.</p></li>
+<li><p>Missing <code class="docutils literal notranslate"><span class="pre">import</span></code> chain from the sources given to <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> to the
+module that defines the callable that is expected to be used. That can be
+solved by adding more <code class="docutils literal notranslate"><span class="pre">import</span></code> statements, or simply giving that source
+file directly to <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code>.</p></li>
+<li><p>Wrong goal selected using <code class="docutils literal notranslate"><span class="pre">--goal</span></code>.</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="customizing-exekall">
+<span id="customize"></span><h2>Customizing exekall<a class="headerlink" href="#customizing-exekall" title="Permalink to this headline">¶</a></h2>
+<p>The behavior of <code class="docutils literal notranslate"><span class="pre">exekall</span></code> can be customized by subclassing
+<a class="reference internal" href="../internal_api.html#exekall.customization.AdaptorBase" title="exekall.customization.AdaptorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">exekall.customization.AdaptorBase</span></code></a> in a module that must be called
+<code class="docutils literal notranslate"><span class="pre">exekall_customization.py</span></code> and located in one of the parent packages of the
+modules that are explicitly passed to <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code>.  This allows adding
+extra options to <code class="docutils literal notranslate"><span class="pre">exekall</span> <span class="pre">run</span></code> and <code class="docutils literal notranslate"><span class="pre">compare</span></code>, tag values in IDs, change the
+set of callables that will be hidden from the ID and define what type is
+considered to provide reusable values by the engine among other things.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../public_api.html" class="btn btn-neutral float-right" title="Public API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral float-left" title="Exekall Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, ARM-Software
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
