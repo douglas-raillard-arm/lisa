@@ -130,7 +130,6 @@ apt_packages=(
     openssh-client
     wget
     unzip
-    expect
     kernelshark
     python3
     python3-dev
@@ -153,7 +152,6 @@ pacman_packages=(
     base-devel
     wget
     unzip
-    expect
     python
     python-pip
     python-setuptools
