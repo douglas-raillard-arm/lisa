@@ -44,9 +44,14 @@ from lisa.target import Target
 from lisa.utils import (
     Serializable, memoized, ArtifactPath, non_recursive_property,
     update_wrapper_doc, ExekallTaggable, annotations_from_signature,
+    HideExekallID,
 )
 from lisa.datautils import df_filter_task_ids
 from lisa.trace import FtraceCollector, FtraceConf, DmesgCollector
+from lisa.conf import (
+    SimpleMultiSrcConf, KeyDesc, TopLevelKeyDesc,
+    StrList,
+)
 
 class TestMetric:
     """
@@ -843,6 +848,24 @@ class FtraceTestBundle(TestBundle, metaclass=FtraceTestBundleMeta):
         """
         return Trace(self.trace_path, self.plat_info, **kwargs)
 
+
+class DmesgPatternWhitelist(StrList, HideExekallID):
+    pass
+
+class DmesgTestConf(SimpleMultiSrcConf):
+    """
+    Configuration class for :meth:`lisa.tests.base.DmesgTestBundle.test_dmesg`.
+
+    {generated_help}
+    """
+    STRUCTURE = TopLevelKeyDesc('dmesg-test-conf', 'Dmesg test configuration', (
+        KeyDesc('whitelist', 'List of Python regex matching dmesg entries content to be whitelisted', [DmesgPatternWhitelist]),
+    ))
+
+    def get_pattern_whitelist(self) -> DmesgPatternWhitelist:
+        return self.get('whitelist', [])
+
+
 class DmesgTestBundle(TestBundle):
     """
     Abstract Base Class for TestBundles based on dmesg output.
@@ -873,7 +896,8 @@ class DmesgTestBundle(TestBundle):
                 if line.strip()
             ]
 
-    def test_dmesg(self, level='warn', facility=None) -> ResultBundle:
+    def test_dmesg(self, level='warn', facility=None, pattern_whitelist:DmesgPatternWhitelist=[]) -> ResultBundle:
+    # def test_dmesg(self, level='warn', facility=None) -> ResultBundle:
         """
         Basic test on kernel dmesg output.
 
@@ -886,16 +910,30 @@ class DmesgTestBundle(TestBundle):
             able to print it, so specifying it may lead to no entry being
             inspected at all. If ``None``, the facility is ignored.
         :type facility: str or None
+
+        :param pattern_whitelist: List of regexes to whitelist some messages.
+        :type pattern_whitelist: list or None
         """
         levels = DmesgCollector.LOG_LEVELS
         # Consider as an issue all levels more critical than `level`
         issue_levels = levels[:levels.index(level) + 1]
+
+        logger = self.get_logger()
+        if pattern_whitelist:
+            logger.info('Will ignore patterns in dmesg output: {}'.format(pattern_whitelist))
+
+        regex_whitelist = [
+            re.compile(pattern)
+            for pattern in pattern_whitelist
+        ]
+
         issues = [
             entry
             for entry in self.dmesg_entries
             if (
                 (entry.facility == facility if facility else True)
-                and entry.level in issue_levels
+                and (entry.level in issue_levels)
+                and not any(regex.match(entry.msg) for regex in regex_whitelist)
             )
         ]
 
