@@ -30,6 +30,7 @@ import logging
 import webbrowser
 import inspect
 import shlex
+import subprocess
 from functools import reduce, wraps
 from collections.abc import Sequence
 from collections import namedtuple
@@ -720,7 +721,7 @@ class Trace(Loggable, TraceBase):
         machine.
         """
         if isinstance(self._ftrace, trappy.FTrace):
-            return os.popen("kernelshark {}".format(shlex.quote(self.trace_path)))
+            return subprocess.Popen(['kernelshark', self.trace_path])
         if isinstance(self._ftrace, trappy.SysTrace):
             return webbrowser.open(self.trace_path)
 
