@@ -126,14 +126,26 @@ class KeyDesc(KeyDescBase):
         parent :class:`MultiSrcConf`. A getter will also be created on the parent
         configuration class, so that the typed key is exposed to ``exekall``.
         If the key is not present in the configuration object, the getter will
-        return ``None``.
+        return ``None``. By default, the ``newtype`` is the qualname of the
+        key, in camelcase.
     :type newtype: str
     """
     def __init__(self, name, help, classinfo, newtype=None):
         super().__init__(name=name, help=help)
         # isinstance's style classinfo
         self.classinfo = tuple(classinfo)
-        self.newtype = newtype
+        self._newtype = newtype
+
+    @property
+    def newtype(self):
+        if self._newtype:
+            return self._newtype
+        else:
+            compos = itertools.chain.from_iterable(
+                x.split('-')
+                for x in self.path[1:]
+            )
+            return ''.join(x.title() for x in compos)
 
     def validate_val(self, val):
         """
@@ -467,7 +479,7 @@ class MultiSrcConfMeta(abc.ABCMeta):
 
             for key_desc in dfs(new_cls.STRUCTURE):
                 newtype_name = key_desc.newtype
-                if isinstance(key_desc, KeyDesc) and newtype_name:
+                if isinstance(key_desc, KeyDesc):
                     # Inherit from HideExekallID, since we don't want it to be
                     # shown in the exekall IDs.
                     class newtype(HideExekallID):
