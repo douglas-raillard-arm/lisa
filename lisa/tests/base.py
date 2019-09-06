@@ -44,7 +44,6 @@ from lisa.target import Target
 from lisa.utils import (
     Serializable, memoized, ArtifactPath, non_recursive_property,
     update_wrapper_doc, ExekallTaggable, annotations_from_signature,
-    HideExekallID,
 )
 from lisa.datautils import df_filter_task_ids
 from lisa.trace import FtraceCollector, FtraceConf, DmesgCollector
@@ -849,9 +848,6 @@ class FtraceTestBundle(TestBundle, metaclass=FtraceTestBundleMeta):
         return Trace(self.trace_path, self.plat_info, **kwargs)
 
 
-class DmesgPatternWhitelist(StrList, HideExekallID):
-    pass
-
 class DmesgTestConf(SimpleMultiSrcConf):
     """
     Configuration class for :meth:`lisa.tests.base.DmesgTestBundle.test_dmesg`.
@@ -859,11 +855,8 @@ class DmesgTestConf(SimpleMultiSrcConf):
     {generated_help}
     """
     STRUCTURE = TopLevelKeyDesc('dmesg-test-conf', 'Dmesg test configuration', (
-        KeyDesc('whitelist', 'List of Python regex matching dmesg entries content to be whitelisted', [DmesgPatternWhitelist]),
+        KeyDesc('whitelist', 'List of Python regex matching dmesg entries content to be whitelisted', [StrList], newtype='PatternWhitelist'),
     ))
-
-    def get_pattern_whitelist(self) -> DmesgPatternWhitelist:
-        return self.get('whitelist', [])
 
 
 class DmesgTestBundle(TestBundle):
@@ -896,7 +889,7 @@ class DmesgTestBundle(TestBundle):
                 if line.strip()
             ]
 
-    def test_dmesg(self, level='warn', facility=None, pattern_whitelist:DmesgPatternWhitelist=[]) -> ResultBundle:
+    def test_dmesg(self, level='warn', facility=None, pattern_whitelist:DmesgTestConf.PatternWhitelist=None) -> ResultBundle:
     # def test_dmesg(self, level='warn', facility=None) -> ResultBundle:
         """
         Basic test on kernel dmesg output.
@@ -919,13 +912,15 @@ class DmesgTestBundle(TestBundle):
         issue_levels = levels[:levels.index(level) + 1]
 
         logger = self.get_logger()
+
         if pattern_whitelist:
             logger.info('Will ignore patterns in dmesg output: {}'.format(pattern_whitelist))
-
-        regex_whitelist = [
-            re.compile(pattern)
-            for pattern in pattern_whitelist
-        ]
+            regex_whitelist = [
+                re.compile(pattern)
+                for pattern in pattern_whitelist
+            ]
+        else:
+            regex_whitelist = []
 
         issues = [
             entry
