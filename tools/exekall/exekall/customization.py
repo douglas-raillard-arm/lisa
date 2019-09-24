@@ -115,6 +115,17 @@ class AdaptorBase:
         self.hidden_op_set = set()
         return self.hidden_op_set
 
+    def get_sequenced_op_list(self, op_set):
+        """
+        Returns the set of :class:`exekall.engine.Operator` for which values
+        must be used one after another, but never intermixed.
+
+        This allows usage of that value to have expensive effects on the
+        environment. This way, the values will be used one after another with
+        as few "context switches" as possible.
+        """
+        return []
+
     @staticmethod
     def register_run_param(parser):
         """
@@ -290,4 +301,3 @@ class AdaptorBase:
             if subcls.name == name:
                 return subcls
         return None
-

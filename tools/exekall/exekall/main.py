@@ -30,6 +30,7 @@ import pathlib
 import random
 import shutil
 import sys
+import math
 
 from exekall.customization import AdaptorBase
 import exekall.utils as utils
@@ -921,6 +922,59 @@ def do_run(args, parser, run_parser, argv):
         ]
     else:
         iteration_expr_list = [expr_list]
+
+    # Group together the expressions that share the same prebuilt operators.
+    # This allows user-provided values of a given type to be mutually exclusive,
+    # as they will be used one after the other instead of interleaved.
+    # Note that mutual exclusion between values of different types is not possible:
+    # a1 and a2 instance of A
+    # b1 and b2 instance of B
+    # There is no order of that list that will avoid transitions
+    # a1 -> a2 -> a1 or b1 -> b2 -> b1:
+    # * a1 b1
+    # * a2 b1
+    # * a1 b2
+    # * a2 b2
+
+    def get_sequenced_operators(expr, sequenced_ops):
+        ops = set()
+        op = expr.op
+        if op in sequenced_ops:
+            ops.add(op)
+
+        for e in expr.param_map.values():
+            ops.update(get_sequenced_operators(e, sequenced_ops))
+
+        return ops
+
+    sequenced_ops = adaptor.get_sequenced_op_list(op_set)
+    sequence_key = dict()
+    for expr in utils.flatten_seq(iteration_expr_list):
+        ops = get_sequenced_operators(expr, set(sequenced_ops))
+        if len(ops) > 1:
+            raise ValueError('Can only sequence uses of one value, but got {}: {}'.format(
+                len(ops),
+                ', '.join(
+                    utils.get_name(op.value_type, qual=False) for op in ops
+            )))
+        else:
+            try:
+                op = ops.pop()
+            except KeyError:
+                # Will be ordered last
+                key = math.inf
+            else:
+                # Use the index in the list, so that expressions will have the
+                # same ordering
+                key = sequenced_ops.index(op)
+
+            sequence_key[expr] = key
+
+    iteration_expr_list = [
+        # Since sorted() is stable, we do a minimal amount of reordering.
+        sorted(expr_list, key=lambda expr: sequence_key[expr])
+        for expr_list in iteration_expr_list
+    ]
 
     # Make sure all references to Consumer are cloned appropriately
     for expr in utils.flatten_seq(iteration_expr_list):
