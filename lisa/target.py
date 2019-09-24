@@ -23,6 +23,7 @@ import contextlib
 import logging
 import shlex
 from collections.abc import Mapping
+from collections import OrderedDict
 import copy
 import sys
 import argparse
@@ -33,7 +34,7 @@ import abc
 
 import devlib
 from devlib.utils.misc import which
-from devlib import Platform
+from devlib import Platform, TargetStableError
 from devlib.platform.gem5 import Gem5SimulationPlatform
 
 import lisa.assets
@@ -820,5 +821,56 @@ class Gem5SimulationPlatformWrapper(Gem5SimulationPlatform):
                 virtio_args=virtio_args,
                 **kwargs
             )
+
+
+class TargetSetupConf(SimpleMultiSrcConf, HideExekallID):
+    STRUCTURE = TopLevelKeyDesc('target-setup-conf', 'custom target setup', (
+        KeyDesc('setups', 'list of configuration items', [list]),
+    ))
+
+    @property
+    def conf_items(self):
+        return [
+            TargetSetupConfItem.from_conf(item)
+            for item in self['setups']
+        ]
+
+
+class TargetSetupConfItem(Loggable, ExekallTaggable):
+    def __init__(self, name, sysfs=None):
+        self.name = name
+        self.sysfs = sysfs or OrderedDict()
+
+    def get_tags(self):
+        return {'name': self.name}
+
+    @classmethod
+    def from_conf(cls, conf):
+        sysfs = OrderedDict(
+            entry.copy().popitem()
+            for entry in conf.get('sysfs', [])
+        )
+
+        return cls(
+            name=conf['name'],
+            sysfs=sysfs,
+        )
+
+    def make_target(self, conf:TargetConf, res_dir:ArtifactPath=None, plat_info:PlatformInfo=None) -> Target:
+        target = Target.from_conf(
+            conf=conf,
+            res_dir=res_dir,
+            plat_info=plat_info,
+        )
+        self.setup_target(target)
+        return target
+
+    def setup_target(self, target):
+        logger = self.get_logger()
+        logger.info('Applying setup: {}'.format(self.name))
+
+        for path, value in self.sysfs.items():
+            logger.info('Writing "{}" to {}'.format(value, path))
+            target.write_value(value, path)
 
 # vim :set tabstop=4 shiftwidth=4 expandtab textwidth=80

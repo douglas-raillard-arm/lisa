@@ -25,7 +25,7 @@ import os.path
 from pathlib import Path
 from collections import OrderedDict, namedtuple
 
-from lisa.target import Target, TargetConf
+from lisa.target import Target, TargetConf, TargetSetupConf, TargetSetupConfItem
 from lisa.trace import FtraceCollector, FtraceConf
 from lisa.platforms.platinfo import PlatformInfo
 from lisa.utils import HideExekallID, Loggable, ArtifactPath, get_subclasses, groupby, Serializable, get_nested_key, ExekallTaggable
@@ -98,6 +98,11 @@ class ExekallFtraceCollector(FtraceCollector, HideExekallID):
 class LISAAdaptor(AdaptorBase):
     name = 'LISA'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.sequenced_op_list = []
+
+
     def get_non_reusable_type_set(self):
         return {NonReusable}
 
@@ -127,6 +132,7 @@ class LISAAdaptor(AdaptorBase):
 
         # Then aggregate all the conf from each type, so they just act as
         # alternative sources.
+        conf_map = dict()
         for (_, conf_cls), conf_and_path_seq in groupby(conf_list, key=keyfunc):
             conf_and_path_list = list(conf_and_path_seq)
 
@@ -135,6 +141,8 @@ class LISAAdaptor(AdaptorBase):
             for conf_src, conf_path in conf_and_path_list:
                 src = os.path.basename(conf_path)
                 conf.add_src(src, conf_src)
+
+            conf_map[conf_cls] = conf
 
             op_set.add(PrebuiltOperator(
                 conf_cls, [conf],
@@ -147,6 +155,22 @@ class LISAAdaptor(AdaptorBase):
             op_set.add(PrebuiltOperator(type(obj), [obj],
                 non_reusable_type_set=non_reusable_type_set
             ))
+
+        # Inject the TargetSetupConfItem
+        try:
+            conf = conf_map[TargetSetupConf]
+        except KeyError:
+            pass
+        else:
+            for conf_item in conf.conf_items:
+                op = PrebuiltOperator(
+                    TargetSetupConfItem, [conf_item],
+                    non_reusable_type_set=non_reusable_type_set
+                )
+                op_set.add(op)
+                # Sequence based on TargetSetupConf only, so that we have the
+                # minimal amount of target setup change
+                self.sequenced_op_list.append(op)
 
         # Inject a dummy empty TargetConf
         if self.args.inject_empty_target_conf:
@@ -163,6 +187,9 @@ class LISAAdaptor(AdaptorBase):
         }
         self.hidden_op_set = hidden_op_set
         return hidden_op_set
+
+    def get_sequenced_op_list(self, op_set):
+        return self.sequenced_op_list
 
     def format_expr_list(self, expr_list, verbose=0):
         def get_callable_events(callable_):
