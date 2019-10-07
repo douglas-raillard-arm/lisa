@@ -408,15 +408,16 @@ class RTA(Workload):
 
         logger.info('Target RT-App calibration: %s', pload)
 
-        if 'sched' not in target.modules:
-            return pload
+        plat_info = target.plat_info
 
         # Sanity check calibration values for asymmetric systems
-        cpu_capacities = target.sched.get_capacities()
+        cpu_capacities = plat_info['cpu-capacities']
 
-        # Find the max pload per capacity level
+        # Find the min pload per capacity level, i.e. the fastest detected CPU.
+        # It is more likely to represent the right pload, as it has suffered
+        # from less IRQ slowdown or similar disturbances that might be random.
         capa_pload = {
-            capacity: max(pload[cpu] for cpu, capa in cpu_caps)
+            capacity: min(pload[cpu] for cpu, capa in cpu_caps)
             for capacity, cpu_caps in groupby(cpu_capacities.items(), lambda k_v: k_v[1])
         }
 
@@ -429,6 +430,16 @@ class RTA(Workload):
         # according to pload (small pload=fast cpu)
         if list(pload_list) != sorted(pload_list, reverse=True):
             raise RuntimeError('Calibration values reports big cores less capable than LITTLE cores')
+
+        # Check that the CPU capacities are inversely proportional to the pload
+        capa_factors = [capa / (1/pload) for capa, pload in capa_pload.items()]
+        factor_max = max(capa_factors)
+        # Normalize in percentage to the max value
+        capa_factors_pct = [100 * x/factor_max for x in capa_factors]
+        dispersion_pct = max(capa_factors_pct) - min(capa_factors_pct)
+
+        if dispersion_pct > 10:
+            raise RuntimeError('The calibration values are not inversely proportional to the CPU capacities. Either rt-app calibration failed, or the rt-app busy loops has a very different instruction mix compared to the workload used to establish the CPU capacities.')
 
         return pload
 
