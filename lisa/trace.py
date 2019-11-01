@@ -1458,6 +1458,8 @@ class FtraceConf(SimpleMultiSrcConf, HideExekallID):
         KeyDesc('events', 'FTrace events to trace', [StrList]),
         KeyDesc('functions', 'FTrace functions to trace', [StrList]),
         KeyDesc('buffer-size', 'FTrace buffer size', [int]),
+        KeyDesc('trace-clock', 'Clock used while tracing (see "trace_clock" in ftrace.txt kernel doc)', [str, None]),
+        KeyDesc('saved-cmdlines-nr', 'Number of saved cmdlines with associated PID while tracing', [int]),
     ))
 
     def add_merged_src(self, src, conf, **kwargs):
@@ -1474,6 +1476,15 @@ class FtraceConf(SimpleMultiSrcConf, HideExekallID):
             if key in ('events', 'functions'):
                 return sorted(set(val) | set(self.get(key, [])))
             elif key == 'buffer-size':
+                return max(val, self.get(key, 0))
+            elif key == 'trace-clock':
+                if self.get(key, val) == val:
+                    return val
+                else:
+                    raise KeyError('Cannot merge key "{}": incompatible values specified: {} != {}'.format(
+                        key, self[key], val,
+                    ))
+            elif key == 'saved-cmdlines-nr':
                 return max(val, self.get(key, 0))
             else:
                 raise KeyError('Cannot merge key "{}"'.format(key))
@@ -1512,15 +1523,18 @@ class FtraceCollector(Loggable, Configurable):
 
     CONF_CLASS = FtraceConf
 
-    def __init__(self, target, events=None, functions=None, buffer_size=10240, autoreport=False, **kwargs):
+    def __init__(self, target, events=None, functions=None, buffer_size=10240, autoreport=False, trace_clock=None, saved_cmdlines_nr=4096, **kwargs):
         events = events or []
         functions = functions or []
+        trace_clock = trace_clock or 'global'
         kwargs.update(dict(
             target=target,
             events=events,
             functions=functions,
             buffer_size=buffer_size,
             autoreport=autoreport,
+            trace_clock=trace_clock,
+            saved_cmdlines_nr=saved_cmdlines_nr,
         ))
         self.check_init_param(**kwargs)
 
