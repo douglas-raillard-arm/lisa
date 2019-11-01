@@ -1534,7 +1534,7 @@ class FtraceCollector(Loggable, Configurable):
         events = events or []
         functions = functions or []
         trace_clock = trace_clock or 'global'
-        kwargs.update(dict(
+        kwargs.update(
             target=target,
             events=events,
             functions=functions,
@@ -1543,7 +1543,7 @@ class FtraceCollector(Loggable, Configurable):
             trace_clock=trace_clock,
             saved_cmdlines_nr=saved_cmdlines_nr,
             tracer=tracer,
-        ))
+        )
         self.check_init_param(**kwargs)
 
         self.events = events
