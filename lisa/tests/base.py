@@ -768,7 +768,7 @@ class TestBundle(Serializable, ExekallTaggable, abc.ABC, metaclass=TestBundleMet
         if cls.VERIFY_SERIALIZATION:
             bundle.to_dir(res_dir)
             # Updating the res_dir breaks deserialization for some use cases
-            bundle = cls.from_dir(res_dir, update_res_dir=False)
+            cls.from_dir(res_dir, update_res_dir=False)
 
         return bundle
 
