@@ -139,6 +139,7 @@ class PlatformInfo(MultiSrcConf, HideExekallID):
         """
         Read and parse the content of ``/proc/kallsyms``.
         """
+        return {}
 
         def parse_line(line):
             splitted = re.split(r'\W+', line)
