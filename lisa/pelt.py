@@ -142,7 +142,15 @@ def simulate_pelt(activations, init=0, index=None, clock=None, window=PELT_WINDO
 
             return output * scale
 
-        return pelt
+        from lisa.pelt2 import sched_avg, update_load_sum
+        sa = sched_avg(init)
+        def pelt2(row):
+            nonlocal sa
+            running = row['activations']
+            delta = row['delta']
+            return update_load_sum(sa, running, delta)
+
+        return pelt2
 
     sim = make_pelt_sim(
         init=init,
