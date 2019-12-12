@@ -18,6 +18,7 @@
 import re
 import functools
 from collections.abc import Mapping
+from concurrent import futures
 
 from lisa.utils import HideExekallID, group_by_value
 from lisa.conf import (
@@ -162,22 +163,26 @@ class PlatformInfo(MultiSrcConf, HideExekallID):
 
         info['kernel']['symbols-address'] = functools.partial(self._read_kallsyms, target)
 
-        def dfs(existing_info, new_info):
+        def dfs(existing_info, new_info, visit):
             def evaluate(existing_info, key, val):
                 if isinstance(val, Mapping):
-                    return dfs(existing_info[key], val)
+                    return dfs(existing_info[key], val, visit)
                 else:
                     if only_missing and key in existing_info:
                         return None
                     else:
-                        return val()
+                        return visit(val)
 
             return {
                 key: evaluate(existing_info, key, val)
                 for key, val in new_info.items()
             }
 
-        info = dfs(self, info)
+        # Load the information in parallel to speed it up
+        with futures.ThreadPoolExecutor() as executor:
+            info = dfs(self, info, lambda val: executor.submit(val))
+
+        info = dfs(self, info, lambda val: val.result())
 
         return self.add_src(src, info, filter_none=True, **kwargs)
 
