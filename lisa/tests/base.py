@@ -1099,7 +1099,14 @@ class RTATestBundle(FtraceTestBundle, DmesgTestBundle):
 
         # The first phase is the buffer phase we don't care about
         if self._BUFFER_PHASE_DURATION_S:
-            phase_start_df = phase_start_df[phase_start_df.index.get_level_values('phase') > 0]
+            buffer_phase = 0
+            first_phase = buffer_phase + 1
+            # Find the timestamp of the start of the first useful phase. Since
+            # there can be multiple tasks, we want to take the timestamp of the
+            # task that is late to the party, so we are sure to never see any
+            # of the buffer phase in the window.
+            last_first_phase_start = phase_start_df[phase_start_df.index.get_level_values('phase') == first_phase]['Time'].max()
+            phase_start_df = phase_start_df[phase_start_df['Time'] >= last_first_phase_start]
 
         rta_start = phase_start_df.apply(get_first_switch, axis=1).min()
 
