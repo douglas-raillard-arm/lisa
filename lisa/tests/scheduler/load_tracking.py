@@ -856,22 +856,19 @@ class CPUMigrationBase(LoadTrackingBase):
         :returns: A dict of the shape {cpu : {phase_id : trace_util}}
         """
         df = self.trace.analysis.load_tracking.df_cpus_signal('util')
-        phase_start = self.trace.start
-        cpu_util = {}
+        task = self.rtapp_task_ids_map['migr'][0]
 
-        for i, phase in enumerate(self.reference_task.phases):
-            # Start looking at signals once they should've converged
-            start = phase_start + UTIL_CONVERGENCE_TIME_S
-            # Trim the end a bit, otherwise we could have one or two events
-            # from the next phase
-            end = phase_start + phase.duration_s * .9
-            phase_df = df[start:end]
+        cpu_util = {}
+        for row in self.trace.analysis.rta.df_phases(task).itertuples():
+            phase = row.phase
+            duration = row.duration
+            start = row.Index
+            end = start + duration
+            phase_df = df_window(df, (start, end), method='pre')
 
             for cpu in self.cpus:
-                util = phase_df[phase_df.cpu == cpu].util
-                cpu_util.setdefault(cpu, {})[i] = series_tunnel_mean(util)
-
-            phase_start += phase.duration_s
+                util = phase_df[phase_df['cpu'] == cpu]['util']
+                cpu_util.setdefault(cpu, {})[phase] = series_tunnel_mean(util)
 
         return cpu_util
 
