@@ -126,6 +126,7 @@ class UtilConvergence(UtilTrackingBase):
     @property
     @memoized
     def fast_ramp(self):
+        return True
         min_kernel = KernelVersion('5.5.0').parts
         cur_kernel = self.plat_info['kernel']['version'].parts
         return cur_kernel < min_kernel
