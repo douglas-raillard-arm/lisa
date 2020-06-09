@@ -957,6 +957,20 @@ class DmesgTestBundle(TestBundle):
     Path to the dmesg log in the result directory.
     """
 
+    DMESG_IGNORED_PATTERNS = []
+    """
+    List of patterns to ignore in addition to the ones passed to
+    :meth:`test_dmesg`.
+    """
+
+    CANNED_DMESG_IGNORED_PATTERNS = {
+        'EAS-schedutil': 'Disabling EAS, schedutil is mandatory',
+    }
+    """
+    Mapping of canned patterns to avoid repetition while defining
+    :attr:`DMESG_IGNORED_PATTERNS` in subclasses.
+    """
+
     @property
     def dmesg_path(self):
         """
@@ -987,12 +1001,18 @@ class DmesgTestBundle(TestBundle):
             inspected at all. If ``None``, the facility is ignored.
         :type facility: str or None
 
-        :param ignored_patterns: List of regexes to ignore some messages.
+        :param ignored_patterns: List of regexes to ignore some messages. The
+            pattern list is combined with :attr:`DMESG_IGNORED_PATTERNS` class
+            attribute.
         :type ignored_patterns: list or None
         """
         levels = DmesgCollector.LOG_LEVELS
         # Consider as an issue all levels more critical than `level`
         issue_levels = levels[:levels.index(level) + 1]
+        ignored_patterns = (
+            (ignored_patterns or []) +
+            (self.DMESG_IGNORED_PATTERNS or [])
+        )
 
         logger = self.get_logger()
 
@@ -1011,7 +1031,7 @@ class DmesgTestBundle(TestBundle):
             if (
                 (entry.facility == facility if facility else True)
                 and (entry.level in issue_levels)
-                and not any(regex.match(entry.msg) for regex in ignored_regex)
+                and not any(regex.search(entry.msg) for regex in ignored_regex)
             )
         ]
 
