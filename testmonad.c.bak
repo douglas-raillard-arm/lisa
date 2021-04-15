@@ -1,0 +1,99 @@
+//usr/bin/clang -Wall -Wextra -Wno-unused-parameter -O3 -std=gnu11 "$0" && ./a.out; exit
+
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
+typedef struct monad (*lazy_monad)(void *ctx);
+
+enum monad_variant {
+    RETURN,
+    SKIP,
+};
+
+union value {
+    char char_;
+    int int_;
+};
+
+struct monad {
+    enum monad_variant monad_variant;
+    void *ctx;
+    lazy_monad next;
+    union value value;
+};
+
+static inline struct monad _return(enum monad_variant monad_variant, const void *value,
+                            size_t size) {
+    struct monad monad = {
+      .monad_variant=monad_variant,
+    };
+    memcpy(&monad.value, value, size);
+    return monad;
+}
+
+#define RETURN_VARIANT(monad_variant, val) ({ \
+    typeof(val) x = (val); \
+    return _return(monad_variant, &x, sizeof(x)); \
+})
+#define RETURN_EMPTY(monad_variant) return _return(monad_variant, NULL, 0)
+
+#define Return(x) RETURN_VARIANT(RETURN, x)
+#define ReturnNone() RETURN_EMPTY(RETURN)
+#define Skip() RETURN_EMPTY(SKIP)
+
+static inline struct monad _prepare_bind(void *ctx, size_t offset, size_t size, lazy_monad ma,
+                                  lazy_monad a_mb) {
+    struct monad _ma = ma(ctx);
+    _ma.ctx = ctx;
+    _ma.next = a_mb;
+    memcpy((void*)ctx + offset, &_ma.value, size);
+    return _ma;
+}
+
+static inline struct monad bind(struct monad ma) {
+    if (ma.monad_variant == RETURN) {
+        return ma.next(ma.ctx);
+    } else {
+        return ma;
+    }
+}
+
+#define EVAL(ctx_type, m) ({ctx_type ctx = {0}; m(&ctx).value; })
+
+#define BIND(ctx, name, ma, a_mb)					\
+  bind(_prepare_bind(ctx, offsetof(typeof(*ctx), name), sizeof(ctx->name), (lazy_monad)ma, (lazy_monad)a_mb))
+
+struct ctx {
+  int y;
+  int x;
+};
+
+static inline struct monad stmt1(struct ctx *ctx) {
+    /* Skip(); */
+    Return(42);
+}
+
+static inline struct monad stmt2(struct ctx *ctx) {
+    printf("got val=%d\n", ctx->x);
+    /* ReturnNone(); */
+    Return(ctx->x * 3);
+}
+
+static inline struct monad stmt3(struct ctx *ctx) {
+    return BIND(ctx, x, stmt1, stmt2);
+}
+
+static inline struct monad stmt4(struct ctx *ctx) {
+	// TODO: figure out a recursive function equivalent to a loop
+	return BIND(ctx, x, stmt3, stmt4);
+}
+
+int main() {
+    // printf() displays the string inside quotation
+    printf("Hello, World!\n");
+    union value x = EVAL(struct ctx, stmt3);
+    /* union value x = EVAL(struct ctx, stmt4); */
+    printf("result=%d\n", *(int*)&x);
+    return 0;
+}
