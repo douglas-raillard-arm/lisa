@@ -93,7 +93,7 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
     ({                                                                         \
         typeof(ma) __bind_ma;                                                  \
         typeof((a_mb_addr(NULL))) __bind_mb;                                   \
-    recurse:                                                                   \
+    __bind_recurse:                                                            \
         __bind_ma = (ma);                                                      \
         if (__bind_ma.tag == CTRL_RETURN) {                                    \
             GET_MONAD_VALUE(&ctx->name, __bind_ma);                            \
@@ -133,7 +133,7 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
 #define BIND_REC_STMT(bound_name, ctx_type, name, a_mb)                        \
     static typeof(a_mb(NULL)) bound_name(ctx_type *ctx) {                      \
         return ___BIND(ctx, name, (a_mb)(ctx), ({                              \
-                           goto recurse;                                       \
+                           goto __bind_recurse;                                \
                            __bind_mb;                                          \
                        }),                                                     \
                        a_mb);                                                  \
