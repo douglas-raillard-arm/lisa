@@ -2,6 +2,7 @@
 
 // ./a.out; exit
 //
+
 #if defined(__clang__)
 #if __clang_major__ >= 13
 #define TAIL_CALL(x) __attribute__((musttail)) return (x)
@@ -12,6 +13,8 @@
 #elif defined(__GNUC__) || defined(__GNUG__)
 #define TAIL_CALL(x) return (x)
 #define INLINE inline
+// Ensure we get sibling call elimination, which is critical for loops.
+#pragma GCC optimize "-foptimize-sibling-calls"
 #endif
 
 #include <stdbool.h>
