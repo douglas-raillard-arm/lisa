@@ -84,20 +84,20 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
     memcpy((char *)(addr), &(m).value, sizeof((m).value))
 
 #define ___BIND(ctx, name, ma, a_mb, a_mb_addr)                                \
-    ({                                                                         \
+    do {                                                                       \
         typeof(ma) __bind_ma;                                                  \
         typeof((a_mb_addr(NULL))) __bind_mb;                                   \
     __bind_recurse:                                                            \
         __bind_ma = (ma);                                                      \
         if (__bind_ma.tag == CTRL_RETURN) {                                    \
             GET_MONAD_VALUE(&ctx->name, __bind_ma);                            \
-            __bind_mb = (a_mb);                                                \
+            __attribute__((musttail)) return (a_mb);                           \
         } else if (__bind_ma.tag == CTRL_BREAK) {                              \
             GET_MONAD_VALUE(&ctx->name, __bind_ma);                            \
             SET_MONAD_VALUE(__bind_mb, __bind_ma.value);                       \
             __bind_mb.tag = CTRL_RETURN;                                       \
         } else if (__bind_ma.tag == CTRL_RETURN_NONE) {                        \
-            __bind_mb = (a_mb);                                                \
+            __attribute__((musttail)) return (a_mb);                           \
         } else if (__bind_ma.tag == CTRL_BREAK_NONE) {                         \
             __bind_mb.tag = CTRL_RETURN_NONE;                                  \
         } else if (__bind_ma.tag == CTRL_YIELD) {                              \
@@ -110,14 +110,14 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
         } else {                                                               \
             __bind_mb.tag = __bind_ma.tag;                                     \
         }                                                                      \
-        __bind_mb;                                                             \
-    })
+        return __bind_mb;                                                      \
+    } while (0)
 
 #define __BIND(ctx, name, ma, a_mb) ___BIND(ctx, name, ma, a_mb(ctx), a_mb)
 
 #define BIND_STMT(bound_name, ctx_type, name, ma, a_mb)                        \
     static INLINE typeof((a_mb)(NULL)) bound_name(ctx_type *ctx) {             \
-        return __BIND(ctx, name, (ma)(ctx), a_mb);                             \
+        __BIND(ctx, name, (ma)(ctx), a_mb);                                    \
     }
 
 /* Specialized implementation for tight loops. We could use tail recursion, but
@@ -126,16 +126,16 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
  */
 #define BIND_REC_STMT(bound_name, ctx_type, name, a_mb)                        \
     static typeof(a_mb(NULL)) bound_name(ctx_type *ctx) {                      \
-        return ___BIND(ctx, name, (a_mb)(ctx), ({                              \
-                           goto __bind_recurse;                                \
-                           __bind_mb;                                          \
-                       }),                                                     \
-                       a_mb);                                                  \
+        ___BIND(ctx, name, (a_mb)(ctx), ({                                     \
+                    goto __bind_recurse;                                       \
+                    __bind_mb;                                                 \
+                }),                                                            \
+                a_mb);                                                         \
     }
 
 #define BIND_EXPR(bound_name, ctx_type, name, expr, a_mb)                      \
     static INLINE typeof((a_mb)(NULL)) bound_name(ctx_type *ctx) {             \
-        return __BIND(ctx, name, expr, a_mb);                                  \
+        __BIND(ctx, name, expr, a_mb);                                         \
     }
 
 #define __FUNC(name, ctx_type, expr)                                           \
@@ -152,65 +152,35 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
     })
 
 #define CONSUME_GENERATOR(bound_name, ctx_type, name, gen_expr, a_mb)          \
-    static INLINE typeof((a_mb)(NULL))                                         \
+    static INLINE typeof(((ctx_type *)NULL)->__scratch_gen_##bound_name)       \
         __consume_gen_##bound_name(ctx_type *ctx) {                            \
-        void *__thunk_ctx;                                                     \
         if (ctx->__resume_gen_##bound_name) {                                  \
-            if (ctx->__scratch_gen_##bound_name.tag == CTRL_YIELD) {           \
-                __thunk_ctx = ctx->__scratch_gen_##bound_name.thunk.ctx;       \
-                ctx->__scratch_gen_##bound_name =                              \
-                    ctx->__scratch_gen_##bound_name.thunk.k(__thunk_ctx);      \
-                free(__thunk_ctx);                                             \
-            }                                                                  \
+            void *__thunk_ctx;                                                 \
+            __thunk_ctx = ctx->__scratch_gen_##bound_name.thunk.ctx;           \
+            ctx->__scratch_gen_##bound_name =                                  \
+                ctx->__scratch_gen_##bound_name.thunk.k(__thunk_ctx);          \
+            free(__thunk_ctx);                                                 \
         } else {                                                               \
             ctx->__scratch_gen_##bound_name = (gen_expr);                      \
+            ctx->__resume_gen_##bound_name = 1;                                \
         }                                                                      \
-        typeof((a_mb)(NULL)) mb;                                               \
-        while (1) {                                                            \
-            if (ctx->__scratch_gen_##bound_name.tag == CTRL_YIELD) {           \
-                bool __break = 0;                                              \
-                GET_MONAD_VALUE(&ctx->name, ctx->__scratch_gen_##bound_name);  \
-                mb = (a_mb)(ctx);                                              \
-                if (mb.tag == CTRL_BREAK) {                                    \
-                    mb.tag = CTRL_RETURN;                                      \
-                    __break = 1;                                               \
-                } else if (mb.tag == CTRL_BREAK_NONE) {                        \
-                    mb.tag = CTRL_RETURN_NONE;                                 \
-                    __break = 1;                                               \
-                }                                                              \
-                if (mb.tag == CTRL_YIELD) {                                    \
-                    ctx->__resume_gen_##bound_name = 1;                        \
-                    GET_MONAD_VALUE(&ctx->name, mb);                           \
-                    mb.thunk.k =                                               \
-                        (typeof(mb.thunk.k))__consume_gen_##bound_name;        \
-                    mb.thunk.ctx = malloc(sizeof(*ctx));                       \
-                    memcpy(mb.thunk.ctx, ctx, sizeof(*ctx));                   \
-                    __break = 1;                                               \
-                } else {                                                       \
-                    __thunk_ctx = ctx->__scratch_gen_##bound_name.thunk.ctx;   \
-                    ctx->__scratch_gen_##bound_name =                          \
-                        ctx->__scratch_gen_##bound_name.thunk.k(__thunk_ctx);  \
-                    free(__thunk_ctx);                                         \
-                }                                                              \
-                if (__break)                                                   \
-                    break;                                                     \
-            } else if (ctx->__scratch_gen_##bound_name.tag == CTRL_RETURN) {   \
-                GET_MONAD_VALUE(&ctx->name, ctx->__scratch_gen_##bound_name);  \
-                mb = (a_mb)(ctx);                                              \
-                break;                                                         \
-            } else if (ctx->__scratch_gen_##bound_name.tag ==                  \
-                       CTRL_RETURN_NONE) {                                     \
-                mb.tag = CTRL_RETURN_NONE;                                     \
-                break;                                                         \
-            }                                                                  \
-        }                                                                      \
-        ctx->__resume_gen_##bound_name = 0;                                    \
-        return mb;                                                             \
+        if (ctx->__scratch_gen_##bound_name.tag == CTRL_YIELD)                 \
+            ctx->__scratch_gen_##bound_name.tag = CTRL_RETURN;                 \
+        return ctx->__scratch_gen_##bound_name;                                \
     }                                                                          \
-    static INLINE typeof((a_mb)(NULL)) bound_name(ctx_type *ctx) {             \
+    static INLINE typeof((a_mb)(NULL))                                         \
+        __consume_gen_loop2_##bound_name(ctx_type *ctx);                       \
+    BIND_STMT(__consume_gen_loop1_##bound_name, ctx_type, __sink, a_mb,        \
+              __consume_gen_loop2_##bound_name);                               \
+    BIND_STMT(__consume_gen_loop2_##bound_name, ctx_type, name,                \
+              __consume_gen_##bound_name, __consume_gen_loop1_##bound_name);   \
+    static INLINE typeof(__consume_gen_loop2_##bound_name(NULL))               \
+        bound_name(ctx_type *ctx) {                                            \
         ctx->__resume_gen_##bound_name = 0;                                    \
-        return __consume_gen_##bound_name(ctx);                                \
+        __attribute__((musttail)) return __consume_gen_loop2_##bound_name(     \
+            ctx);                                                              \
     }
+
 
 struct ctx {
     int y;
@@ -434,7 +404,10 @@ static INLINE CTRL_MONAD(int) consume1(struct ctx2 *ctx) {
 
 static INLINE CTRL_MONAD(None) consume2(struct ctx2 *ctx) {
     printf("z=%d\n", ctx->z);
+    /* if (ctx->z > 100) */
+    /*     BreakNone(consume2); */
     ReturnNone(consume2);
+    /* Yield(consume2, ctx->z); */
 }
 
 /* BIND_REC_STMT(loop1, struct ctx2, x, gen1) */
@@ -448,8 +421,8 @@ int main() {
     // print() displays the string inside quotation
     myprint("Hello, World %lu %s!\n", sizeof(struct ctx2), "");
     /* union value x = EVAL(struct ctx, stmt3); */
-    use_loop();
-    /* use_gen(); */
+    /* use_loop(); */
+    use_gen();
 
     /* myprint("result=%d\n", *(int*)&x); */
     return 0;
