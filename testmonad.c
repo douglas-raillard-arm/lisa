@@ -91,13 +91,13 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
         __bind_ma = (ma);                                                      \
         if (__bind_ma.tag == CTRL_RETURN) {                                    \
             GET_MONAD_VALUE(&ctx->name, __bind_ma);                            \
-            __attribute__((musttail)) return (a_mb);                           \
+            return (a_mb);                           \
         } else if (__bind_ma.tag == CTRL_BREAK) {                              \
             GET_MONAD_VALUE(&ctx->name, __bind_ma);                            \
             SET_MONAD_VALUE(__bind_mb, __bind_ma.value);                       \
             __bind_mb.tag = CTRL_RETURN;                                       \
         } else if (__bind_ma.tag == CTRL_RETURN_NONE) {                        \
-            __attribute__((musttail)) return (a_mb);                           \
+            return (a_mb);                           \
         } else if (__bind_ma.tag == CTRL_BREAK_NONE) {                         \
             __bind_mb.tag = CTRL_RETURN_NONE;                                  \
         } else if (__bind_ma.tag == CTRL_YIELD) {                              \
@@ -116,8 +116,8 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
 #define __BIND(ctx, name, ma, a_mb) ___BIND(ctx, name, ma, a_mb(ctx), a_mb)
 
 #define BIND_STMT(bound_name, ctx_type, name, ma, a_mb)                        \
-    static INLINE typeof((a_mb)(NULL)) bound_name(ctx_type *ctx) {             \
-        __BIND(ctx, name, (ma)(ctx), a_mb);                                    \
+    static inline typeof((a_mb)(NULL)) bound_name(ctx_type *ctx) {             \
+        __BIND(ctx, name, (ma)(ctx), (*(typeof(bound_name)*)(&a_mb)));                                    \
     }
 
 /* Specialized implementation for tight loops. We could use tail recursion, but
@@ -126,11 +126,7 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
  */
 #define BIND_REC_STMT(bound_name, ctx_type, name, a_mb)                        \
     static typeof(a_mb(NULL)) bound_name(ctx_type *ctx) {                      \
-        ___BIND(ctx, name, (a_mb)(ctx), ({                                     \
-                    goto __bind_recurse;                                       \
-                    __bind_mb;                                                 \
-                }),                                                            \
-                a_mb);                                                         \
+        ___BIND(ctx, name, (a_mb)(ctx), bound_name(ctx), a_mb); \
     }
 
 #define BIND_EXPR(bound_name, ctx_type, name, expr, a_mb)                      \
@@ -168,7 +164,7 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
             ctx->__scratch_gen_##bound_name.tag = CTRL_RETURN;                 \
         return ctx->__scratch_gen_##bound_name;                                \
     }                                                                          \
-    static INLINE typeof((a_mb)(NULL))                                         \
+    static typeof((a_mb)(NULL))                                         \
         __consume_gen_loop2_##bound_name(ctx_type *ctx);                       \
     BIND_STMT(__consume_gen_loop1_##bound_name, ctx_type, __sink, a_mb,        \
               __consume_gen_loop2_##bound_name);                               \
@@ -177,7 +173,7 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
     static INLINE typeof(__consume_gen_loop2_##bound_name(NULL))               \
         bound_name(ctx_type *ctx) {                                            \
         ctx->__resume_gen_##bound_name = 0;                                    \
-        __attribute__((musttail)) return __consume_gen_loop2_##bound_name(     \
+        return __consume_gen_loop2_##bound_name(     \
             ctx);                                                              \
     }
 
