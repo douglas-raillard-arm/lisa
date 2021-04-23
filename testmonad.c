@@ -1,9 +1,18 @@
 // usr/bin/clang -Wall -Wextra -Wno-unused-parameter -O3 -std=gnu11 "$0" &&
 
 // ./a.out; exit
-
+//
+#if defined(__clang__)
+#if __clang_major__ >= 13
+#define TAIL_CALL(x) __attribute__((musttail)) return (x)
+#else
+#define TAIL_CALL(x) return (x)
+#endif
 #define INLINE __attribute__((always_inline))
-/* #define INLINE inline */
+#elif defined(__GNUC__) || defined(__GNUG__)
+#define TAIL_CALL(x) return (x)
+#define INLINE inline
+#endif
 
 #include <stdbool.h>
 
@@ -87,17 +96,16 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
     do {                                                                       \
         typeof(ma) __bind_ma;                                                  \
         typeof((a_mb_addr(NULL))) __bind_mb;                                   \
-    __bind_recurse:                                                            \
         __bind_ma = (ma);                                                      \
         if (__bind_ma.tag == CTRL_RETURN) {                                    \
             GET_MONAD_VALUE(&ctx->name, __bind_ma);                            \
-            return (a_mb);                           \
+            TAIL_CALL(a_mb);                                                   \
         } else if (__bind_ma.tag == CTRL_BREAK) {                              \
             GET_MONAD_VALUE(&ctx->name, __bind_ma);                            \
             SET_MONAD_VALUE(__bind_mb, __bind_ma.value);                       \
             __bind_mb.tag = CTRL_RETURN;                                       \
         } else if (__bind_ma.tag == CTRL_RETURN_NONE) {                        \
-            return (a_mb);                           \
+            TAIL_CALL(a_mb);                                                   \
         } else if (__bind_ma.tag == CTRL_BREAK_NONE) {                         \
             __bind_mb.tag = CTRL_RETURN_NONE;                                  \
         } else if (__bind_ma.tag == CTRL_YIELD) {                              \
@@ -116,8 +124,8 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
 #define __BIND(ctx, name, ma, a_mb) ___BIND(ctx, name, ma, a_mb(ctx), a_mb)
 
 #define BIND_STMT(bound_name, ctx_type, name, ma, a_mb)                        \
-    static inline typeof((a_mb)(NULL)) bound_name(ctx_type *ctx) {             \
-        __BIND(ctx, name, (ma)(ctx), (*(typeof(bound_name)*)(&a_mb)));                                    \
+    static INLINE typeof((a_mb)(NULL)) bound_name(ctx_type *ctx) {             \
+        __BIND(ctx, name, (ma)(ctx), a_mb);                                    \
     }
 
 /* Specialized implementation for tight loops. We could use tail recursion, but
@@ -126,7 +134,7 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
  */
 #define BIND_REC_STMT(bound_name, ctx_type, name, a_mb)                        \
     static typeof(a_mb(NULL)) bound_name(ctx_type *ctx) {                      \
-        ___BIND(ctx, name, (a_mb)(ctx), bound_name(ctx), a_mb); \
+        ___BIND(ctx, name, (a_mb)(ctx), bound_name(ctx), a_mb);                \
     }
 
 #define BIND_EXPR(bound_name, ctx_type, name, expr, a_mb)                      \
@@ -164,7 +172,7 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
             ctx->__scratch_gen_##bound_name.tag = CTRL_RETURN;                 \
         return ctx->__scratch_gen_##bound_name;                                \
     }                                                                          \
-    static typeof((a_mb)(NULL))                                         \
+    static INLINE typeof((a_mb)(NULL))                                         \
         __consume_gen_loop2_##bound_name(ctx_type *ctx);                       \
     BIND_STMT(__consume_gen_loop1_##bound_name, ctx_type, __sink, a_mb,        \
               __consume_gen_loop2_##bound_name);                               \
@@ -173,10 +181,8 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
     static INLINE typeof(__consume_gen_loop2_##bound_name(NULL))               \
         bound_name(ctx_type *ctx) {                                            \
         ctx->__resume_gen_##bound_name = 0;                                    \
-        return __consume_gen_loop2_##bound_name(     \
-            ctx);                                                              \
+        TAIL_CALL(__consume_gen_loop2_##bound_name(ctx));                      \
     }
-
 
 struct ctx {
     int y;
