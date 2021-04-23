@@ -3,6 +3,7 @@
 // ./a.out; exit
 
 #define INLINE __attribute__((always_inline))
+/* #define INLINE inline */
 
 #include <stdbool.h>
 
@@ -77,17 +78,10 @@ MAKE_CTRL_MONAD(ull, unsigned long long);
 #define Skip(stmt) RETURN_EMPTY(stmt, CTRL_SKIP)
 
 #define SET_MONAD_VALUE(m, x)                                                  \
-    do {                                                                       \
-        typeof(x) _x = (x);                                                    \
-        memcpy((char *)&(m) + offsetof(typeof(m), value), &_x,                 \
-               sizeof(m.value));                                               \
-    } while (0);
+    memcpy((char *)&(m) + offsetof(typeof(m), value), &(x), sizeof(m.value))
 
 #define GET_MONAD_VALUE(addr, m)                                               \
-    do {                                                                       \
-        typeof(m) _m = (m);                                                    \
-        memcpy((char *)(addr), &_m.value, sizeof(_m.value));                   \
-    } while (0);
+    memcpy((char *)(addr), &(m).value, sizeof((m).value))
 
 #define ___BIND(ctx, name, ma, a_mb, a_mb_addr)                                \
     ({                                                                         \
