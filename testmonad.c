@@ -3,196 +3,9 @@
 // ./a.out; exit
 //
 
-#if defined(__clang__)
-#if __clang_major__ >= 13
-#define TAIL_CALL(x) __attribute__((musttail)) return (x)
-#else
-#define TAIL_CALL(x) return (x)
-#endif
-#define INLINE __attribute__((always_inline))
-#elif defined(__GNUC__) || defined(__GNUG__)
-#define TAIL_CALL(x) return (x)
-#define INLINE inline
-// Ensure we get sibling call elimination, which is critical for loops.
-#pragma GCC optimize "-foptimize-sibling-calls"
-#endif
+#include "testmonad.h"
 
-#include <stdbool.h>
-
-#ifdef BPF
-#include <linux/slab.h>
-#include <linux/stddef.h>
-#include <linux/string.h>
-#define myprint(s, ...)                                                        \
-    ({                                                                         \
-        char _fmt[] = s;                                                       \
-        bpf_trace_printk_(_fmt, sizeof(_fmt), __VA_ARGS__);                    \
-    })
-#define NULL ((void *)0)
-#define size_t unsigned long
-#define malloc(x) kmalloc(x, GFP_USER)
-#define free(x) kfree(x)
-#else
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#define myprint printf
-#endif
-
-enum ctrl_tag {
-    CTRL_YIELD,
-    CTRL_RETURN,
-    CTRL_SKIP,
-    CTRL_BREAK,
-    CTRL_RETURN_NONE,
-    CTRL_BREAK_NONE,
-};
-
-#define THUNK(name) struct thunk_##name
-#define MAKE_THUNK(name)                                                       \
-    THUNK(name) {                                                              \
-        CTRL_MONAD(name) (*k)(void *);                                         \
-        void *ctx;                                                             \
-    }
-
-#define CTRL_MONAD(name) struct ctrl_monad_##name
-#define MAKE_CTRL_MONAD(name, type)                                            \
-    CTRL_MONAD(name);                                                          \
-    MAKE_THUNK(name);                                                          \
-    CTRL_MONAD(name) {                                                         \
-        enum ctrl_tag tag;                                                     \
-        THUNK(name) thunk;                                                     \
-        type value;                                                            \
-    }
-
-MAKE_THUNK(None);
-CTRL_MONAD(None) {
-    enum ctrl_tag tag;
-    THUNK(None) thunk;
-    char value[0];
-};
-
-MAKE_CTRL_MONAD(int, int);
-MAKE_CTRL_MONAD(ull, unsigned long long);
-
-#define RETURN_X(stmt, _tag, val)                                              \
-    return (typeof(stmt(NULL))) { .tag = _tag, .value = (val), }
-
-#define RETURN_EMPTY(stmt, _tag)                                               \
-    return (typeof(stmt(NULL))) { .tag = _tag }
-
-#define Yield(stmt, x) RETURN_X(stmt, CTRL_YIELD, x)
-#define Return(stmt, x) RETURN_X(stmt, CTRL_RETURN, x)
-#define Break(stmt, x) RETURN_X(stmt, CTRL_BREAK, x)
-#define BreakNone(stmt) RETURN_EMPTY(stmt, CTRL_BREAK_NONE)
-#define ReturnNone(stmt) RETURN_EMPTY(stmt, CTRL_RETURN_NONE)
-#define Skip(stmt) RETURN_EMPTY(stmt, CTRL_SKIP)
-
-#define SET_MONAD_VALUE(m, x)                                                  \
-    memcpy((char *)&(m) + offsetof(typeof(m), value), &(x), sizeof(m.value))
-
-#define GET_MONAD_VALUE(addr, m)                                               \
-    memcpy((char *)(addr), &(m).value, sizeof((m).value))
-
-#define ___BIND(ctx, name, ma, a_mb, a_mb_addr)                                \
-    do {                                                                       \
-        typeof(ma) __bind_ma;                                                  \
-        typeof((a_mb_addr(NULL))) __bind_mb;                                   \
-        __bind_ma = (ma);                                                      \
-        if (__bind_ma.tag == CTRL_RETURN) {                                    \
-            GET_MONAD_VALUE(&ctx->name, __bind_ma);                            \
-            TAIL_CALL(a_mb);                                                   \
-        } else if (__bind_ma.tag == CTRL_BREAK) {                              \
-            GET_MONAD_VALUE(&ctx->name, __bind_ma);                            \
-            SET_MONAD_VALUE(__bind_mb, __bind_ma.value);                       \
-            __bind_mb.tag = CTRL_RETURN;                                       \
-        } else if (__bind_ma.tag == CTRL_RETURN_NONE) {                        \
-            TAIL_CALL(a_mb);                                                   \
-        } else if (__bind_ma.tag == CTRL_BREAK_NONE) {                         \
-            __bind_mb.tag = CTRL_RETURN_NONE;                                  \
-        } else if (__bind_ma.tag == CTRL_YIELD) {                              \
-            __bind_mb.tag = CTRL_YIELD;                                        \
-            __bind_mb.thunk.ctx = malloc(sizeof(*ctx));                        \
-            __bind_mb.thunk.k = (typeof(__bind_mb.thunk.k))(a_mb_addr);        \
-            SET_MONAD_VALUE(__bind_mb, __bind_ma.value);                       \
-            GET_MONAD_VALUE(&ctx->name, __bind_ma);                            \
-            memcpy(__bind_mb.thunk.ctx, ctx, sizeof(*ctx));                    \
-        } else {                                                               \
-            __bind_mb.tag = __bind_ma.tag;                                     \
-        }                                                                      \
-        return __bind_mb;                                                      \
-    } while (0)
-
-#define __BIND(ctx, name, ma, a_mb) ___BIND(ctx, name, ma, a_mb(ctx), a_mb)
-
-#define BIND_STMT(bound_name, ctx_type, name, ma, a_mb)                        \
-    static INLINE typeof((a_mb)(NULL)) bound_name(ctx_type *ctx) {             \
-        __BIND(ctx, name, (ma)(ctx), a_mb);                                    \
-    }
-
-/* Specialized implementation for tight loops. We could use tail recursion, but
- * since clang is not always able to recognize it we just use a goto with an
- * associated lavel in __BIND
- */
-#define BIND_REC_STMT(bound_name, ctx_type, name, a_mb)                        \
-    static typeof(a_mb(NULL)) bound_name(ctx_type *ctx) {                      \
-        ___BIND(ctx, name, (a_mb)(ctx), bound_name(ctx), a_mb);                \
-    }
-
-#define BIND_EXPR(bound_name, ctx_type, name, expr, a_mb)                      \
-    static INLINE typeof((a_mb)(NULL)) bound_name(ctx_type *ctx) {             \
-        __BIND(ctx, name, expr, a_mb);                                         \
-    }
-
-#define __FUNC(name, ctx_type, expr)                                           \
-    typeof(expr(NULL)) __attribute__((flatten)) name(void) {                   \
-        ctx_type ctx;                                                          \
-        return expr(&ctx);                                                     \
-    }
-#define FUNC(name, ctx_type, expr) static inline __FUNC(name, ctx_type, expr)
-#define PUBLIC_FUNC(name, ctx_type, expr) static __FUNC(name, ctx_type, expr)
-#define EVAL(ctx_type, m)                                                      \
-    ({                                                                         \
-        ctx_type ctx;                                                          \
-        m(&ctx).value;                                                         \
-    })
-
-#define CONSUME_GENERATOR(bound_name, ctx_type, name, gen_expr, a_mb)          \
-    static INLINE typeof(((ctx_type *)NULL)->__scratch_gen_##bound_name)       \
-        __consume_gen_##bound_name(ctx_type *ctx) {                            \
-        if (ctx->__resume_gen_##bound_name) {                                  \
-            void *__thunk_ctx;                                                 \
-            __thunk_ctx = ctx->__scratch_gen_##bound_name.thunk.ctx;           \
-            ctx->__scratch_gen_##bound_name =                                  \
-                ctx->__scratch_gen_##bound_name.thunk.k(__thunk_ctx);          \
-            free(__thunk_ctx);                                                 \
-        } else {                                                               \
-            ctx->__scratch_gen_##bound_name = (gen_expr);                      \
-            ctx->__resume_gen_##bound_name = 1;                                \
-        }                                                                      \
-        if (ctx->__scratch_gen_##bound_name.tag == CTRL_YIELD)                 \
-            ctx->__scratch_gen_##bound_name.tag = CTRL_RETURN;                 \
-        return ctx->__scratch_gen_##bound_name;                                \
-    }                                                                          \
-    static INLINE typeof((a_mb)(NULL))                                         \
-        __consume_gen_loop2_##bound_name(ctx_type *ctx);                       \
-    BIND_STMT(__consume_gen_loop1_##bound_name, ctx_type, __sink, a_mb,        \
-              __consume_gen_loop2_##bound_name);                               \
-    BIND_STMT(__consume_gen_loop2_##bound_name, ctx_type, name,                \
-              __consume_gen_##bound_name, __consume_gen_loop1_##bound_name);   \
-    static INLINE typeof(__consume_gen_loop2_##bound_name(NULL))               \
-        bound_name(ctx_type *ctx) {                                            \
-        ctx->__resume_gen_##bound_name = 0;                                    \
-        TAIL_CALL(__consume_gen_loop2_##bound_name(ctx));                      \
-    }
-
-struct ctx {
-    int y;
-    int x;
-};
-
-static INLINE CTRL_MONAD(int) stmt1(struct ctx *ctx) {
+MAKE_STMT(stmt1, struct ctx, int) {
     /* Skip(); */
     Return(stmt1, 33);
 }
@@ -359,22 +172,14 @@ void cor_body(struct cor_ctx *ctx) {
 
 void cor_init(struct cor_ctx *ctx) { ctx->next_state = COR_STATE1; }
 
-struct ctx2 {
-    CTRL_MONAD(int) __scratch_gen_gen_bind2;
-    bool __resume_gen_gen_bind2;
-
-    CTRL_MONAD(int) __scratch_gen_gen_bind3;
-    bool __resume_gen_gen_bind3;
-
-    CTRL_MONAD(int) __scratch_gen_loop1;
-    bool __resume_gen_loop1;
-
-    char __sink[0];
-
-    int y;
-    int x;
-    int z;
-};
+MAKE_CTX_BEGIN(ctx2)
+GENERATOR_CONSUMER_STATE(gen_bind2, int);
+GENERATOR_CONSUMER_STATE(gen_bind3, int);
+GENERATOR_CONSUMER_STATE(loop1, int);
+int y;
+int x;
+int z;
+MAKE_CTX_END(ctx2)
 
 static INLINE CTRL_MONAD(int) init1(struct ctx2 *ctx) { Return(init1, 20); }
 static INLINE CTRL_MONAD(int) gen1(struct ctx2 *ctx) {
@@ -395,7 +200,10 @@ static INLINE CTRL_MONAD(int) __1gen1(struct ctx2 *ctx) {
 }
 static INLINE CTRL_MONAD(int) __2gen1(struct ctx2 *ctx) {
     printf("from 2=%d\n", ctx->x);
-    Yield(__2gen1, ctx->x + 1);
+    if (ctx->x < 100)
+        Yield(__2gen1, ctx->x + 1);
+    else
+        Suspend(__2gen1);
 }
 static INLINE CTRL_MONAD(int) loop1(struct ctx2 *ctx);
 
@@ -427,7 +235,8 @@ int main() {
     myprint("Hello, World %lu %s!\n", sizeof(struct ctx2), "");
     /* union value x = EVAL(struct ctx, stmt3); */
     /* use_loop(); */
-    use_gen();
+    typeof(use_gen()) x = use_gen();
+    printf("tag=%d\n", x.tag);
 
     /* myprint("result=%d\n", *(int*)&x); */
     return 0;
