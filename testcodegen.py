@@ -114,9 +114,59 @@ class CtxTyp(Typ):
 
 
 class Expr(SimpleHash):
+    def __init__(self, typ, *, prog):
+        self.typ = typ
+        self.prog = prog
+
+    @abc.abstractmethod
+    def get_c(self, stmt):
+        pass
+
+    def __add__(self, expr):
+        return self.prog.CompoundExpr(self, expr)
+
+
+class Control(Expr):
+    def __init__(self, name, typ, val=None, *, prog):
+        self.name = name
+        self.val = val
+        super().__init__(
+            typ=typ,
+            prog=prog
+        )
+
+    def get_c(self, stmt):
+        val = self.val
+        val = '' if val is None else f', {val}'
+        return f'{self.name}({stmt.name}{val})'
+
+
+class CompoundExpr(Expr):
+    def __init__(self, expr1, expr2, prog):
+        self.expr1 = expr1
+        self.expr2 = expr2
+        super().__init__(
+            typ=expr2.typ,
+            prog=prog,
+        )
+
+    def get_c(self, stmt):
+        return '({' + '; '.join(map(
+            lambda expr: '({ ' + expr.get_c(stmt=stmt) + ' ;})',
+            (self.expr1, self.expr2)
+        )) + ';})'
+
+
+class RawExpr(Expr):
     def __init__(self, code, typ, *, prog):
         self.code = code
-        self.typ = typ
+        super().__init__(
+            typ=typ,
+            prog=prog,
+        )
+
+    def get_c(self, stmt):
+        return self.code
 
 
 class Stmt(SimpleHash):
@@ -139,7 +189,7 @@ class ExprStmt(Stmt):
         return self.expr.typ
 
     def get_c(self, func):
-        return f'MAKE_STMT({self.name}, {func.ctx_typ.name}, {self.typ.name}) {{ {self.expr.code.get_c(stmt=self)}; }}'
+        return f'MAKE_STMT({self.name}, {func.ctx_typ.name}, {self.typ.name}) {{ {self.expr.get_c(stmt=self)}; }}'
 
 
 class AssignStmt(Stmt):
@@ -357,48 +407,6 @@ class UserFunc(Func):
         )
 
 
-class Code(SimpleHash):
-    def __init__(self, prog):
-        self.prog = prog
-
-    def __add__(self, code):
-        return self.prog.CompoundCode(self, code)
-
-
-class CompoundCode(Code):
-    def __init__(self, code1, code2, prog):
-        self.code1 = code1
-        self.code2 = code2
-        super().__init__(prog=prog)
-
-    def get_c(self, stmt):
-        return '; '.join(map(
-            lambda code: code.get_c(stmt=stmt),
-            (self.code1, self.code2)
-        ))
-
-
-class ControlMonad(Code):
-    def __init__(self, name, val=None, *, prog):
-        self.name = name
-        self.val = val
-        super().__init__(prog=prog)
-
-    def get_c(self, stmt):
-        val = self.val
-        val = '' if val is None else f', {val}'
-        return f'{self.name}({stmt.name}{val})'
-
-
-class RawCode(Code):
-    def __init__(self, code, prog):
-        self.code = code
-        super().__init__(prog=prog)
-
-    def get_c(self, stmt):
-        return self.code
-
-
 class Program:
     def __init__(self):
         self._unique_id_cnt = -1
@@ -440,23 +448,23 @@ f = prog.UserFunc(
     stmts=[
         (stmt_x:=prog.AssignStmt(
             var='x',
-            expr=prog.Expr(
-                code=prog.RawCode(rf'printf("user param1=%d\n", ctx->__param_user_param1)') + prog.ControlMonad('Return', 3),
-                typ=typs['int'],
+            expr=(
+                prog.RawExpr(
+                    code=rf'printf("user param1=%d\n", ctx->__param_user_param1)',
+                    typ=typs['void_val'],
+                ) +
+                prog.Control('Return', val=3, typ=typs['int'])
             ),
         )),
         prog.AssignStmt(
             # var=var_x,
             var=prog.BlackHoleVar(),
-            expr=prog.Expr(
-                code=prog.ControlMonad('Return', 42),
-                typ=typs['int'],
-            ),
+            expr=prog.Control('Return', val=42, typ=typs['int']),
         ),
         # (stmt_y:=prog.AssignStmt(
         #     var='y',
         #     expr=prog.Expr(
-        #         code=prog.ControlMonad('Return', stmt_x.var.local_ref),
+        #         code=prog.Control('Return', stmt_x.var.local_ref),
         #         typ=typs['int'],
         #     ),
         # )),
@@ -465,15 +473,15 @@ f = prog.UserFunc(
             expr=prog.LoopStmt(
                 body=[
                     prog.ExprStmt(
-                        expr=prog.Expr(
-                            code=prog.RawCode(r'printf("useless loop\n");') + prog.ControlMonad('ReturnNone'),
-                            typ=typs['int'],
+                        expr=(
+                            prog.RawExpr(r'printf("useless loop\n")', typ=typs['void_val']) +
+                            prog.Control('ReturnNone', typ=typs['int'])
                         ),
                     ),
                     prog.ExprStmt(
-                        expr=prog.Expr(
-                            code=prog.ControlMonad('Break', stmt_x.var.local_ref),
-                            typ=typs['int'],
+                        expr=(
+                            prog.RawExpr(r'printf("useless loop\n")', typ=typs['void_val']) +
+                            prog.Control('Break', val=stmt_x.var.local_ref, typ=typs['int'])
                         ),
                     )
                 ],
@@ -482,71 +490,80 @@ f = prog.UserFunc(
         (stmt_z:=prog.AssignStmt(
             # var='z',
             var=None,
-            expr=prog.Expr(
-                code=prog.RawCode(rf'printf("y=%d\n", {stmt_y.var.local_ref})') + prog.ControlMonad('Return', rf'{stmt_y.var.local_ref} + 1'),
-                typ=typs['char'],
+            expr=(
+                prog.RawExpr(
+                    rf'printf("y=%d\n", {stmt_y.var.local_ref})',
+                    typ=typs['void_val'],
+                ) +
+                prog.Control('Return', val=rf'{stmt_y.var.local_ref} + 1', typ=typs['char'])
             ),
         )),
         prog.ExprStmt(
-            expr=prog.Expr(
-                code=prog.RawCode(rf'printf("snd z=%d\n", {stmt_z.var.local_ref})') + prog.ControlMonad('ReturnNone'),
-                typ=typs['int'],
+            expr=(
+                prog.RawExpr(
+                    rf'printf("snd z=%d\n", {stmt_z.var.local_ref})',
+                    typ=typs['void_val'],
+                ) +
+                prog.Control('ReturnNone', typ=typs['int'])
             ),
         ),
         prog.LoopStmt(
             init=prog.AssignStmt(
                 var=stmt_z.var,
                 # var=prog.BlackHoleVar(),
-                expr=prog.Expr(
-                    code=prog.ControlMonad('Return', 55),
-                    typ=typs['char'],
-                ),
+                expr=prog.Control('Return', val=55, typ=typs['char']),
             ),
             body=[
                 prog.AssignStmt(
                     var=stmt_z.var,
-                    expr=prog.Expr(
-                        code=prog.RawCode(rf'printf("in loop   z=%d\n", {stmt_z.var.local_ref})') + prog.ControlMonad('Return', rf'{stmt_z.var.local_ref} + 1'),
-                        typ=typs['char'],
+                    expr=(
+                        prog.RawExpr(
+                            rf'printf("in loop   z=%d\n", {stmt_z.var.local_ref})',
+                            typ=typs['void_val'],
+                        ) +
+                        prog.Control('Return', val=rf'{stmt_z.var.local_ref} + 1', typ=typs['char'])
                     ),
                 ),
                 prog.AssignStmt(
                     var=stmt_z.var,
-                    expr=prog.Expr(
-                        code=prog.RawCode(rf'printf("in loop 2 z=%d\n", {stmt_z.var.local_ref})') + prog.ControlMonad('Return', rf'{stmt_z.var.local_ref} + 1'),
-                        typ=typs['char'],
+                    expr=(
+                        prog.RawExpr(
+                            rf'printf("in loop 2 z=%d\n", {stmt_z.var.local_ref})',
+                            typ=typs['void_val'],
+                        ) +
+                        prog.Control('Return', val=rf'{stmt_z.var.local_ref} + 1', typ=typs['char'])
                     ),
                 ),
                 prog.LoopStmt(
                     body=[
                         prog.ExprStmt(
-                            expr=prog.Expr(
-                                code=prog.RawCode(r'printf("inner loop\n");') + prog.ControlMonad('ReturnNone'),
-                                typ=typs['int'],
+                            expr=(
+                                prog.RawExpr(
+                                    r'printf("inner loop\n")',
+                                    typ=typs['void_val'],
+                                ) +
+                                prog.Control('ReturnNone', typ=typs['int'])
                             ),
                         ),
                         prog.LoopStmt(
                             body=[
                                 prog.ExprStmt(
-                                    expr=prog.Expr(
-                                        code=prog.RawCode(r'printf("inner loop 2\n");') + prog.ControlMonad('ReturnNone'),
-                                        typ=typs['int'],
+                                    expr=(
+                                        prog.RawExpr(
+                                            r'printf("inner loop 2\n")',
+                                            typ=typs['void_val'],
+                                        ) +
+                                        prog.Control('ReturnNone', typ=typs['int'])
                                     ),
                                 ),
                                 prog.ExprStmt(
-                                    expr=prog.Expr(
-                                        code=prog.ControlMonad('Break', stmt_x.var.local_ref),
-                                        typ=typs['int'],
-                                    ),
+                                    expr=prog.Control('Break', val=stmt_x.var.local_ref, typ=typs['int'])
                                 )
                             ],
                         ),
                         prog.ExprStmt(
-                            expr=prog.Expr(
-                                code=prog.ControlMonad('Break', stmt_x.var.local_ref),
-                                typ=typs['int'],
-                            ),
-                        )
+                            expr=prog.Control('Break', val=stmt_x.var.local_ref, typ=typs['int']),
+                        ),
                     ],
                 ),
                 # prog.ExprStmt(
