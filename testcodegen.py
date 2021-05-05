@@ -192,6 +192,61 @@ class ExprStmt(Stmt):
         return f'MAKE_STMT({self.name}, {func.ctx_typ.name}, {self.typ.name}) {{ {self.expr.get_c(stmt=self)}; }}'
 
 
+class IfStmt(Stmt):
+    def __init__(self, cond, true, false, *, prog):
+        self.prog = prog
+
+        if true.typ != false.typ:
+            raise ValueError(f'Branches of an "if" expression must have the same type: {true.typ.name} != {false.typ.name}')
+
+        self.cond = cond
+        self.true = true
+        self.false = false
+        self.tmp_cond = prog.TmpVar(typ=self.cond.typ)
+
+        self.typ = true.typ
+        self.variables = (
+            self.cond.variables |
+            self.true.variables |
+            self.false.variables |
+            {self.tmp_cond}
+        )
+        assign = AssignStmt(self.cond, var=self.tmp_cond, prog=prog)
+
+        if_expr = prog.RawExpr(
+            code=f'(({{ return {self.tmp_cond.local_ref} ? {self.true.name}(ctx) : {self.false.name}(ctx); }}))',
+            typ=self.typ,
+            prog=prog,
+        )
+        if_stmt = ExprStmt(expr=if_expr, prog=prog)
+        bound = BoundStmt(assign, if_stmt, prog=prog)
+
+        self.bound = bound
+        self.assign = assign
+        self.if_stmt = if_stmt
+
+    @property
+    def name(self):
+        return self.bound.name
+
+    @property
+    def used_typs(self):
+        return (
+            self.cond.used_typs |
+            self.true.used_typs |
+            self.false.used_typs
+        )
+
+    def get_c(self, func):
+        return '\n'.join((
+            self.true.get_c(func=func),
+            self.false.get_c(func=func),
+            self.assign.get_c(func=func),
+            self.if_stmt.get_c(func=func),
+            self.bound.get_c(func=func),
+        ))
+
+
 class AssignStmt(Stmt):
     def __init__(self, expr, var, *, prog):
         if isinstance(expr, Stmt):
@@ -312,10 +367,12 @@ class SequenceStmt(Stmt):
 
     @property
     def used_typs(self):
+        stmts = set(self.stmts) - {self}
         return {
-            stmt.typ
-            for stmt in self.stmts
-        }
+            typ
+            for stmt in stmts
+            for typ in stmt.used_typs
+        } | {self.typ}
 
 
 class _LoopBodyStmt(SequenceStmt):
@@ -345,9 +402,6 @@ class LoopStmt(SequenceStmt):
             prog=prog,
         )
         self.body = body
-
-
-
 
 
 class Func(SimpleHash):
@@ -531,7 +585,30 @@ f = prog.UserFunc(
                             rf'printf("in loop 2 z=%d\n", {stmt_z.var.local_ref})',
                             typ=typs['void_val'],
                         ) +
-                        prog.Control('Return', val=rf'{stmt_z.var.local_ref} + 1', typ=typs['char'])
+                        prog.Control('Return', val=rf'{stmt_z.var.local_ref}', typ=typs['char'])
+                    ),
+                ),
+                prog.IfStmt(
+                    cond=prog.ExprStmt(
+                        expr=prog.Control('Return', val=f'{stmt_z.var.local_ref} % 2 == 0', typ=typs['int'])
+                    ),
+                    true=prog.ExprStmt(
+                        expr=(
+                            prog.RawExpr(
+                                rf'printf("in loop 3 is odd\n")',
+                                typ=typs['void_val'],
+                            ) +
+                            prog.Control('ReturnNone', typ=typs['void_val'])
+                        )
+                    ),
+                    false=prog.ExprStmt(
+                        expr=(
+                            prog.RawExpr(
+                                rf'printf("in loop 3 is even\n")',
+                                typ=typs['void_val'],
+                            ) +
+                            prog.Control('ReturnNone', typ=typs['void_val'])
+                        )
                     ),
                 ),
                 prog.LoopStmt(
@@ -613,6 +690,12 @@ with tempfile.NamedTemporaryFile(suffix='.c') as f:
     f.write(src.encode('utf-8'))
     f.write(b'\n')
     f.flush()
+    cpped_name = 'x.c'
+    cpped = subprocess.check_output(['cpp', '-P', f.name])
+    with open(cpped_name, 'wb') as f_cpp:
+        f_cpp.write(cpped)
+    subprocess.check_call(['clang-format', '-i', '--style={IndentWidth: 4}', cpped_name])
+
     cmd = ['gcc', '-Wall', '-Wextra', '-Wno-unneeded-internal-declaration', '-Wno-unused-parameter', '-Wno-unused-function', '-Wno-unused-variable', '-Wno-unused-label', '-std=gnu11', '-O3', f.name, '-o', exe_name]
     try:
         subprocess.check_call(cmd)
