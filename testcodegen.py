@@ -691,7 +691,7 @@ f = prog.UserFunc(
 
 typs = '\n'.join(
     typ.get_c()
-    for typ in prog.used_typs
+    for typ in sorted(prog.used_typs, key=attrgetter('name'))
 )
 
 import tempfile
@@ -740,4 +740,5 @@ with tempfile.NamedTemporaryFile(suffix='.c') as f:
     # breakpoint()
 
 print('='*40)
-subprocess.check_call(exe_name)
+cmd = ['valgrind', '--leak-check=full', exe_name]
+subprocess.check_call(cmd)
