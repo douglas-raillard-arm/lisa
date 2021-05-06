@@ -171,11 +171,21 @@ class RawExpr(Expr):
 
 class Stmt(SimpleHash):
     def get_c_decl(self, func):
-        return f'MAKE_STMT_PROTOTYPE({self.name}, {func.ctx_typ.name}, {self.typ.name})'
+        return '\n'.join(
+            f'MAKE_STMT_PROTOTYPE({stmt.name}, {func.ctx_typ.name}, {stmt.typ.name})'
+            for stmt in sorted(
+                self.used_stmts,
+                key=attrgetter('name')
+            )
+        )
 
     @property
     def used_typs(self):
         return {self.typ}
+
+    @property
+    def used_stmts(self):
+        return {self}
 
 
 class ExprStmt(Stmt):
@@ -237,6 +247,17 @@ class IfStmt(Stmt):
             self.false.used_typs
         )
 
+    @property
+    def used_stmts(self):
+        return (
+            self.cond.used_stmts |
+            self.true.used_stmts |
+            self.false.used_stmts |
+            self.assign.used_stmts |
+            self.if_stmt.used_stmts |
+            self.bound.used_stmts
+        )
+
     def get_c(self, func):
         return '\n'.join((
             self.true.get_c(func=func),
@@ -275,6 +296,10 @@ class AssignStmt(Stmt):
         return self.stmt.used_typs
 
     @property
+    def used_stmts(self):
+        return self.stmt.used_stmts
+
+    @property
     def typ(self):
         return self.stmt.typ
 
@@ -301,6 +326,14 @@ class BoundStmt(Stmt):
     @property
     def used_typs(self):
         return self.stmt.used_typs | self.assign.used_typs
+
+    @property
+    def used_stmts(self):
+        return (
+            self.stmt.used_stmts |
+            self.assign.used_stmts |
+            {self}
+        )
 
     @property
     def typ(self):
@@ -340,21 +373,13 @@ class SequenceStmt(Stmt):
 
     def get_c(self, func):
         dedup_stmts = deduplicate(self.stmts)
-        return (
-            '\n'.join(
-                stmt.get_c_decl(func=func)
-                for stmt in dedup_stmts
-                if stmt is not self
-            ) +
-            '\n' +
-            '\n'.join(
-                stmt.get_c(func=func)
-                for stmt in chain(
-                    dedup_stmts,
-                    self._bound_stmts,
-                )
-                if stmt is not self
+        return '\n'.join(
+            stmt.get_c(func=func)
+            for stmt in chain(
+                dedup_stmts,
+                self._bound_stmts,
             )
+            if stmt is not self
         )
 
     @property
@@ -373,6 +398,15 @@ class SequenceStmt(Stmt):
             for stmt in stmts
             for typ in stmt.used_typs
         } | {self.typ}
+
+    @property
+    def used_stmts(self):
+        stmts = set(self.stmts) - {self}
+        return {
+            _stmt
+            for stmt in stmts
+            for _stmt in stmt.used_stmts
+        } | {self}
 
 
 class _LoopBodyStmt(SequenceStmt):
@@ -401,7 +435,6 @@ class LoopStmt(SequenceStmt):
             stmts = ([] if init is None else [init]) + [body],
             prog=prog,
         )
-        self.body = body
 
 
 class Func(SimpleHash):
@@ -446,6 +479,8 @@ class Func(SimpleHash):
         macro = 'PUBLIC_FUNC' if self.public else 'FUNC'
         return (
             self.ctx_typ.get_c() +
+            '\n\n' +
+            self.stmt.get_c_decl(func=self) +
             '\n\n' +
             self.stmt.get_c(func=self) +
             '\n\n' +
