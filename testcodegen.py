@@ -63,7 +63,7 @@ class BlackHoleVar(Var):
         super().__init__(
             prog=prog,
             name='blackhole',
-            typ=prog.BuiltinTyp('void_val')
+            typ=prog.BuiltinTyp('void_t')
         )
 
 
@@ -82,6 +82,9 @@ class Typ(SimpleHash, abc.ABC):
     @property
     def ctrl_monad(self):
         return self.prog.ControlMonadOf(self)
+
+    def __str__(self):
+        return f'{self.__class__.__qualname__}({self.name})'
 
 
 class BuiltinTyp(Typ):
@@ -206,10 +209,10 @@ class Stmt(SimpleHash):
 
 
 class ExprStmt(Stmt):
-    def __init__(self, expr, *, prog):
+    def __init__(self, expr, name=None, *, prog):
         self.expr = expr
         self.variables = set()
-        self.name = f'expr_{prog.make_unique_id()}'
+        self.name = name or f'expr_{prog.make_unique_id()}'
 
     @property
     def typ(self):
@@ -220,15 +223,17 @@ class ExprStmt(Stmt):
 
 
 class RawStmt(ExprStmt):
-    def __init__(self, code, typ, *, prog):
+    def __init__(self, typ, code, variables, name=None, *, prog):
         super().__init__(
             expr=RawExpr(
                 code=code,
                 typ=typ,
                 prog=prog,
             ),
+            name=name,
             prog=prog,
         )
+        self.variables = set(variables)
 
 
 class IfStmt(Stmt):
@@ -306,7 +311,7 @@ class AssignStmt(Stmt):
 
         if isinstance(var, Var):
             if not ((var.typ == stmt.typ) or var == prog.BlackHoleVar()):
-                raise ValueError('variable type {var.typ} mismatching expression type {stmt.typ}')
+                raise ValueError(f'variable type {var.typ} mismatching expression type {stmt.typ}')
         elif var is None:
             var = prog.TmpVar(typ=stmt.typ)
         else:
@@ -466,9 +471,83 @@ class LoopStmt(SequenceStmt):
         )
 
 
-class ConsumeGeneratorStmt(Stmt):
-    def __init__(self, *, prog):
+class ConsumeGeneratorStmt(LoopStmt):
+    def __init__(self, assign, stmt, *, prog):
+        self.assign = assign
+        self.stmt = stmt
         self.prog = prog
+
+        gen_state = prog.TmpVar(typ=assign.typ.ctrl_monad)
+        stmt_ret = prog.TmpVar(typ=stmt.typ)
+        resume = prog.TmpVar(typ=prog.BuiltinTyp('bool_t'))
+
+        consume_name = f'__consume_{prog.make_unique_id()}'
+        code = textwrap.dedent(f'''
+            if ({resume.local_ref}) {{
+                if ({gen_state.local_ref}.thunk.k) {{
+                    void *__thunk_ctx;
+                    __thunk_ctx = {gen_state.local_ref}.thunk.ctx;
+                    {gen_state.local_ref} = {gen_state.local_ref}.thunk.k(__thunk_ctx);
+                    free(__thunk_ctx);
+                }} else {{
+                    BreakNone({consume_name});
+                }}
+            }} else {{
+                {gen_state.local_ref} = {assign.name}(ctx);
+                {resume.local_ref} = 1;
+            }}
+            if ({gen_state.local_ref}.tag == CTRL_YIELD)
+                {gen_state.local_ref}.tag = CTRL_RETURN;
+            /* Set the continuation to NULL to indicate that the generator will
+            * not yield anymore. We cannot just check
+            * "ctx->__state_gen_##bound_name.tag == CTRL_YIELD" as it has been
+            * re-written to CTRL_RETURN. */
+            else
+                {gen_state.local_ref}.thunk.k = NULL;
+            return {gen_state.local_ref};
+        ''')
+        consume_stmt = prog.RawStmt(
+            typ=assign.typ,
+            code=code,
+            variables={
+                gen_state,
+                stmt_ret,
+                resume,
+            },
+            name=consume_name,
+        )
+
+        init_stmt = prog.ExprStmt(
+            expr=prog.Control('Return', val=0, typ=resume.typ),
+        )
+
+        super().__init__(
+            init=init_stmt,
+            body=[
+                prog.AssignStmt(
+                    var=assign.var,
+                    expr=consume_stmt,
+                ),
+                prog.AssignStmt(
+                    var=stmt_ret,
+                    expr=stmt,
+                ),
+            ],
+            prog=prog,
+        )
+
+        self.variables.update((gen_state, resume))
+
+    @property
+    def used_stmts(self):
+        return super().used_stmts | {self.assign}
+
+    def get_c(self, func):
+        return (
+            self.assign.get_c(func=func) +
+            '\n' +
+            super().get_c(func=func)
+        )
 
 
 class Func(SimpleHash):
@@ -559,7 +638,7 @@ prog = Program()
 typs = {
     'int': prog.BuiltinTyp('int'),
     'char': prog.BuiltinTyp('char'),
-    'void_val': prog.BuiltinTyp('void_val'),
+    'void_t': prog.BuiltinTyp('void_t'),
 }
 var_x=prog.UserVar('x', typ=typs['int'])
 
@@ -574,7 +653,7 @@ f = prog.UserFunc(
             expr=(
                 prog.RawExpr(
                     code=rf'printf("user param1=%d\n", ctx->__param_user_param1)',
-                    typ=typs['void_val'],
+                    typ=typs['void_t'],
                 ) +
                 prog.Control('Return', val=3, typ=typs['int'])
             ),
@@ -597,13 +676,13 @@ f = prog.UserFunc(
                 body=[
                     prog.ExprStmt(
                         expr=(
-                            prog.RawExpr(r'printf("useless loop\n")', typ=typs['void_val']) +
+                            prog.RawExpr(r'printf("useless loop\n")', typ=typs['void_t']) +
                             prog.Control('ReturnNone', typ=typs['int'])
                         ),
                     ),
                     prog.ExprStmt(
                         expr=(
-                            prog.RawExpr(r'printf("useless loop\n")', typ=typs['void_val']) +
+                            prog.RawExpr(r'printf("useless loop\n")', typ=typs['void_t']) +
                             prog.Control('Break', val=stmt_x.var.local_ref, typ=typs['int'])
                         ),
                     )
@@ -616,7 +695,7 @@ f = prog.UserFunc(
             expr=(
                 prog.RawExpr(
                     rf'printf("y=%d\n", {stmt_y.var.local_ref})',
-                    typ=typs['void_val'],
+                    typ=typs['void_t'],
                 ) +
                 prog.Control('Return', val=rf'{stmt_y.var.local_ref} + 1', typ=typs['char'])
             ),
@@ -625,9 +704,36 @@ f = prog.UserFunc(
             expr=(
                 prog.RawExpr(
                     rf'printf("snd z=%d\n", {stmt_z.var.local_ref})',
-                    typ=typs['void_val'],
+                    typ=typs['void_t'],
                 ) +
                 prog.Control('ReturnNone', typ=typs['int'])
+            ),
+        ),
+        prog.ConsumeGeneratorStmt(
+            assign=(stmt_yield:=prog.AssignStmt(
+                var=prog.UserVar('yielded', typ=typs['int']),
+                # expr=prog.Control('Yield', val=3, typ=typs['int']),
+                expr=prog.SequenceStmt(
+                    stmts=[
+                        prog.ExprStmt(
+                            prog.RawExpr(rf'printf("hello1\n");', typ=typs['void_t']) +
+                            prog.Control('Yield', val=3, typ=typs['int'])
+                        ),
+                        prog.ExprStmt(
+                            prog.RawExpr(rf'printf("hello2\n");', typ=typs['void_t']) +
+                            prog.Control('Yield', val=4, typ=typs['int'])
+                        ),
+                    ]
+                ),
+            )),
+            stmt=prog.ExprStmt(
+                expr=(
+                    prog.RawExpr(
+                        rf'printf("yielded value=%d\n", {stmt_yield.var.local_ref})',
+                        typ=typs['void_t'],
+                    ) +
+                    prog.Control('ReturnNone', typ=typs['int'])
+                ),
             ),
         ),
         prog.LoopStmt(
@@ -642,7 +748,7 @@ f = prog.UserFunc(
                     expr=(
                         prog.RawExpr(
                             rf'printf("in loop   z=%d\n", {stmt_z.var.local_ref})',
-                            typ=typs['void_val'],
+                            typ=typs['void_t'],
                         ) +
                         prog.Control('Return', val=rf'{stmt_z.var.local_ref} + 1', typ=typs['char'])
                     ),
@@ -652,7 +758,7 @@ f = prog.UserFunc(
                     expr=(
                         prog.RawExpr(
                             rf'printf("in loop 2 z=%d\n", {stmt_z.var.local_ref})',
-                            typ=typs['void_val'],
+                            typ=typs['void_t'],
                         ) +
                         prog.Control('Return', val=rf'{stmt_z.var.local_ref}', typ=typs['char'])
                     ),
@@ -665,18 +771,18 @@ f = prog.UserFunc(
                         expr=(
                             prog.RawExpr(
                                 rf'printf("in loop 3 is odd\n")',
-                                typ=typs['void_val'],
+                                typ=typs['void_t'],
                             ) +
-                            prog.Control('ReturnNone', typ=typs['void_val'])
+                            prog.Control('ReturnNone', typ=typs['void_t'])
                         )
                     ),
                     false=prog.ExprStmt(
                         expr=(
                             prog.RawExpr(
                                 rf'printf("in loop 3 is even\n")',
-                                typ=typs['void_val'],
+                                typ=typs['void_t'],
                             ) +
-                            prog.Control('ReturnNone', typ=typs['void_val'])
+                            prog.Control('ReturnNone', typ=typs['void_t'])
                         )
                     ),
                 ),
@@ -686,7 +792,7 @@ f = prog.UserFunc(
                             expr=(
                                 prog.RawExpr(
                                     r'printf("inner loop\n")',
-                                    typ=typs['void_val'],
+                                    typ=typs['void_t'],
                                 ) +
                                 prog.Control('ReturnNone', typ=typs['int'])
                             ),
@@ -697,7 +803,7 @@ f = prog.UserFunc(
                                     expr=(
                                         prog.RawExpr(
                                             r'printf("inner loop 2\n")',
-                                            typ=typs['void_val'],
+                                            typ=typs['void_t'],
                                         ) +
                                         prog.Control('ReturnNone', typ=typs['int'])
                                     ),
@@ -712,12 +818,6 @@ f = prog.UserFunc(
                         ),
                     ],
                 ),
-                # prog.ExprStmt(
-                #     expr=prog.Expr(
-                #         code=prog.RawCode(rf'if({stmt_z.var.local_ref} > 100) {{ BreakNone(expr_9); }} else {{ ReturnNone(expr_9); }}'),
-                #         typ=typs['void_val'],
-                #     ),
-                # ),
             ],
         ),
     ]
@@ -752,6 +852,7 @@ int main() {
 
 import sys
 print(src, file=sys.stderr)
+# exit(0)
 
 exe_name = './testgen.exe'
 with tempfile.NamedTemporaryFile(suffix='.c') as f:

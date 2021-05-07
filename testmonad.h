@@ -34,11 +34,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #define myprint printf
 #endif
 
 #include <stdbool.h>
-typedef char void_val[0];
+typedef char void_t[0];
+typedef bool bool_t;
 
 enum ctrl_tag {
     CTRL_RETURN,
