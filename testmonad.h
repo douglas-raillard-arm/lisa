@@ -215,7 +215,7 @@ enum ctrl_tag {
     }
 
 #define MAKE_STMT(name, ctx_type, type)                                        \
-    static INLINE CTRL_MONAD(type) name(ctx_type *ctx)
+    static INLINE type name(ctx_type *ctx)
 
 #define MAKE_STMT_PROTOTYPE(name, ctx_type, type)                              \
     MAKE_STMT(name, ctx_type, type);

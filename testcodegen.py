@@ -3,6 +3,7 @@
 import abc
 import uuid
 import functools
+import textwrap
 from functools import partial
 from operator import attrgetter, itemgetter
 from itertools import chain, accumulate
@@ -69,6 +70,7 @@ class BlackHoleVar(Var):
 class Typ(SimpleHash, abc.ABC):
     def __init__(self, name, *, prog):
         self.name = name
+        self.prog = prog
 
     def get_c(self):
         decl = self._get_c()
@@ -78,8 +80,8 @@ class Typ(SimpleHash, abc.ABC):
         )
 
     @property
-    def ctrl(self):
-        return CtrlMonad(self)
+    def ctrl_monad(self):
+        return self.prog.ControlMonadOf(self)
 
 
 class BuiltinTyp(Typ):
@@ -87,10 +89,11 @@ class BuiltinTyp(Typ):
         return ''
 
 
-class CtrlMonad(BuiltinTyp):
-    def __init__(self, typ):
+class ControlMonadOf(BuiltinTyp):
+    def __init__(self, typ, *, prog):
         super().__init__(
             name=f'CTRL_MONAD({typ.name})',
+            prog=prog,
         )
 
 
@@ -186,7 +189,7 @@ class RawExpr(Expr):
 class Stmt(SimpleHash):
     def get_c_decl(self, func):
         return '\n'.join(
-            f'MAKE_STMT_PROTOTYPE({stmt.name}, {func.ctx_typ.name}, {stmt.typ.name})'
+            f'MAKE_STMT_PROTOTYPE({stmt.name}, {func.ctx_typ.name}, {stmt.typ.ctrl_monad.name})'
             for stmt in sorted(
                 self.used_stmts,
                 key=attrgetter('name')
@@ -213,7 +216,19 @@ class ExprStmt(Stmt):
         return self.expr.typ
 
     def get_c(self, func):
-        return f'MAKE_STMT({self.name}, {func.ctx_typ.name}, {self.typ.name}) {{ {self.expr.get_c(stmt=self)}; }}'
+        return f'MAKE_STMT({self.name}, {func.ctx_typ.name}, {self.expr.typ.ctrl_monad.name}) {{ {self.expr.get_c(stmt=self)}; }}'
+
+
+class RawStmt(ExprStmt):
+    def __init__(self, code, typ, *, prog):
+        super().__init__(
+            expr=RawExpr(
+                code=code,
+                typ=typ,
+                prog=prog,
+            ),
+            prog=prog,
+        )
 
 
 class IfStmt(Stmt):
@@ -449,6 +464,11 @@ class LoopStmt(SequenceStmt):
             stmts = ([] if init is None else [init]) + [body],
             prog=prog,
         )
+
+
+class ConsumeGeneratorStmt(Stmt):
+    def __init__(self, *, prog):
+        self.prog = prog
 
 
 class Func(SimpleHash):
