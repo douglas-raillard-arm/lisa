@@ -171,50 +171,50 @@ enum ctrl_tag {
 /*         m(&ctx).value;                                                         \ */
 /*     }) */
 
-#define GENERATOR_CONSUMER_STATE(name, producer_type, consumer_type)           \
-    CTRL_MONAD(producer_type) __state_gen_##name;                              \
-    CTRL_MONAD(consumer_type) __scratch_gen_##name;                      \
-    bool __resume_gen_##name;
+/* #define GENERATOR_CONSUMER_STATE(name, producer_type, consumer_type)           \ */
+/*     CTRL_MONAD(producer_type) __state_gen_##name;                              \ */
+/*     CTRL_MONAD(consumer_type) __scratch_gen_##name;                      \ */
+/*     bool __resume_gen_##name; */
 
-#define CONSUME_GENERATOR(bound_name, ctx_type, name, gen_expr, a_mb)          \
-    static INLINE typeof(((ctx_type *)NULL)->__state_gen_##bound_name)         \
-        __consume_gen_##bound_name(ctx_type *ctx) {                            \
-        if (ctx->__resume_gen_##bound_name) {                                  \
-            if (ctx->__state_gen_##bound_name.thunk.k) {                       \
-                void *__thunk_ctx;                                             \
-                __thunk_ctx = ctx->__state_gen_##bound_name.thunk.ctx;         \
-                ctx->__state_gen_##bound_name =                                \
-                    ctx->__state_gen_##bound_name.thunk.k(__thunk_ctx);        \
-                free(__thunk_ctx);                                             \
-            } else {                                                           \
-                return ctx->__scratch_gen_##bound_name;                        \
-            }                                                                  \
-        } else {                                                               \
-            ctx->__state_gen_##bound_name = (gen_expr);                        \
-            ctx->__resume_gen_##bound_name = 1;                                \
-        }                                                                      \
-        if (ctx->__state_gen_##bound_name.tag == CTRL_YIELD)                   \
-            ctx->__state_gen_##bound_name.tag = CTRL_RETURN;                   \
-        /* Set the continuation to NULL to indicate that the generator will    \
-         * not yield anymore. We cannot just check                             \
-         * "ctx->__state_gen_##bound_name.tag == CTRL_YIELD" as it has been    \
-         * re-written to CTRL_RETURN. */                                       \
-        else                                                                   \
-            ctx->__state_gen_##bound_name.thunk.k = NULL;                      \
-        return ctx->__state_gen_##bound_name;                                  \
-    }                                                                          \
-    static INLINE typeof((a_mb)(NULL)) __consume_gen_loop2_##bound_name(       \
-        ctx_type *ctx);                                                        \
-    BIND_STMT(__consume_gen_loop1_##bound_name, ctx_type,                      \
-              __scratch_gen_##bound_name, a_mb,                                \
-              __consume_gen_loop2_##bound_name);                               \
-    BIND_STMT(__consume_gen_loop2_##bound_name, ctx_type, name,                \
-              __consume_gen_##bound_name, __consume_gen_loop1_##bound_name);   \
-    static INLINE typeof(__consume_gen_loop2_##bound_name(NULL)) bound_name(   \
-        ctx_type *ctx) {                                                       \
-        ctx->__resume_gen_##bound_name = 0;                                    \
-        TAIL_CALL(__consume_gen_loop2_##bound_name(ctx));                      \
-    }
+/* #define CONSUME_GENERATOR(bound_name, ctx_type, name, gen_expr, a_mb)          \ */
+/*     static INLINE typeof(((ctx_type *)NULL)->__state_gen_##bound_name)         \ */
+/*         __consume_gen_##bound_name(ctx_type *ctx) {                            \ */
+/*         if (ctx->__resume_gen_##bound_name) {                                  \ */
+/*             if (ctx->__state_gen_##bound_name.thunk.k) {                       \ */
+/*                 void *__thunk_ctx;                                             \ */
+/*                 __thunk_ctx = ctx->__state_gen_##bound_name.thunk.ctx;         \ */
+/*                 ctx->__state_gen_##bound_name =                                \ */
+/*                     ctx->__state_gen_##bound_name.thunk.k(__thunk_ctx);        \ */
+/*                 free(__thunk_ctx);                                             \ */
+/*             } else {                                                           \ */
+/*                 return ctx->__scratch_gen_##bound_name;                        \ */
+/*             }                                                                  \ */
+/*         } else {                                                               \ */
+/*             ctx->__state_gen_##bound_name = (gen_expr);                        \ */
+/*             ctx->__resume_gen_##bound_name = 1;                                \ */
+/*         }                                                                      \ */
+/*         if (ctx->__state_gen_##bound_name.tag == CTRL_YIELD)                   \ */
+/*             ctx->__state_gen_##bound_name.tag = CTRL_RETURN;                   \ */
+/*         /\* Set the continuation to NULL to indicate that the generator will    \ */
+/*          * not yield anymore. We cannot just check                             \ */
+/*          * "ctx->__state_gen_##bound_name.tag == CTRL_YIELD" as it has been    \ */
+/*          * re-written to CTRL_RETURN. *\/                                       \ */
+/*         else                                                                   \ */
+/*             ctx->__state_gen_##bound_name.thunk.k = NULL;                      \ */
+/*         return ctx->__state_gen_##bound_name;                                  \ */
+/*     }                                                                          \ */
+/*     static INLINE typeof((a_mb)(NULL)) __consume_gen_loop1_##bound_name(       \ */
+/*         ctx_type *ctx);                                                        \ */
+/*     static INLINE typeof(__consume_gen_loop1_##bound_name(NULL)) bound_name( \ */
+/* 	    ctx_type *ctx) {						\ */
+/* 	    ctx->__resume_gen_##bound_name = 0;				\ */
+/* 	    TAIL_CALL(__consume_gen_loop1_##bound_name(ctx));		\ */
+/*     } \ */
+/*     BIND_STMT(__consume_gen_loop1_##bound_name, ctx_type, name,                \ */
+/*               __consume_gen_##bound_name, __consume_gen_loop2_##bound_name);   \ */
+/*     BIND_STMT(__consume_gen_loop2_##bound_name, ctx_type,		\ */
+/*               __scratch_gen_##bound_name, a_mb,				\ */
+/*               __consume_gen_loop1_##bound_name);			\ */
 
 #define MAKE_STMT(name, ctx_type, type)                                        \
     static INLINE type name(ctx_type *ctx)
