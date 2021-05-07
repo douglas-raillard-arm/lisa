@@ -224,7 +224,7 @@ class IfStmt(Stmt):
         assign = AssignStmt(self.cond, var=self.tmp_cond, prog=prog)
 
         if_expr = prog.RawExpr(
-            code=f'(({{ return {self.tmp_cond.local_ref} ? {self.true.name}(ctx) : {self.false.name}(ctx); }}))',
+            code=f'({{ if({self.tmp_cond.local_ref}) TAIL_CALL({self.true.name}(ctx)); else TAIL_CALL({self.false.name}(ctx)); }})',
             typ=self.typ,
             prog=prog,
         )
