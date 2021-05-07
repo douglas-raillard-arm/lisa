@@ -171,7 +171,7 @@ enum ctrl_tag {
 
 #define GENERATOR_CONSUMER_STATE(name, producer_type, consumer_type)           \
     CTRL_MONAD(producer_type) __state_gen_##name;                              \
-    CTRL_MONAD(consumer_type) __scratch_gen_##bound_name;                      \
+    CTRL_MONAD(consumer_type) __scratch_gen_##name;                      \
     bool __resume_gen_##name;
 
 #define CONSUME_GENERATOR(bound_name, ctx_type, name, gen_expr, a_mb)          \

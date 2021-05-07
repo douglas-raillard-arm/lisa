@@ -20,13 +20,16 @@ def accumulate_right(xs, f):
 
 
 class Var(SimpleHash):
-    def __init__(self, name, typ, prog):
+    def __init__(self, name, typ, *, prog):
         self.name = name
         self.typ = typ
 
     @property
     def local_ref(self):
         return f'(ctx->{self.name})'
+
+    def get_c_decl(self):
+        return f'{self.typ.name} {self.name};'
 
 
 class UserVar(Var):
@@ -74,10 +77,21 @@ class Typ(SimpleHash, abc.ABC):
             (('\n' + decl) if decl else '')
         )
 
+    @property
+    def ctrl(self):
+        return CtrlMonad(self)
+
 
 class BuiltinTyp(Typ):
     def _get_c(self):
         return ''
+
+
+class CtrlMonad(BuiltinTyp):
+    def __init__(self, typ):
+        super().__init__(
+            name=f'CTRL_MONAD({typ.name})',
+        )
 
 
 class UserTyp(Typ):
@@ -105,7 +119,7 @@ class CtxTyp(Typ):
             f'MAKE_CTX_BEGIN({self.name})' +
             '\n    ' +
             '\n    '.join(
-                f'{var.typ.name} {var.name};'
+                var.get_c_decl()
                 for var in sorted(self.variables, key=attrgetter('name'))
             ) +
             '\n' +
