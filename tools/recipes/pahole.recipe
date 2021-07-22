@@ -1,20 +1,34 @@
 #! /bin/bash
 
+ALPINE_VERSION=v3.13
+ALPINE_BUILD_DEPENDENCIES=(bash gcc git make cmake musl-dev zlib-dev libbpf-dev linux-headers)
+BROKEN_CROSS_COMPILATION=1
+
 download() {
-    git clone -b 'v1.20' --single-branch --depth 1 git://git.kernel.org/pub/scm/devel/pahole/pahole.git pahole_src
-    echo "Pahole download completed"
+    git clone https://git.kernel.org/pub/scm/devel/pahole/pahole.git
+    git -C pahole checkout ba953a53be25765e90603a00fd175419151b17b7
+    # git -C pahole checkout master
 }
 
 build() {
-    cd pahole_src
-    mkdir build
+    cd pahole
+
+    mkdir build install
     cd build
-    cmake -D__LIB=lib ..
-    make
-    echo "Pahole build completed"
+    cmake \
+        -D__LIB=lib \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DCMAKE_INSTALL_PREFIX=../install \
+        -DCMAKE_C_FLAGS="-Wno-unused-variable" \
+        .. \
+    && make install
 }
 
 install() {
-    cp -v pahole_src/build/pahole "$LISA_ARCH_ASSETS/pahole"
-    echo "Pahole install completed"
+    ls -l pahole
+    ls -l pahole/install
+    cp -v pahole/install/pahole "$LISA_ARCH_ASSETS/pahole"
+
+    # source "$LISA_HOME/tools/recipes/utils.sh"
+    # install_readme pahole pahole LICENSES
 }
