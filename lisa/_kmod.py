@@ -43,6 +43,9 @@ import glob
 import collections
 import hashlib
 from shlex import quote
+from io import BytesIO
+
+from elftools.elf.elffile import ELFFile
 
 from devlib.target import KernelVersion, TypedKernelConfig, KernelConfigTristate
 from devlib.host import LocalConnection
@@ -1439,5 +1442,43 @@ class DynamicKmod(Loggable):
 
 
 
+class FtraceDynamicKmod(DynamicKmod):
+
+    def _get_symbols(self, section=None):
+        content = self._compile()
+        elf = ELFFile(BytesIO(content))
+
+        if section:
+            section_idx = {
+                s.name: idx
+                for idx, s in enumerate(elf.iter_sections())
+            }
+
+            idx = section_idx[section]
+            predicate = lambda s: s.entry['st_shndx'] == idx
+        else:
+            predicate = lambda s: True
+
+        symtab = elf.get_section_by_name('.symtab')
+        return sorted(
+            s.name
+            for s in symtab.iter_symbols()
+            if predicate(s)
+        )
+
+    @property
+    @memoized
+    def defined_events(self):
+        def parse(name):
+            return re.match(r'__event_(.*)', name)
+
+        return sorted(set(
+            m.group(1)
+            for m in map(
+                parse,
+                self._get_symbols('_ftrace_events')
+            )
+            if m
+        ))
 
 # vim :set tabstop=4 shiftwidth=4 expandtab textwidth=80
