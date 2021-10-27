@@ -43,7 +43,8 @@ from devlib.platform.gem5 import Gem5SimulationPlatform
 from lisa.utils import Loggable, HideExekallID, resolve_dotted_name, get_subclasses, import_all_submodules, LISA_HOME, RESULT_DIR, LATEST_LINK, setup_logging, ArtifactPath, nullcontext, ExekallTaggable, memoized
 from lisa._assets import ASSETS_PATH
 from lisa.conf import SimpleMultiSrcConf, KeyDesc, LevelKeyDesc, TopLevelKeyDesc,Configurable
-from lisa._generic import TypedList
+from lisa._generic import TypedList, TypedDict
+from lisa._kmod import KernelTree
 
 from lisa.platforms.platinfo import PlatformInfo
 
@@ -148,6 +149,14 @@ class TargetConf(SimpleMultiSrcConf, HideExekallID):
         KeyDesc('workdir', 'Remote target workdir', [str]),
         KeyDesc('tools', 'List of tools to install on the target', [TypedList[str]]),
         KeyDesc('lazy-platinfo', 'Lazily autodect the platform information to speed up the connection', [bool]),
+        LevelKeyDesc('kernel', 'kernel information', (
+            KeyDesc('src', 'Path to kernel source tree matching the kernel running on the target used to build modules', [str]),
+            LevelKeyDesc('modules', 'kernel modules', (
+                KeyDesc('build-env', 'Environment used to build modules. Can be any of "alpine" (Alpine Linux chroot, recommended) or "host" (host system)', [str]),
+                KeyDesc('make-variables', 'Extra variables to pass to "make" command, such as "CC"', [TypedDict[str, object]]),
+                KeyDesc('overlay-backend', 'Backend to use for overlaying folders while building modules. Can be "overlayfs" (overlayfs filesystem, recommended) or "copy (plain folder copy)', [str]),
+            )),
+        )),
         LevelKeyDesc('wait-boot', 'Wait for the target to finish booting', (
             KeyDesc('enable', 'Enable the boot check', [bool]),
             KeyDesc('timeout', 'Timeout of the boot check', [int]),
@@ -239,19 +248,33 @@ class Target(Loggable, HideExekallID, ExekallTaggable, Configurable):
         'devlib_file_xfer': ['devlib', 'file-xfer'],
         'wait_boot': ['wait-boot', 'enable'],
         'wait_boot_timeout': ['wait-boot', 'timeout'],
+
+        'kernel_src': ['kernel', 'src'],
+        'kmod_build_env': ['kernel', 'modules', 'build-env'],
+        'kmod_make_vars': ['kernel', 'modules', 'make-variables'],
+        'kmod_overlay_backend': ['kernel', 'modules', 'overlay-backend'],
     }
 
     def __init__(self, kind, name='<noname>', tools=[], res_dir=None,
         plat_info=None, lazy_platinfo=False, workdir=None, device=None, host=None, port=None,
         username=None, password=None, keyfile=None, strict_host_check=None,
         devlib_platform=None, devlib_excluded_modules=[], devlib_file_xfer=None,
-        wait_boot=True, wait_boot_timeout=10,
+        wait_boot=True, wait_boot_timeout=10, kernel_src=None, kmod_build_env=None,
+        kmod_make_vars=None, kmod_overlay_backend=None,
     ):
         # pylint: disable=dangerous-default-value
         super().__init__()
         logger = self.logger
 
         self.name = name
+
+        self._kmod_tree = None
+        self._kmod_tree_spec = dict(
+            tree_path=kernel_src,
+            build_env=kmod_build_env,
+            make_vars=kmod_make_vars,
+            overlay_backend=kmod_overlay_backend,
+        )
 
         res_dir = res_dir if res_dir else self._get_res_dir(
             root=os.path.join(LISA_HOME, RESULT_DIR),
@@ -343,12 +366,45 @@ class Target(Loggable, HideExekallID, ExekallTaggable, Configurable):
             # TODO: turn the keys that are available into a dict and pickle that.
             #
             # plat_info is typically full of closures so we cannot ship it easily
-            if k not in {'plat_info'}
+            if k not in {'plat_info', '_kmod_tree'}
         }
 
     def __setstate__(self, dct):
         self.__dict__ = dct
         self._init_plat_info(deferred=True)
+        self._kmod_tree = None
+
+    def get_kmod(self, mod_cls, **kwargs):
+        """
+        Build a :class:`lisa._kmod.DynamicKmod` instance of the given
+        subclass.
+
+        :Variable keyword arguments: Forwarded to the ``from_target`` class
+            method of ``mod_cls``.
+        """
+        make = functools.partial(
+            mod_cls.from_target,
+            target=self,
+        )
+        if 'kernel_tree' in kwargs:
+            return make(**kwargs)
+        else:
+            mod = make(
+                **kwargs,
+                kernel_tree={
+                    **self._kmod_tree_spec,
+                    **(
+                        self._kmod_tree._to_spec()
+                        if self._kmod_tree else
+                        {}
+                    ),
+                }
+            )
+            # Memoize the KernelTree, as it is a reusable object. Memoizing
+            # allows remembering its checksum across calls, which will allow
+            # hitting the .ko cache without having to setup a kernel tree.
+            self._kmod_tree = mod.kernel_tree
+            return mod
 
     def cached_pull(self, src, dst, **kwargs):
         """
