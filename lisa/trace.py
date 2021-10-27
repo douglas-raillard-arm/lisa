@@ -57,6 +57,7 @@ from lisa._generic import TypedList
 from lisa.datautils import SignalDesc, df_add_delta, df_deduplicate, df_window, df_window_signals, series_convert
 from lisa.version import VERSION_TOKEN
 from lisa._typeclass import FromString, IntListFromStringInstance
+from lisa._kmod import LISAFtraceDynamicKmod
 
 
 class TaskID(namedtuple('TaskID', ('pid', 'comm'))):
@@ -5376,6 +5377,11 @@ class FtraceCollector(CollectorBase, Configurable):
     TOOLS = ['trace-cmd']
     _COMPOSITION_ORDER = 0
 
+    _FTRACE_KMOD_CLASSES = [
+        LISAFtraceDynamicKmod,
+    ]
+    "Class for dynamic kernel modules providing ftrace events"
+
     def __init__(self, target, *, events=None, functions=None, buffer_size=10240, output_path=None, autoreport=False, trace_clock=None, saved_cmdlines_nr=8192, tracer=None, **kwargs):
         events = events or []
         functions = functions or []
@@ -5421,16 +5427,71 @@ class FtraceCollector(CollectorBase, Configurable):
             tracer=tracer,
         )
 
+        # If some events are not already available on that kernel, look them up
+        # in custom modules
+        missing = kernel_events - self._target_available_events(target)
+        #TODO: ensure the modules we load will not provide events that are
+        #already present in the kernel. Otherwise, raise an exception so we
+        #don't end up with duplicates.
+        if missing:
+            self._kmods = self._get_kmods(target, kernel_events)
+        else:
+            self._kmods = []
+
+        self._kmods_cm = None
+
         # Install the tools before creating the collector, as devlib will check
         # for it
         self._install_tools(target)
-        collector = devlib.FtraceCollector(
-            # Prevent devlib from pushing its own trace-cmd since we provide
-            # our own binary
-            no_install=True,
-            **kwargs
-        )
+
+        # We need to install the kmod when initializing the devlib object, so
+        # that the available events are accurate.
+        with self._with_kmods():
+            collector = devlib.FtraceCollector(
+                # Prevent devlib from pushing its own trace-cmd since we provide
+                # our own binary
+                no_install=True,
+                **kwargs
+            )
         super().__init__(collector, output_path=output_path)
+
+    @classmethod
+    def _get_kmods(cls, target, events):
+        def need_mod(mod_cls):
+            kmod = target.get_kmod(mod_cls)
+            needed = set(events) & set(kmod.defined_events)
+            return kmod if needed else None
+
+        mods = list(map(need_mod, cls._FTRACE_KMOD_CLASSES))
+        mods = [mod for mod in mods if mod is not None]
+        return mods
+
+    @contextlib.contextmanager
+    def _with_kmods(self):
+        with contextlib.ExitStack() as stack:
+            for kmod in self._kmods:
+                stack.enter_context(kmod.run())
+            yield
+
+    def __enter__(self):
+        kmods_cm = self._with_kmods()
+        kmods_cm.__enter__()
+        self._kmods_cm = kmods_cm
+        return super().__enter__()
+
+    def __exit__(self, *args, **kwargs):
+        x = super().__exit__(*args, **kwargs)
+        self._kmods_cm.__exit__(*args, **kwargs)
+        self._kmods_cm = None
+        return x
+
+    @staticmethod
+    def _target_available_events(target):
+        events = target.read_value('/sys/kernel/debug/tracing/available_events')
+        return set(
+            event.split(':', 1)[1]
+            for event in events.splitlines()
+        )
 
     @classmethod
     @kwargs_forwarded_to(__init__)
