@@ -474,7 +474,7 @@ class KernelTree(Loggable):
 
     @staticmethod
     def _resolve_overlay_backend(overlay_backend):
-        return overlay_backend or 'overlayfs'
+        return overlay_backend or 'copy'
 
     def _to_spec(self):
         return dict(
