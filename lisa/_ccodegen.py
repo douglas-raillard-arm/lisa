@@ -223,7 +223,7 @@ class SuspendedGeneratorOf(Typ):
         super().__init__(
             name=f'SUSPENDED_GENERATOR({typ.name})',
             prog=prog,
-            deps=[typ],
+            deps=[typ, typ.ctrl_monad],
         )
         self._typ_param = typ
 
@@ -328,7 +328,7 @@ class YieldExpr(Expr):
         if val is None:
             return f'GeneratorFinish({stmt.name})'
         else:
-            return f'GeneratorYield({stmt.name}, {self.val})'
+            return f'GeneratorYield({stmt.name}, {self.val}, CTRL_RETURN)'
 
 
 class SimpleExpr(ControlExpr):
@@ -378,7 +378,7 @@ class RawExpr(Expr):
         return self.code
 
 
-class Stmt(SimpleHash, Node, Typed):
+class Stmt(SimpleHash, Node, Typed, abc.ABC):
     def get_c_decl(self, func):
         stmts = {
             # Uniqify on the name (to avoid generating duplicated prototypes).
@@ -394,6 +394,25 @@ class Stmt(SimpleHash, Node, Typed):
             )
         )
 
+    def get_c(self, func, visited):
+        if self in visited:
+            return ''
+        else:
+            visited.add(self)
+            return self._get_c(func=func)
+
+
+    def __pow__(self, other):
+        return self.prog.BoundStmt(self, other)
+
+
+class DelegatedStmt(Stmt):
+    def get_c(self, *args, **kwargs):
+        return '\n'.join(
+            stmt.get_c(*args, **kwargs)
+            for stmt in self.delegated_stmts
+        )
+
 
 class ExprStmt(Stmt):
     def __init__(self, expr, name=None, *, prog):
@@ -405,7 +424,7 @@ class ExprStmt(Stmt):
     def typ(self):
         return self.expr.typ
 
-    def get_c(self, func):
+    def _get_c(self, func):
         return f'MAKE_STMT({self.name}, {func.ctx_typ.name}, {self.expr.typ.ctrl_monad.name}) {{ {self.expr.get_c(stmt=self)}; }}'
 
 
@@ -423,7 +442,7 @@ class RawStmt(ExprStmt):
         self.variables = set(variables)
 
 
-class IfStmt(Stmt):
+class IfStmt(DelegatedStmt):
     def __init__(self, cond, true, false, *, prog):
         self.prog = prog
 
@@ -458,25 +477,21 @@ class IfStmt(Stmt):
         self.assign = assign
         self.if_stmt = if_stmt
 
-    @property
-    def name(self):
-        return self.bound.name
-
-    def get_c(self, func):
-        stmts = [
+        self.delegated_stmts = [
             self.true,
             self.false,
             self.assign,
             self.if_stmt,
             self.bound,
         ]
-        return '\n'.join(
-            stmt.get_c(func=func)
-            for stmt in stmts
-        )
+
+    @property
+    def name(self):
+        return self.bound.name
 
 
-class AssignStmt(Stmt):
+class AssignStmt(DelegatedStmt):
+    # TODO: rename s/expr/stmt/
     def __init__(self, expr, var=None, *, prog):
         if isinstance(expr, Stmt):
             stmt = expr
@@ -495,6 +510,7 @@ class AssignStmt(Stmt):
 
         self.var = var
         self.stmt = stmt
+        self.delegated_stmts = [stmt]
 
     @property
     def variables(self):
@@ -507,9 +523,6 @@ class AssignStmt(Stmt):
     @property
     def typ(self):
         return self.stmt.typ
-
-    def get_c(self, func):
-        return self.stmt.get_c(func=func)
 
 
 class BoundStmt(Stmt):
@@ -532,7 +545,7 @@ class BoundStmt(Stmt):
     def typ(self):
         return self.stmt.typ
 
-    def get_c(self, func):
+    def _get_c(self, func):
         return f'BIND_STMT({self.name}, {func.ctx_typ.name}, {self.var.name}, {self.assign.name}, {self.stmt.name})'
 
 
@@ -563,10 +576,10 @@ class SequenceStmt(Stmt):
     def used_stmts(self):
         return self.stmt.used_stmts
 
-    def get_c(self, func):
+    def get_c(self, *args, **kwargs):
         dedup_stmts = deduplicate(self.stmts)
         return '\n'.join(
-            stmt.get_c(func=func)
+            stmt.get_c(*args, **kwargs)
             for stmt in chain(
                 dedup_stmts,
                 self._bound_stmts,
@@ -616,7 +629,7 @@ class ConsumeGeneratorStmt(LoopStmt):
         # This needs to be a fully private variable, since it will be
         # overwritten with junk on the last iteration when the generator breaks
         # without actually providing a value.
-        assign_var = prog.TmpVar(typ=generator_stmt.typ)
+        assign_var = prog.TmpVar(typ=generator_stmt.typ.wrapped_typ)
         stmt = make_consumer_stmt(assign_var)
 
         self.stmt = stmt
@@ -625,57 +638,65 @@ class ConsumeGeneratorStmt(LoopStmt):
 
         gen_state = prog.TmpVar(typ=generator_stmt.typ.ctrl_monad)
         stmt_ret = prog.TmpVar(typ=stmt.typ)
-        resume = prog.TmpVar(typ=prog.builtin_typs['bool'])
 
-        consume_name = f'__consume_{prog.make_unique_id()}'
-        code = textwrap.dedent(f'''
-            if ({resume.local_ref}) {{
-                {gen_state.local_ref} = {gen_state.local_ref}.value.value.thunk.k(ctx);
-            }} else {{
-                {gen_state.local_ref} = {generator_stmt.name}(ctx);
-                {resume.local_ref} = 1;
-            }}
-            if ({gen_state.local_ref}.tag != CTRL_GENERATOR_YIELD)
-                {resume.local_ref} = 0;
-            return {gen_state.local_ref}.value;
-        ''')
+        consume_id = prog.make_unique_id()
         consume_stmt = prog.RawStmt(
-            typ=generator_stmt.typ,
-            code=code,
+            typ=generator_stmt.typ.wrapped_typ,
+            code=textwrap.dedent(f'''
+                {gen_state.local_ref} = {gen_state.local_ref}.value.thunk.k(ctx);
+                /* Generator is finished, we can break out of the consuming loop */
+                if ({gen_state.local_ref}.tag == CTRL_RETURN)
+                    {gen_state.local_ref}.value.value.tag = CTRL_BREAK;
+                return {gen_state.local_ref}.value.value;
+            '''),
             variables={
                 gen_state,
-                stmt_ret,
-                resume,
             },
-            name=consume_name,
+            name=f'__consume_{consume_id}',
         )
 
-        init_stmt = prog.ExprStmt(
-            expr=prog.ControlExpr('Return', val=0, typ=resume.typ),
+        consume_stmt_first = prog.RawStmt(
+            typ=assign_var.typ,
+            code = textwrap.dedent(f'''
+                {gen_state.local_ref} = {generator_stmt.name}(ctx);
+                return {gen_state.local_ref}.value.value;
+            '''),
+            variables={
+                gen_state,
+            },
+            name=f'__consume_first_{consume_id}',
+        )
+
+        work_stmt = prog.AssignStmt(
+            var=stmt_ret,
+            expr=stmt,
         )
 
         super().__init__(
-            init=init_stmt,
+            init=prog.SequenceStmt([
+                prog.AssignStmt(
+                    var=assign_var,
+                    expr=consume_stmt_first,
+                ),
+                work_stmt,
+            ]),
             body=[
                 prog.AssignStmt(
                     var=assign_var,
                     expr=consume_stmt,
                 ),
-                prog.AssignStmt(
-                    var=stmt_ret,
-                    expr=stmt,
-                ),
+                work_stmt,
             ],
             prog=prog,
         )
 
-        self.variables.update((gen_state, resume))
+        self.variables.update((gen_state, stmt_ret))
 
-    def get_c(self, func):
+    def get_c(self, *args, **kwargs):
         return (
-            self.generator_stmt.get_c(func=func) +
+            self.generator_stmt.get_c(*args, **kwargs) +
             '\n' +
-            super().get_c(func=func)
+            super().get_c(*args, **kwargs)
         )
 
 
@@ -714,10 +735,11 @@ class Func(SimpleHash, Node):
 
     def get_c(self):
         macro = 'PUBLIC_FUNC' if self.public else 'FUNC'
+        visited = set()
         return (
             self.stmt.get_c_decl(func=self) +
             '\n\n' +
-            self.stmt.get_c(func=self) +
+            self.stmt.get_c(func=self, visited=visited) +
             '\n\n' +
             f'{macro}({self.name}, {self.ctx_typ.name}, {self.stmt.name})'
         )
@@ -841,23 +863,13 @@ def main():
             ),
             prog.ConsumeGeneratorStmt(
                 generator_stmt=prog.SequenceStmt(
-                    # TODO: GeneratorYield currently depends on being bound to
-                    # something else, otherwise it will not go through ___BIND
-                    # and will not set the thunk. The interaction of ___BIND
-                    # and the consumer code in ConsumeGeneratorStmt needs to be
-                    # rethaught to avoid the duplication
-                    #
-                    # TODO: GeneratorSuspend is broken, as it is just a "YieldNone".
                     stmts=[
                         prog.ExprStmt(
                             prog.RawExpr(rf'printf("hello1\n");', typ=prog.builtin_typs['unit']) +
-                            # prog.ControlExpr('GeneratorYield', val=3, typ=prog.builtin_typs['int'])
                             prog.YieldExpr(val=3, typ=prog.builtin_typs['int']),
                         ),
                         prog.ExprStmt(
                             prog.RawExpr(rf'printf("hello2\n");', typ=prog.builtin_typs['unit']) +
-                            #prog.ControlExpr('GeneratorYield', val=4, typ=prog.builtin_typs['int'])
-                            # prog.ControlExpr('GeneratorYield', val=4, typ=prog.builtin_typs['int'])
                             prog.YieldExpr(val=4, typ=prog.builtin_typs['int']),
                         ),
                         prog.ExprStmt(
@@ -1004,17 +1016,20 @@ def main():
         f.write(src.encode('utf-8'))
         f.write(b'\n')
         f.flush()
-        import os
-        # os.system(f'cpp -P {f.name} | less')
-        # os.system(f'cat {f.name} | less')
-        # breakpoint()
         cpped_name = 'x.c'
         cpped = subprocess.check_output(['cpp', '-P', f.name])
         with open(cpped_name, 'wb') as f_cpp:
             f_cpp.write(cpped)
         subprocess.check_call(['clang-format', '-i', '--style={IndentWidth: 4}', cpped_name])
 
-        cmd = ['gcc', '-Wall', '-Wextra', '-Wno-unneeded-internal-declaration', '-Wno-unused-parameter', '-Wno-unused-function', '-Wno-unused-variable', '-Wno-unused-label', '-std=gnu11', '-O3', f.name, '-o', exe_name]
+        src = f.name
+        src = cpped_name
+
+        import os
+        # os.system(f'cpp -P {f.name} | less')
+        # os.system(f'cat {src} | less')
+        # breakpoint()
+        cmd = ['gcc', '-Wall', '-Wextra', '-Wno-unneeded-internal-declaration', '-Wno-unused-parameter', '-Wno-unused-function', '-Wno-unused-variable', '-Wno-unused-label', '-std=gnu11', '-O3', src, '-o', exe_name]
         try:
             subprocess.check_call(cmd)
         except subprocess.CalledProcessError as e:

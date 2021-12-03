@@ -1,5 +1,6 @@
 // Clang
 #if defined(__clang__)
+#define PRAGMA_COMPILER clang
 #define INLINE __attribute__((always_inline))
 #if __clang_major__ >= 13
 #define TAIL_CALL(x) __attribute__((musttail)) return (x)
@@ -10,11 +11,20 @@
 #endif
 // GCC
 #elif defined(__GNUC__) || defined(__GNUG__)
+#define PRAGMA_COMPILER GCC
 #define TAIL_CALL(x) return (x)
 #define INLINE inline
 // Ensure we get sibling call elimination, which is critical for loops.
 #pragma GCC optimize "-foptimize-sibling-calls"
 #endif
+
+#define _DO_PRAGMA(x) _Pragma(#x)
+#define DO_PRAGMA(x) _DO_PRAGMA(x)
+
+#define SUPPRESS_WARNING_BEGIN(x)              \
+    DO_PRAGMA(PRAGMA_COMPILER diagnostic push) \
+    DO_PRAGMA(PRAGMA_COMPILER diagnostic ignored x)
+#define SUPPRESS_WARNING_END(x) DO_PRAGMA(PRAGMA_COMPILER diagnostic pop)
 
 #ifdef BPF
 #include <linux/slab.h>
@@ -44,41 +54,48 @@ enum ctrl_tag {
     CTRL_GENERATOR_YIELD,
 };
 
+// Ensure the "name" is properly expanded
 #define THUNK(name) __THUNK(name)
 #define __THUNK(name) thunk_##name
-#define MAKE_THUNK(name) \
-    typedef struct {     \
-        CTRL_MONAD(name) \
-        (*k)(void *);    \
+// The "k" attribute *must* be the first one so we can blindly set the
+// continuation address
+#define MAKE_THUNK(name)                                           \
+    struct CTRL_MONAD(SUSPENDED_GENERATOR(name));                  \
+    typedef struct THUNK(name) {                                   \
+        struct CTRL_MONAD(SUSPENDED_GENERATOR(name)) (*k)(void *); \
     } THUNK(name)
 
 #define SUSPENDED_GENERATOR(name) __SUSPENDED_GENERATOR(name)
 #define __SUSPENDED_GENERATOR(name) suspended_gen_##name
-#define MAKE_SUSPENDED_GENERATOR(name, type) \
-    MAKE_THUNK(name);                        \
-    typedef struct {                         \
-        CTRL_MONAD(name)                     \
-        value;                               \
-        THUNK(name)                          \
-        thunk;                               \
+// The "thunk" attribute *must* be the first one so we can blindly set the
+// continuation address without knowing the exact type.
+#define MAKE_SUSPENDED_GENERATOR(name, type)   \
+    MAKE_THUNK(name);                          \
+    typedef struct SUSPENDED_GENERATOR(name) { \
+        THUNK(name)                            \
+        thunk;                                 \
+        CTRL_MONAD(name)                       \
+        value;                                 \
     } SUSPENDED_GENERATOR(name)
 
 #define CTRL_MONAD(name) __CTRL_MONAD(name)
 #define __CTRL_MONAD(name) ctrl_monad_##name
-#define MAKE_CTRL_MONAD(name, type) \
-    typedef struct {                \
-        enum ctrl_tag tag;          \
-        type value;                 \
+#define MAKE_CTRL_MONAD(name, type)   \
+    typedef struct CTRL_MONAD(name) { \
+        enum ctrl_tag tag;            \
+        type value;                   \
     } CTRL_MONAD(name)
 
 #define RETURN_X(stmt, _tag, val) \
-    return (typeof(stmt(NULL))) { .tag = _tag, .value = (val), }
+    return (typeof(stmt(NULL))) { .tag = (_tag), .value = (val), }
 
-#define RETURN_EMPTY(stmt, _tag) \
-    return (typeof(stmt(NULL))) { .tag = _tag }
+#define _GeneratorAction(stmt, action, _tag, ...)         \
+    return (typeof(stmt(NULL))) {                         \
+        .tag = action, .value = {.value = {__VA_ARGS__} } \
+    }
 
-#define GeneratorYield(stmt, x) RETURN_X(stmt, CTRL_GENERATOR_YIELD, x)
-#define GeneratorFinish(stmt) RETURN_EMPTY(stmt, CTRL_BREAK)
+#define GeneratorYield(stmt, x, _tag) _GeneratorAction(stmt, CTRL_GENERATOR_YIELD, .tag = (_tag), .value = (x))
+#define GeneratorFinish(stmt) _GeneratorAction(stmt, CTRL_RETURN, )
 #define Return(stmt, x) RETURN_X(stmt, CTRL_RETURN, x)
 #define Break(stmt, x) RETURN_X(stmt, CTRL_BREAK, x)
 
@@ -96,27 +113,30 @@ enum ctrl_tag {
     }                      \
     ;
 
-#define ___BIND(ctx, name, ma, a_mb, a_mb_addr)                                     \
-    do {                                                                            \
-        typeof(ma) __bind_ma;                                                       \
-        typeof((a_mb_addr(NULL))) __bind_mb;                                        \
-        __bind_ma = (ma);                                                           \
-        if (__bind_ma.tag == CTRL_RETURN) {                                         \
-            GET_MONAD_VALUE(&ctx->name, __bind_ma);                                 \
-            TAIL_CALL(a_mb);                                                        \
-        } else if (__bind_ma.tag == CTRL_BREAK) {                                   \
-            GET_MONAD_VALUE(&ctx->name, __bind_ma);                                 \
-            SET_MONAD_VALUE(__bind_mb, __bind_ma.value);                            \
-            __bind_mb.tag = CTRL_RETURN;                                            \
-        } else if (__bind_ma.tag == CTRL_GENERATOR_YIELD) {                         \
-            GET_MONAD_VALUE(&ctx->name, __bind_ma);                                 \
-            SET_MONAD_VALUE(__bind_mb, __bind_ma.value);                            \
-            __bind_mb.tag = __bind_ma.tag;                                          \
-            __bind_mb.value.thunk.k = (typeof(__bind_mb.value.thunk.k))(a_mb_addr); \
-        } else {                                                                    \
-            __builtin_unreachable();                                                \
-        }                                                                           \
-        return __bind_mb;                                                           \
+#define ___BIND(ctx, name, ma, a_mb, a_mb_addr)                                                                                     \
+    do {                                                                                                                            \
+        typeof(ma) __bind_ma;                                                                                                       \
+        typeof((a_mb_addr(NULL))) __bind_mb;                                                                                        \
+        __bind_ma = (ma);                                                                                                           \
+        if (__bind_ma.tag == CTRL_RETURN) {                                                                                         \
+            GET_MONAD_VALUE(&ctx->name, __bind_ma);                                                                                 \
+            TAIL_CALL(a_mb);                                                                                                        \
+        } else if (__bind_ma.tag == CTRL_BREAK) {                                                                                   \
+            GET_MONAD_VALUE(&ctx->name, __bind_ma);                                                                                 \
+            SET_MONAD_VALUE(__bind_mb, __bind_ma.value);                                                                            \
+            __bind_mb.tag = CTRL_RETURN;                                                                                            \
+        } else if (__bind_ma.tag == CTRL_GENERATOR_YIELD) {                                                                         \
+            GET_MONAD_VALUE(&ctx->name, __bind_ma);                                                                                 \
+            SET_MONAD_VALUE(__bind_mb, __bind_ma.value);                                                                            \
+            __bind_mb.tag = __bind_ma.tag;                                                                                          \
+            /* The continuation address is the first member of the thunk, which is the first member of the SUSPENDED_GENERATOR() */ \
+            SUPPRESS_WARNING_BEGIN("-Wstrict-aliasing")                                                                             \
+            *(void **)&__bind_mb.value = (void *)(a_mb_addr);                                                                       \
+            SUPPRESS_WARNING_END("-Wstrict-aliasing")                                                                               \
+        } else {                                                                                                                    \
+            __builtin_unreachable();                                                                                                \
+        }                                                                                                                           \
+        return __bind_mb;                                                                                                           \
     } while (0)
 
 #define __BIND(ctx, name, ma, a_mb) ___BIND(ctx, name, ma, a_mb(ctx), a_mb)
@@ -125,11 +145,6 @@ enum ctrl_tag {
     static INLINE typeof((a_mb)(NULL)) bound_name(ctx_type *ctx) { \
         __BIND(ctx, name, (ma)(ctx), a_mb);                        \
     }
-
-/* #define BIND_REC_STMT(bound_name, ctx_type, name, a_mb) \ */
-/*     static inline typeof(a_mb(NULL)) bound_name(ctx_type *ctx) { \ */
-/*         ___BIND(ctx, name, (a_mb)(ctx), bound_name(ctx), a_mb); \ */
-/*     } */
 
 #define BIND_EXPR(bound_name, ctx_type, name, expr, a_mb)          \
     static INLINE typeof((a_mb)(NULL)) bound_name(ctx_type *ctx) { \
@@ -151,56 +166,6 @@ enum ctrl_tag {
 #define USER_FUNC_PARAM_TYPE(func, name) \
     typeof(((__ctx_type___user_##func *)NULL)->__param_user_##name)
 #define USER_FUNC_CALL(func, ...) CALL_FUNC(__user_##func, __VA_ARGS__)
-/* #define EVAL(ctx_type, m)                                                      \ */
-/*     ({                                                                         \ */
-/*         ctx_type ctx;                                                          \ */
-/*         m(&ctx).value;                                                         \ */
-/*     }) */
-
-/* #define GENERATOR_CONSUMER_STATE(name, producer_type, consumer_type)           \ */
-/*     CTRL_MONAD(producer_type) __state_gen_##name;                              \ */
-/*     CTRL_MONAD(consumer_type) __scratch_gen_##name;                      \ */
-/*     bool __resume_gen_##name; */
-
-/* #define CONSUME_GENERATOR(bound_name, ctx_type, name, gen_expr, a_mb)          \ */
-/*     static INLINE typeof(((ctx_type *)NULL)->__state_gen_##bound_name)         \ */
-/*         __consume_gen_##bound_name(ctx_type *ctx) {                            \ */
-/*         if (ctx->__resume_gen_##bound_name) {                                  \ */
-/*             if (ctx->__state_gen_##bound_name.thunk.k) {                       \ */
-/*                 void *__thunk_ctx;                                             \ */
-/*                 __thunk_ctx = ctx->__state_gen_##bound_name.thunk.ctx;         \ */
-/*                 ctx->__state_gen_##bound_name =                                \ */
-/*                     ctx->__state_gen_##bound_name.thunk.k(__thunk_ctx);        \ */
-/*                 free(__thunk_ctx);                                             \ */
-/*             } else {                                                           \ */
-/*                 return ctx->__scratch_gen_##bound_name;                        \ */
-/*             }                                                                  \ */
-/*         } else {                                                               \ */
-/*             ctx->__state_gen_##bound_name = (gen_expr);                        \ */
-/*             ctx->__resume_gen_##bound_name = 1;                                \ */
-/*         }                                                                      \ */
-/*         if (ctx->__state_gen_##bound_name.tag == CTRL_GENERATOR_YIELD)                   \ */
-/*             ctx->__state_gen_##bound_name.tag = CTRL_RETURN;                   \ */
-/*         /\* Set the continuation to NULL to indicate that the generator will    \ */
-/*          * not yield anymore. We cannot just check                             \ */
-/*          * "ctx->__state_gen_##bound_name.tag == CTRL_GENERATOR_YIELD" as it has been    \ */
-/*          * re-written to CTRL_RETURN. *\/                                       \ */
-/*         else                                                                   \ */
-/*             ctx->__state_gen_##bound_name.thunk.k = NULL;                      \ */
-/*         return ctx->__state_gen_##bound_name;                                  \ */
-/*     }                                                                          \ */
-/*     static INLINE typeof((a_mb)(NULL)) __consume_gen_loop1_##bound_name(       \ */
-/*         ctx_type *ctx);                                                        \ */
-/*     static INLINE typeof(__consume_gen_loop1_##bound_name(NULL)) bound_name( \ */
-/*             ctx_type *ctx) {                                                \ */
-/*             ctx->__resume_gen_##bound_name = 0;                                \ */
-/*             TAIL_CALL(__consume_gen_loop1_##bound_name(ctx));                \ */
-/*     } \ */
-/*     BIND_STMT(__consume_gen_loop1_##bound_name, ctx_type, name,                \ */
-/*               __consume_gen_##bound_name, __consume_gen_loop2_##bound_name);   \ */
-/*     BIND_STMT(__consume_gen_loop2_##bound_name, ctx_type,                \ */
-/*               __scratch_gen_##bound_name, a_mb,                                \ */
-/*               __consume_gen_loop1_##bound_name);                        \ */
 
 #define MAKE_STMT(name, ctx_type, type) \
     static INLINE type name(ctx_type *ctx)
