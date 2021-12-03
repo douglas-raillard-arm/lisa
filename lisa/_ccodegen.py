@@ -228,7 +228,7 @@ class SuspendedGeneratorOf(Typ):
         self._typ_param = typ
 
     @property
-    def wrapped_typ(self):
+    def yielded_typ(self):
         return self._typ_param
 
     def get_c(self):
@@ -629,7 +629,8 @@ class ConsumeGeneratorStmt(LoopStmt):
         # This needs to be a fully private variable, since it will be
         # overwritten with junk on the last iteration when the generator breaks
         # without actually providing a value.
-        assign_var = prog.TmpVar(typ=generator_stmt.typ.wrapped_typ)
+        yielded_typ = generator_stmt.typ.yielded_typ
+        assign_var = prog.TmpVar(typ=yielded_typ)
         stmt = make_consumer_stmt(assign_var)
 
         self.stmt = stmt
@@ -640,32 +641,25 @@ class ConsumeGeneratorStmt(LoopStmt):
         stmt_ret = prog.TmpVar(typ=stmt.typ)
 
         consume_id = prog.make_unique_id()
-        consume_stmt = prog.RawStmt(
-            typ=generator_stmt.typ.wrapped_typ,
-            code=textwrap.dedent(f'''
-                {gen_state.local_ref} = {gen_state.local_ref}.value.thunk.k(ctx);
-                /* Generator is finished, we can break out of the consuming loop */
-                if ({gen_state.local_ref}.tag == CTRL_RETURN)
-                    {gen_state.local_ref}.value.value.tag = CTRL_BREAK;
-                return {gen_state.local_ref}.value.value;
-            '''),
-            variables={
-                gen_state,
-            },
-            name=f'__consume_{consume_id}',
-        )
 
-        consume_stmt_first = prog.RawStmt(
-            typ=assign_var.typ,
-            code = textwrap.dedent(f'''
-                {gen_state.local_ref} = {generator_stmt.name}(ctx);
-                return {gen_state.local_ref}.value.value;
-            '''),
-            variables={
-                gen_state,
-            },
-            name=f'__consume_first_{consume_id}',
-        )
+        def make_consume_stmt(name, next_code):
+            return prog.AssignStmt(
+                var=assign_var,
+                expr=prog.RawStmt(
+                    typ=assign_var.typ,
+                    code=textwrap.dedent(f'''
+                        {gen_state.local_ref} = {next_code};
+                        /* Generator is finished, we can break out of the consuming loop */
+                        if ({gen_state.local_ref}.tag == CTRL_RETURN)
+                            {gen_state.local_ref}.value.value.tag = CTRL_BREAK;
+                        return {gen_state.local_ref}.value.value;
+                    '''),
+                    variables={
+                        gen_state,
+                    },
+                    name=f'__consume_{name}_{consume_id}',
+                )
+            )
 
         work_stmt = prog.AssignStmt(
             var=stmt_ret,
@@ -674,19 +668,19 @@ class ConsumeGeneratorStmt(LoopStmt):
 
         super().__init__(
             init=prog.SequenceStmt([
-                prog.AssignStmt(
-                    var=assign_var,
-                    expr=consume_stmt_first,
+                make_consume_stmt(
+                    name='init',
+                    next_code=f'{generator_stmt.name}(ctx)',
                 ),
                 work_stmt,
             ]),
             body=[
-                prog.AssignStmt(
-                    var=assign_var,
-                    expr=consume_stmt,
+                make_consume_stmt(
+                    name='loop',
+                    next_code=f'{gen_state.local_ref}.value.thunk.k(ctx)',
                 ),
                 work_stmt,
-            ],
+            ]),
             prog=prog,
         )
 
