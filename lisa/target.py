@@ -39,6 +39,7 @@ import devlib
 from devlib.exception import TargetStableError
 from devlib.utils.misc import which
 from devlib.platform.gem5 import Gem5SimulationPlatform
+from devlib.utils.asyn import asyncf, asynccontextmanager
 
 from lisa.utils import Loggable, HideExekallID, resolve_dotted_name, get_subclasses, import_all_submodules, LISA_HOME, RESULT_DIR, LATEST_LINK, setup_logging, ArtifactPath, nullcontext, ExekallTaggable, memoized
 from lisa._assets import ASSETS_PATH
@@ -963,16 +964,21 @@ class Target(Loggable, HideExekallID, ExekallTaggable, Configurable):
             logger.warning('Could not disable idle states, cpuidle devlib module is not loaded')
             cm = nullcontext
         else:
-            @contextlib.contextmanager
-            def cm():
+            @asynccontextmanager
+            async def cm():
+                cpus = tuple(range(self.plat_info['cpus-count']))
                 try:
-                    for cpu in range(self.plat_info['cpus-count']):
-                        cpuidle.disable_all(cpu)
+                    await self.async_manager.map_concurrently(
+                        cpuidle.disable_all.asyn,
+                        cpus,
+                    )
                     yield
                 finally:
                     logger.info('Re-enabling idle states for all domains')
-                    for cpu in range(self.plat_info['cpus-count']):
-                        cpuidle.enable_all(cpu)
+                    await self.async_manager.map_concurrently(
+                        cpuidle.enable_all.asyn,
+                        cpus,
+                    )
 
         return cm()
 
