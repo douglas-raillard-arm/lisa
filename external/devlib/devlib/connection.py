@@ -29,14 +29,15 @@ import time
 import logging
 import select
 import fcntl
+import asyncio
 
-from devlib.utils.misc import InitCheckpoint
+from devlib.utils.misc import InitCheckpoint, memoized
 
 _KILL_TIMEOUT = 3
 
 
 def _kill_pgid_cmd(pgid, sig, busybox):
-    return '{} kill -{} -{}'.format(busybox, sig.value, pgid)
+    return '{} kill -{} -- -{}'.format(busybox, sig.value, pgid)
 
 def _popen_communicate(bg, popen, input, timeout):
     try:
@@ -61,11 +62,14 @@ class ConnectionBase(InitCheckpoint):
     """
     Base class for all connections.
     """
+
     def __init__(self):
         self._current_bg_cmds = WeakSet()
         self._closed = False
         self._close_lock = threading.Lock()
         self.busybox = None
+        self._bg_spawn_lock = threading.RLock()
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def cancel_running_command(self):
         bg_cmds = set(self._current_bg_cmds)
