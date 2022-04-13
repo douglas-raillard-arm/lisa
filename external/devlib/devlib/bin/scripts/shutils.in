@@ -10,8 +10,8 @@ SED=${SED:-$BUSYBOX sed}
 CAT=${CAT:-$BUSYBOX cat}
 AWK=${AWK:-$BUSYBOX awk}
 PS=${PS:-$BUSYBOX ps}
-MOUNT=${PS:-$BUSYBOX mount}
-PRINTF=${PS:-$BUSYBOX printf}
+MOUNT=${MOUNT:-$BUSYBOX mount}
+PRINTF=${PRINTF:-$BUSYBOX printf}
 
 ################################################################################
 # CPUFrequency Utility Functions
@@ -328,6 +328,7 @@ get_fs_mount_point() {
     if [ "$path" == "" ]; then
         return 1
     else
+        $PRINTF "%s" "$path"
         return 0
     fi
 }
@@ -342,7 +343,7 @@ _command_not_found() {
     exit 1
 }
 # Check the command exists
-type "$CMD" 2>/dev/null || _command_not_found
+type "$CMD" 2>&1 >/dev/null || _command_not_found
 
 "$CMD" "$@"
 
