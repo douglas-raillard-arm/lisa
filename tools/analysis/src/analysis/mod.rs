@@ -1,0 +1,1750 @@
+use core::{
+    cmp::max, fmt::Debug, future::Future, hint::unreachable_unchecked, mem::swap, pin::Pin,
+};
+
+use std::{
+    cell::Cell,
+    collections::{btree_map::Entry, BTreeMap},
+    rc::Rc,
+};
+
+use futures::{
+    future,
+    future::FutureExt,
+    stream::{select, Fuse, Stream},
+    task::{Context, Poll},
+    StreamExt as FuturesStreamExt,
+};
+
+use erased_serde::serialize_trait_object;
+use futures_async_stream::{for_await, stream};
+use pin_project::pin_project;
+use schemars::{schema::RootSchema, schema_for, JsonSchema};
+use serde::{Deserialize, Serialize, Serializer};
+use serde_json::value::Value;
+
+use crate::{
+    event::{Event, EventData, EventID, Timestamp},
+    eventreq::EventReq,
+    futures::make_noop_waker,
+};
+
+macro_rules! make_row_struct {
+    ($(#[$attr:meta])* struct $name:ident { $($field_name:ident : $field_type:ty),+ $(,)?} ) => {
+        $(#[$attr])* struct $name { $($field_name: $field_type),+ }
+
+        impl crate::analysis::Row for $name {
+            type AsTuple = ($($field_type),+);
+            type AsRefTuple<'a> = ($(&'a $field_type),+);
+
+            fn columns() -> ::std::vec::Vec<&'static str> {
+                vec![$(stringify!($field_name)),+]
+            }
+        }
+
+        // tuple -> struct
+        impl From<<$name as crate::analysis::Row>::AsTuple> for $name {
+            fn from(x: <$name as crate::analysis::Row>::AsTuple) -> $name {
+                let ($($field_name),+) = x;
+                $name{ $($field_name),+ }
+            }
+        }
+
+        // struct -> tuple
+        impl From<$name> for <$name as crate::analysis::Row>::AsTuple {
+            fn from(x: $name) -> <$name as crate::analysis::Row>::AsTuple {
+                ($(x.$field_name),+)
+            }
+        }
+
+        // ref struct -> tuple of ref
+        impl<'a> From<&'a $name> for <$name as crate::analysis::Row>::AsRefTuple<'a> {
+            fn from(x: &'a $name) -> <$name as crate::analysis::Row>::AsRefTuple<'a> {
+                ($(&x.$field_name),+)
+            }
+        }
+    }
+}
+
+mod tasks;
+
+#[derive(Clone)]
+pub struct RawEventStream {
+    last_seen: EventID,
+    closed: bool,
+    pub curr_event: Rc<Cell<Option<Event>>>,
+}
+
+impl RawEventStream {
+    pub fn new() -> RawEventStream {
+        RawEventStream {
+            last_seen: EventID::new(0),
+            closed: false,
+            // Encapsulate the current event into an Rc<Refcell<>> so that all
+            // the RawEventStream derived from this one will share the same
+            // "slot".
+            curr_event: Rc::new(Cell::new(None)),
+        }
+    }
+}
+
+impl Stream for RawEventStream {
+    type Item = Event;
+
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        if self.closed {
+            Poll::Ready(None)
+        } else {
+            let mut closed = false;
+            let mut last_seen = self.last_seen;
+
+            // Temporarily replace the event in the stream by None, we will put
+            // it back later.
+            let event = self.curr_event.replace(None);
+
+            let res = match &event {
+                None => Poll::Pending,
+                Some(event) => {
+                    last_seen = event.id;
+                    if self.last_seen == event.id {
+                        Poll::Pending
+                    } else {
+                        closed = match event.data {
+                            EventData::EndOfStream => true,
+                            _ => false,
+                        };
+                        Poll::Ready(Some(event.clone()))
+                    }
+                }
+            };
+
+            // Put the event back in the stream for another consumer to look at
+            // it.
+            self.curr_event.replace(event);
+
+            self.last_seen = last_seen;
+            self.closed = closed;
+            // Make sure to call the waker once, so that the future will be
+            // rescheduled for polling next time an event is available. Otherwise,
+            // combinators like futures::future::join_all() will simply not attempt
+            // to poll, thinking that the Future will not make progress.
+            cx.waker().wake_by_ref();
+            res
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum SignalValue<KDim, K, V> {
+    Initial(KDim, K, V),
+    Current(KDim, K, V),
+    Final(KDim, K, V),
+
+    WindowStart(KDim, K, V),
+    WindowEnd(KDim, K, V),
+}
+
+impl<KDim, K, V> SignalValue<KDim, K, V> {
+    fn map_kv<F, K2, V2>(self, f: F) -> SignalValue<KDim, K2, V2>
+    where
+        F: FnOnce(K, V) -> (K2, V2),
+    {
+        use SignalValue::*;
+
+        match self {
+            Initial(kdim, k, v) => {
+                let (k, v) = f(k, v);
+                Initial(kdim, k, v)
+            }
+            Current(kdim, k, v) => {
+                let (k, v) = f(k, v);
+                Current(kdim, k, v)
+            }
+            Final(kdim, k, v) => {
+                let (k, v) = f(k, v);
+                Final(kdim, k, v)
+            }
+            WindowStart(kdim, k, v) => {
+                let (k, v) = f(k, v);
+                WindowStart(kdim, k, v)
+            }
+            WindowEnd(kdim, k, v) => {
+                let (k, v) = f(k, v);
+                WindowEnd(kdim, k, v)
+            }
+        }
+    }
+
+    fn map<F, V2>(self, f: F) -> SignalValue<KDim, K, V2>
+    where
+        F: FnOnce(V) -> V2,
+    {
+        self.map_kv(|k, v| (k, f(v)))
+    }
+
+    fn map_key<F, K2>(self, f: F) -> SignalValue<KDim, K2, V>
+    where
+        F: FnOnce(K) -> K2,
+    {
+        self.map_kv(|k, v| (f(k), v))
+    }
+
+    #[inline]
+    fn key(&self) -> &K {
+        let (_, k, _) = self.into();
+        k
+    }
+    #[inline]
+    fn value(&self) -> &V {
+        let (_, _, v) = self.into();
+        v
+    }
+    #[inline]
+    fn kdim(&self) -> &KDim {
+        let (kdim, _, _) = self.into();
+        kdim
+    }
+
+    #[inline]
+    fn into_key(self) -> K {
+        let (_, k, _) = self.into();
+        k
+    }
+    #[inline]
+    fn into_value(self) -> V {
+        let (_, _, v) = self.into();
+        v
+    }
+    #[inline]
+    fn into_kdim(self) -> KDim {
+        let (kdim, _, _) = self.into();
+        kdim
+    }
+}
+
+impl<KDim, K, V> From<SignalValue<KDim, K, V>> for (KDim, K, V) {
+    fn from(x: SignalValue<KDim, K, V>) -> Self {
+        match x {
+            SignalValue::Initial(kdim, k, v) => (kdim, k, v),
+            SignalValue::Current(kdim, k, v) => (kdim, k, v),
+            SignalValue::Final(kdim, k, v) => (kdim, k, v),
+            SignalValue::WindowStart(kdim, k, v) => (kdim, k, v),
+            SignalValue::WindowEnd(kdim, k, v) => (kdim, k, v),
+        }
+    }
+}
+
+impl<'a, KDim, K, V> From<&'a SignalValue<KDim, K, V>> for (&'a KDim, &'a K, &'a V) {
+    fn from(x: &'a SignalValue<KDim, K, V>) -> Self {
+        match x {
+            SignalValue::Initial(kdim, k, v) => (kdim, k, v),
+            SignalValue::Current(kdim, k, v) => (kdim, k, v),
+            SignalValue::Final(kdim, k, v) => (kdim, k, v),
+            SignalValue::WindowStart(kdim, k, v) => (kdim, k, v),
+            SignalValue::WindowEnd(kdim, k, v) => (kdim, k, v),
+        }
+    }
+}
+
+pub enum SignalUpdate<K, V, UpdateFn = fn(Option<&V>) -> Option<V>> {
+    Update(K, V),
+    UpdateWith(K, UpdateFn),
+    Finished(K),
+    FinishedWithUpdate(K, V),
+}
+
+pub trait Splitter<'a, I, K, V, UpdateFn> {
+    type SplitStream: Stream<Item = SignalUpdate<K, V, UpdateFn>> + 'a;
+    fn split(self: &Self, x: &'a I) -> Self::SplitStream;
+}
+
+impl<'a, F, I, R, K, V, UpdateFn> Splitter<'a, I, K, V, UpdateFn> for F
+where
+    (F, I, R, K, V, UpdateFn): 'a,
+    F: Fn(&'a I) -> R,
+    R: Stream<Item = SignalUpdate<K, V, UpdateFn>> + 'a,
+{
+    type SplitStream = impl Stream<Item = SignalUpdate<K, V, UpdateFn>>;
+    fn split(&self, x: &'a I) -> Self::SplitStream {
+        self(x)
+    }
+}
+
+pub trait MultiplexedStream: Stream
+where
+    Self::Item: HasKDim,
+{
+    // TODO: Using GAT makes the trait not object-safe. Are we cool with that ?
+    // Otherwise we will need to revert back to a Box::pin()
+
+    // SplitFn needs to be a parameter since the actual DemuxStream type will
+    // embed a value of type SplitFn in implementations.
+    type DemuxStream<K, V, SplitFn, UpdateFn>: Stream<
+        Item = SignalValue<<Self::Item as HasKDim>::KDim, K, V>,
+    >;
+    fn demux<K, V, SplitFn, UpdateFn>(
+        self,
+        split: SplitFn,
+    ) -> Self::DemuxStream<K, V, SplitFn, UpdateFn>
+    where
+        // TODO: remove that
+        K: Debug,
+        V: Debug,
+
+        K: Ord + Eq + Clone,
+        V: Clone + Eq,
+        UpdateFn: FnOnce(Option<&V>) -> Option<V>,
+        SplitFn: for<'a> Splitter<'a, Self::Item, K, V, UpdateFn>;
+}
+
+pub trait EventStream: MultiplexedStream<Item = Event> {
+    fn fork(&self) -> Self;
+}
+
+#[pin_project]
+#[derive(Clone)]
+pub struct TraceEventStream<SelectFn> {
+    #[pin]
+    stream: RawEventStream,
+    last_selected: bool,
+    select: SelectFn,
+}
+
+impl<SelectFn> TraceEventStream<SelectFn> {
+    pub fn new(select: SelectFn) -> Self {
+        TraceEventStream {
+            stream: RawEventStream::new(),
+            last_selected: false,
+            select,
+        }
+    }
+
+    pub fn set_curr_event(&mut self, event: Event) {
+        self.stream.curr_event.replace(Some(event));
+    }
+}
+
+impl<SelectFn> Stream for TraceEventStream<SelectFn>
+where
+    SelectFn: FnMut(&Event) -> Option<<Event as HasKDim>::KDim>,
+{
+    type Item = Event;
+
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let mut this = self.project();
+        loop {
+            let polled = this.stream.as_mut().poll_next(cx);
+            return match &polled {
+                Poll::Ready(Some(x)) => {
+                    let last_selected = *this.last_selected;
+                    let selected = match (this.select)(x) {
+                        Some(_) => !last_selected,
+                        None => last_selected,
+                    };
+                    *this.last_selected = selected;
+
+                    if selected {
+                        polled
+                    } else {
+                        continue;
+                    }
+                }
+                _ => polled,
+            };
+        }
+    }
+}
+
+impl<SelectFn> MultiplexedStream for TraceEventStream<SelectFn>
+where
+    SelectFn: FnMut(&Event) -> Option<<Event as HasKDim>::KDim>,
+{
+    type DemuxStream<K, V, SplitFn, UpdateFn> =
+        impl Stream<Item = SignalValue<<Self::Item as HasKDim>::KDim, K, V>>;
+
+    fn demux<K, V, SplitFn, UpdateFn>(
+        self,
+        split: SplitFn,
+    ) -> Self::DemuxStream<K, V, SplitFn, UpdateFn>
+    where
+        // TODO: remove that
+        K: Debug,
+        V: Debug,
+
+        K: Ord + Eq + Clone,
+        V: Clone + Eq,
+        UpdateFn: FnOnce(Option<&V>) -> Option<V>,
+        SplitFn: for<'a> Splitter<'a, Self::Item, K, V, UpdateFn>,
+    {
+        _demux(self.stream, self.select, split)
+    }
+}
+
+impl<SelectFn> EventStream for TraceEventStream<SelectFn>
+where
+    SelectFn: Clone + FnMut(&Event) -> Option<<Event as HasKDim>::KDim>,
+{
+    fn fork(&self) -> Self {
+        self.clone()
+    }
+}
+
+pub trait HasKDim {
+    type KDim: Clone;
+    fn kdim(&self) -> Self::KDim;
+}
+
+impl HasKDim for Event {
+    type KDim = Timestamp;
+    fn kdim(&self) -> Self::KDim {
+        self.ts
+    }
+}
+
+impl<KDim: Clone, K, V> HasKDim for SignalValue<KDim, K, V> {
+    type KDim = KDim;
+    fn kdim(&self) -> Self::KDim {
+        self.kdim().clone()
+    }
+}
+
+impl<K, V1, V2, KDim: Clone> HasKDim
+    for StreamPairItem<SignalValue<KDim, K, V1>, SignalValue<KDim, K, V2>>
+{
+    type KDim = KDim;
+    fn kdim(&self) -> Self::KDim {
+        match self {
+            StreamPairItem::Left(x) => x.kdim().clone(),
+            StreamPairItem::Right(x) => x.kdim().clone(),
+        }
+    }
+}
+
+// TODO: rework the SelectFn API so that it's easier to write a correct
+// selection function (i.e. not based on toggling output)
+#[inline]
+#[stream(item = SignalValue<<S::Item as HasKDim>::KDim, K, V>)]
+async fn _demux<S, K, V, SplitFn, SelectFn, UpdateFn>(
+    stream: S,
+    mut select: SelectFn,
+    splitter: SplitFn,
+) where
+    // TODO: remove that
+    V: Debug,
+    K: Debug,
+
+    K: Ord + Eq + Clone,
+    V: Clone + Eq,
+    S: Stream,
+    S::Item: HasKDim,
+    SelectFn: FnMut(&S::Item) -> Option<<S::Item as HasKDim>::KDim>,
+    SplitFn: for<'a> Splitter<'a, S::Item, K, V, UpdateFn>,
+    UpdateFn: FnOnce(Option<&V>) -> Option<V>,
+{
+    let mut map: BTreeMap<K, V> = BTreeMap::new();
+    let mut prev_selected = false;
+
+    #[for_await]
+    for x in stream {
+        // Window-related events
+        let selected = match select(&x) {
+            Some(kdim) => {
+                // End of window
+                if prev_selected {
+                    // We don't care about the order, as signals are assumed to be
+                    // independent
+                    for (k, v) in map.iter() {
+                        yield SignalValue::WindowEnd(kdim.clone(), k.clone(), v.clone());
+                    }
+                // Start of window
+                } else {
+                    for (k, v) in map.iter() {
+                        yield SignalValue::WindowStart(kdim.clone(), k.clone(), v.clone());
+                    }
+                }
+                !prev_selected
+            }
+            None => prev_selected,
+        };
+
+        #[for_await]
+        for update in splitter.split(&x) {
+            match update {
+                SignalUpdate::Update(k, v) => {
+                    let entry = map.entry(k.clone());
+                    let (initial, redundant) = match entry {
+                        Entry::Occupied(mut entry) => {
+                            // TODO: Do we really want that in all cases if we
+                            // want to e.g. count the number of frequency
+                            // transition ?
+
+                            // Only let through updates that actually change the
+                            // signal value.
+                            let redundant = entry.get() == &v;
+                            if !redundant {
+                                entry.insert(v.clone());
+                            }
+                            (false, redundant)
+                        }
+                        Entry::Vacant(entry) => {
+                            entry.insert(v.clone());
+                            (true, false)
+                        }
+                    };
+
+                    if selected && !redundant {
+                        let kdim = x.kdim();
+                        if initial {
+                            yield SignalValue::Initial(kdim, k, v)
+                        } else {
+                            yield SignalValue::Current(kdim, k, v);
+                        }
+                    }
+                }
+                SignalUpdate::UpdateWith(k, f) => {
+                    let entry = map.entry(k.clone());
+                    match entry {
+                        Entry::Occupied(mut entry) => {
+                            let kdim = x.kdim();
+                            let v = entry.get();
+                            match f(Some(v)) {
+                                Some(_v) => {
+                                    // TODO: Do we really want that in all cases if we
+                                    // want to e.g. count the number of frequency
+                                    // transition ?
+
+                                    // Only yield if the value changed
+                                    if &_v != v {
+                                        entry.insert(_v.clone());
+                                        if selected {
+                                            yield SignalValue::Current(kdim, k, _v);
+                                        }
+                                    }
+                                }
+                                // TODO: We might want to finish with a specific value to avoid the duplicated Current and Final.
+                                // => maybe the function should simply return a
+                                // SignalUpdate instead of an Option<V> ?
+                                None => {
+                                    let v = entry.remove();
+                                    if selected {
+                                        yield SignalValue::Final(kdim, k, v);
+                                    }
+                                }
+                            }
+                        }
+                        Entry::Vacant(entry) => match f(None) {
+                            Some(v) => {
+                                entry.insert(v.clone());
+                                if selected {
+                                    let kdim = x.kdim();
+                                    yield SignalValue::Initial(kdim, k, v);
+                                }
+                            }
+                            None => {}
+                        },
+                    };
+                }
+                SignalUpdate::Finished(k) => {
+                    // We expect a Finished update to come after an Update update,
+                    // so since it's the only place where keys are removed, the key
+                    // should be present. If it's not present, we simply ignore it
+                    // as it indicates a double-Finished.
+                    match map.remove(&k) {
+                        Some(removed) if selected => yield SignalValue::Final(x.kdim(), k, removed),
+                        _ => (),
+                    }
+                }
+                SignalUpdate::FinishedWithUpdate(k, v) => {
+                    // We expect a Finished update to come after an Update update,
+                    // so since it's the only place where keys are removed, the key
+                    // should be present. If it's not present, we simply ignore it
+                    // as it indicates a double-Finished.
+                    if !map.remove(&k).is_none() {
+                        yield SignalValue::Final(x.kdim(), k, v);
+                    }
+                }
+            }
+        }
+
+        prev_selected = selected;
+    }
+}
+
+#[derive(Debug, Clone)]
+enum StreamPairItem<T1, T2> {
+    Left(T1),
+    Right(T2),
+}
+
+fn merge<S1, T1, S2, T2>(s1: S1, s2: S2) -> impl Stream<Item = StreamPairItem<T1, T2>>
+where
+    S1: Stream<Item = T1>,
+    S2: Stream<Item = T2>,
+{
+    let s1 = s1.map(StreamPairItem::<T1, T2>::Left);
+    let s2 = s2.map(StreamPairItem::<T1, T2>::Right);
+    select(s1, s2)
+}
+
+#[stream(item = (T1, Option<T2>))]
+pub async fn left_join<T1, S1, F1, T2, S2, F2, K>(s1: S1, mut f1: F1, s2: S2, mut f2: F2)
+where
+    S1: Stream<Item = T1>,
+    S2: Stream<Item = T2>,
+    F1: FnMut(&T1) -> Option<K>,
+    F2: FnMut(&T2) -> Option<K>,
+    K: Ord,
+    T1: Clone,
+    T2: Clone,
+{
+    let s1 = s1.map(StreamPairItem::<T1, T2>::Left);
+    let s2 = s2.map(StreamPairItem::<T1, T2>::Right);
+
+    let mut map = BTreeMap::<K, T2>::new();
+
+    #[for_await]
+    // Systematically poll s2 before polling s1, so that the map is as up to
+    // date as can be.
+    for x in select_ordered(s2, s1) {
+        match x {
+            StreamPairItem::Left(x) => {
+                if let Some(k) = f1(&x) {
+                    let entry = map.entry(k);
+                    let right = match entry {
+                        Entry::Occupied(entry) => Some(entry.get().clone()),
+                        _ => None,
+                    };
+                    yield (x, right);
+                }
+            }
+            StreamPairItem::Right(x) => {
+                if let Some(k) = f2(&x) {
+                    map.insert(k, x);
+                }
+            }
+        }
+    }
+}
+
+pub fn right_join<T1, S1, F1, T2, S2, F2, K>(
+    s1: S1,
+    f1: F1,
+    s2: S2,
+    f2: F2,
+) -> impl Stream<Item = (Option<T1>, T2)>
+where
+    S1: Stream<Item = T1>,
+    S2: Stream<Item = T2>,
+    F1: FnMut(&T1) -> Option<K>,
+    F2: FnMut(&T2) -> Option<K>,
+    K: Ord,
+    T1: Clone,
+    T2: Clone,
+{
+    left_join(s2, f2, s1, f1).map(|(left, right)| (right, left))
+}
+
+#[derive(Clone, Debug)]
+pub enum FullJoinItem<L, R> {
+    Left(L),
+    Right(R),
+    Both(L, R),
+}
+
+impl<L, R> FullJoinItem<L, R> {
+    fn left(&self) -> Option<&L> {
+        use FullJoinItem::*;
+        match self {
+            Left(x) => Some(x),
+            Right(_) => None,
+            Both(l, _) => Some(l),
+        }
+    }
+
+    fn right(&self) -> Option<&R> {
+        use FullJoinItem::*;
+        match self {
+            Left(_) => None,
+            Right(x) => Some(x),
+            Both(_, r) => Some(r),
+        }
+    }
+
+    fn both(self) -> Option<(L, R)> {
+        use FullJoinItem::*;
+        match self {
+            Left(_) => None,
+            Right(_) => None,
+            Both(l, r) => Some((l, r)),
+        }
+    }
+}
+impl<KDim, T1, T2> HasKDim for FullJoinItem<T1, T2>
+where
+    T1: HasKDim<KDim = KDim>,
+    T2: HasKDim<KDim = KDim>,
+    KDim: Clone + Ord,
+{
+    type KDim = KDim;
+    fn kdim(&self) -> Self::KDim {
+        use FullJoinItem::*;
+        match self {
+            Left(x) => x.kdim(),
+            Right(x) => x.kdim(),
+            Both(l, r) => max(l.kdim(), r.kdim()),
+        }
+    }
+}
+
+// impl<L, R> From<FullJoinItem<L, R>> for (Option<L>, Option<R>) {
+//     fn from(x: FullJoinItem<L, R>) -> Self {
+//         x.any()
+//     }
+// }
+
+#[stream(item = FullJoinItem<T1, T2>)]
+pub async fn full_join<T1, S1, F1, T2, S2, F2, K>(s1: S1, mut f1: F1, s2: S2, mut f2: F2)
+where
+    S1: Stream<Item = T1>,
+    S2: Stream<Item = T2>,
+    F1: FnMut(&T1) -> Option<K>,
+    F2: FnMut(&T2) -> Option<K>,
+    K: Ord + Clone,
+    T1: Clone,
+    T2: Clone,
+
+    // TODO: remove that
+    T1: Debug,
+    T2: Debug,
+{
+    // TODO: maybe merge both maps with (T1, T2) values ?
+    let mut map1 = BTreeMap::<K, T1>::new();
+    let mut map2 = BTreeMap::<K, T2>::new();
+
+    #[for_await]
+    for x in merge(s1, s2) {
+        // Since we own the Vec for now, we are free to drain it and move the
+        // items out of the Vec. This will not change its capacity so the memory
+        // will be stay allocated, so we can later give it back to the Cell.
+        match x {
+            StreamPairItem::Left(x) => {
+                if let Some(k) = f1(&x) {
+                    map1.insert(k.clone(), x.clone());
+
+                    let entry = map2.entry(k);
+                    match entry {
+                        Entry::Occupied(entry) => {
+                            yield FullJoinItem::Both(x, entry.get().clone());
+                        }
+                        _ => yield FullJoinItem::Left(x),
+                    }
+                }
+            }
+            StreamPairItem::Right(x) => {
+                if let Some(k) = f2(&x) {
+                    map2.insert(k.clone(), x.clone());
+
+                    let entry = map1.entry(k);
+                    match entry {
+                        Entry::Occupied(entry) => {
+                            yield FullJoinItem::Both(entry.get().clone(), x);
+                        }
+                        _ => yield FullJoinItem::Right(x),
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub fn inner_join<T1, S1, F1, T2, S2, F2, K>(
+    s1: S1,
+    f1: F1,
+    s2: S2,
+    f2: F2,
+) -> impl Stream<Item = (T1, T2)>
+where
+    S1: Stream<Item = T1>,
+    S2: Stream<Item = T2>,
+    F1: FnMut(&T1) -> Option<K>,
+    F2: FnMut(&T2) -> Option<K>,
+    K: Ord + Clone,
+    T1: Clone,
+    T2: Clone,
+
+    // TODO: remove that
+    T1: Debug,
+    T2: Debug,
+{
+    full_join(s1, f1, s2, f2).filter_map(|x| {
+        future::ready(match x {
+            FullJoinItem::Both(l, r) => Some((l, r)),
+            _ => None,
+        })
+    })
+}
+
+#[stream(item = SignalValue<KDim, K, (V1, Option<V2>)>)]
+pub async fn left_join_signal<V1, S1, V2, S2, KDim, K>(s1: S1, s2: S2)
+where
+    S1: Stream<Item = SignalValue<KDim, K, V1>>,
+    S2: Stream<Item = SignalValue<KDim, K, V2>>,
+    K: Ord + Clone,
+    KDim: Clone,
+    V2: Clone,
+{
+    let s1 = s1.map(StreamPairItem::<S1::Item, S2::Item>::Left);
+    let s2 = s2.map(StreamPairItem::<S1::Item, S2::Item>::Right);
+
+    let mut map = BTreeMap::<K, V2>::new();
+
+    #[for_await]
+    // Systematically poll s2 before polling s1, so that the map is as up to
+    // date as can be.
+    for x in select_ordered(s2, s1) {
+        match x {
+            StreamPairItem::Left(x) => {
+                let k = x.key().clone();
+                let right = match map.entry(k) {
+                    Entry::Occupied(entry) => Some(entry.get().clone()),
+                    _ => None,
+                };
+                yield x.map(|v| (v, right));
+            }
+            StreamPairItem::Right(x) => {
+                let k = x.key();
+                match x {
+                    SignalValue::WindowEnd(..) | SignalValue::Final(..) => {
+                        map.remove(k);
+                    }
+                    _ => {
+                        map.insert(k.clone(), x.value().clone());
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub fn right_join_signal<V1, S1, V2, S2, KDim, K>(
+    s1: S1,
+    s2: S2,
+) -> impl Stream<Item = SignalValue<KDim, K, (Option<V1>, V2)>>
+where
+    S1: Stream<Item = SignalValue<KDim, K, V1>>,
+    S2: Stream<Item = SignalValue<KDim, K, V2>>,
+    K: Ord + Clone,
+    KDim: Clone,
+    V1: Clone,
+{
+    left_join_signal(s2, s1).map(|x| x.map(|(l, r)| (r, l)))
+}
+
+#[stream(item = SignalValue<KDim, K, FullJoinItem<V1, V2>>)]
+pub async fn full_join_signal<K, KDim, V1, V2, S1, S2>(s1: S1, s2: S2)
+where
+    KDim: Clone,
+    K: Ord + Clone,
+    V1: Clone,
+    V2: Clone,
+    S1: Stream<Item = SignalValue<KDim, K, V1>>,
+    S2: Stream<Item = SignalValue<KDim, K, V2>>,
+{
+    let mut state =
+        BTreeMap::<K, FullJoinItem<SignalValue<KDim, K, V1>, SignalValue<KDim, K, V2>>>::new();
+
+    #[for_await]
+    for x in merge(s1, s2) {
+        match x {
+            StreamPairItem::Left(mut left) => {
+                let entry = state.entry(left.key().clone());
+
+                match entry {
+                    Entry::Occupied(mut occupied_entry) => {
+                        let state_ref = occupied_entry.get_mut();
+
+                        match state_ref {
+                            FullJoinItem::Both(_, right) | FullJoinItem::Right(right) => {
+                                yield SignalValue::Current(
+                                    left.kdim().clone(),
+                                    left.key().clone(),
+                                    FullJoinItem::Both(left.value().clone(), right.value().clone()),
+                                );
+                            }
+                            FullJoinItem::Left(_) => {
+                                yield left.clone().map(FullJoinItem::Left);
+                            }
+                        };
+
+                        match left {
+                            SignalValue::WindowEnd(..) | SignalValue::Final(..) => {
+                                match state_ref {
+                                    FullJoinItem::Both(_, right) => {
+                                        // Ideally we would steal ownership of
+                                        // "right" instead of cloning it, but
+                                        // since get_mut() only gives access to
+                                        // &mut and not an owned value we can't
+                                        // do that.
+                                        *state_ref = FullJoinItem::Right(right.clone());
+                                    }
+                                    FullJoinItem::Left(_) => {
+                                        occupied_entry.remove();
+                                    }
+                                    _ => (),
+                                }
+                            }
+                            _ => {
+                                match state_ref {
+                                    FullJoinItem::Both(_left, _) | FullJoinItem::Left(_left) => {
+                                        swap(_left, &mut left);
+                                    }
+                                    FullJoinItem::Right(right) => {
+                                        // Ideally we would steal ownership of
+                                        // "right" instead of cloning it, but
+                                        // since get_mut() only gives access to
+                                        // &mut and not an owned value we can't
+                                        // do that.
+                                        *state_ref = FullJoinItem::Both(left, right.clone())
+                                    }
+                                };
+                            }
+                        };
+                    }
+                    Entry::Vacant(entry) => {
+                        entry.insert(FullJoinItem::Left(left.clone()));
+                        yield left.map(FullJoinItem::Left);
+                    }
+                }
+            }
+            StreamPairItem::Right(mut right) => {
+                let entry = state.entry(right.key().clone());
+
+                match entry {
+                    Entry::Occupied(mut occupied_entry) => {
+                        let state_ref = occupied_entry.get_mut();
+
+                        match state_ref {
+                            FullJoinItem::Both(left, _) | FullJoinItem::Left(left) => {
+                                yield SignalValue::Current(
+                                    right.kdim().clone(),
+                                    right.key().clone(),
+                                    FullJoinItem::Both(left.value().clone(), right.value().clone()),
+                                );
+                            }
+                            FullJoinItem::Right(_) => {
+                                yield right.clone().map(FullJoinItem::Right);
+                            }
+                        };
+
+                        match right {
+                            SignalValue::WindowEnd(..) | SignalValue::Final(..) => {
+                                match state_ref {
+                                    FullJoinItem::Both(left, _) => {
+                                        // Ideally we would steal ownership of
+                                        // "left" instead of cloning it, but
+                                        // since get_mut() only gives access to
+                                        // &mut and not an owned value we can't
+                                        // do that.
+                                        *state_ref = FullJoinItem::Left(left.clone());
+                                    }
+                                    FullJoinItem::Right(_) => {
+                                        occupied_entry.remove();
+                                    }
+                                    _ => (),
+                                }
+                            }
+                            _ => {
+                                match state_ref {
+                                    FullJoinItem::Both(_, _right) | FullJoinItem::Right(_right) => {
+                                        swap(_right, &mut right);
+                                    }
+                                    FullJoinItem::Left(left) => {
+                                        // Ideally we would steal ownership of
+                                        // "left" instead of cloning it, but
+                                        // since get_mut() only gives access to
+                                        // &mut and not an owned value we can't
+                                        // do that.
+                                        *state_ref = FullJoinItem::Both(left.clone(), right)
+                                    }
+                                };
+                            }
+                        };
+                    }
+                    Entry::Vacant(entry) => {
+                        entry.insert(FullJoinItem::Right(right.clone()));
+                        yield right.map(FullJoinItem::Right);
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[stream(item = SignalValue<KDim, K, (V1, V2)>)]
+pub async fn inner_join_signal<K, KDim, V1, V2, S1, S2>(s1: S1, s2: S2)
+where
+    KDim: Clone,
+    K: Ord + Clone,
+    V1: Clone,
+    V2: Clone,
+    S1: Stream<Item = SignalValue<KDim, K, V1>>,
+    S2: Stream<Item = SignalValue<KDim, K, V2>>,
+
+    // TODO: remove that
+    SignalValue<KDim, K, V1>: Debug,
+    SignalValue<KDim, K, V2>: Debug,
+{
+    let mut state =
+        BTreeMap::<K, FullJoinItem<SignalValue<KDim, K, V1>, SignalValue<KDim, K, V2>>>::new();
+
+    #[for_await]
+    for x in merge(s1, s2) {
+        match x {
+            StreamPairItem::Left(left) => {
+                let entry = state.entry(left.key().clone());
+
+                match entry {
+                    Entry::Occupied(mut occupied_entry) => {
+                        let state_ref = occupied_entry.get_mut();
+
+                        match state_ref {
+                            FullJoinItem::Both(_left, SignalValue::WindowEnd(_, _, _right)) => {
+                                match left {
+                                    SignalValue::Current(..)
+                                    | SignalValue::WindowStart(..)
+                                    | SignalValue::Initial(..) => {
+                                        *_left = left.clone();
+                                    }
+                                    SignalValue::WindowEnd(..) => {
+                                        occupied_entry.remove();
+                                    }
+                                    SignalValue::Final(..) => {
+                                        let (kdim, k, v) = left.into();
+                                        // Simply move the value out of the entry
+                                        let _right = match occupied_entry.remove() {
+                                            FullJoinItem::Both(_, _right) => _right.into_value(),
+                                            _ => unsafe { unreachable_unchecked() },
+                                        };
+                                        yield SignalValue::Final(kdim, k, (v, _right));
+                                    }
+                                }
+                            }
+                            FullJoinItem::Both(_left, _right) => match left {
+                                SignalValue::Current(..) => {
+                                    *_left = left.clone();
+                                    let (kdim, k, v) = left.into();
+                                    yield SignalValue::Current(
+                                        kdim,
+                                        k,
+                                        (v, _right.value().clone()),
+                                    );
+                                }
+                                SignalValue::WindowEnd(..) => {
+                                    *_left = left.clone();
+                                    let (kdim, k, v) = left.into();
+                                    yield SignalValue::WindowEnd(
+                                        kdim,
+                                        k,
+                                        (v, _right.value().clone()),
+                                    );
+                                }
+                                SignalValue::Final(..) => {
+                                    let new_state = FullJoinItem::Right(_right.clone());
+                                    let (kdim, k, v) = left.into();
+                                    yield SignalValue::Final(kdim, k, (v, _right.value().clone()));
+                                    *state_ref = new_state;
+                                }
+
+                                _ => unreachable!(),
+                            },
+                            FullJoinItem::Left(_left) => match left {
+                                SignalValue::Current(..)
+                                | SignalValue::WindowStart(..)
+                                | SignalValue::Initial(..) => {
+                                    *_left = left.clone();
+                                }
+                                SignalValue::WindowEnd(..) | SignalValue::Final(..) => {
+                                    occupied_entry.remove();
+                                }
+                            },
+                            FullJoinItem::Right(_right) => match left {
+                                SignalValue::Initial(..) => {
+                                    let new_state =
+                                        FullJoinItem::Both(left.clone(), _right.clone());
+                                    let (kdim, k, v) = left.into();
+                                    yield SignalValue::Initial(
+                                        kdim,
+                                        k,
+                                        (v, _right.value().clone()),
+                                    );
+                                    *state_ref = new_state;
+                                }
+                                SignalValue::WindowStart(..) => {
+                                    let new_state =
+                                        FullJoinItem::Both(left.clone(), _right.clone());
+                                    let (kdim, k, v) = left.into();
+                                    yield SignalValue::WindowStart(
+                                        kdim,
+                                        k,
+                                        (v, _right.value().clone()),
+                                    );
+                                    *state_ref = new_state;
+                                }
+                                _ => unreachable!(),
+                            },
+                        }
+                    }
+                    Entry::Vacant(vacant_entry) => match left {
+                        SignalValue::Current(..)
+                        | SignalValue::WindowStart(..)
+                        | SignalValue::Initial(..) => {
+                            vacant_entry.insert(FullJoinItem::Left(left));
+                        }
+                        _ => (),
+                    },
+                }
+            }
+            StreamPairItem::Right(right) => {
+                let entry = state.entry(right.key().clone());
+
+                match entry {
+                    Entry::Occupied(mut occupied_entry) => {
+                        let state_ref = occupied_entry.get_mut();
+
+                        match state_ref {
+                            FullJoinItem::Both(SignalValue::WindowEnd(_, _, _left), _right) => {
+                                match right {
+                                    SignalValue::Current(..)
+                                    | SignalValue::WindowStart(..)
+                                    | SignalValue::Initial(..) => {
+                                        *_right = right.clone();
+                                    }
+                                    SignalValue::WindowEnd(..) => {
+                                        occupied_entry.remove();
+                                    }
+                                    SignalValue::Final(..) => {
+                                        let (kdim, k, v) = right.into();
+                                        // Simply move the value out of the entry
+                                        let _left = match occupied_entry.remove() {
+                                            FullJoinItem::Both(_left, _) => _left.into_value(),
+                                            _ => unsafe { unreachable_unchecked() },
+                                        };
+                                        yield SignalValue::Final(kdim, k, (_left, v));
+                                    }
+                                }
+                            }
+                            FullJoinItem::Both(_left, _right) => match right {
+                                SignalValue::Current(..) => {
+                                    *_right = right.clone();
+                                    let (kdim, k, v) = right.into();
+                                    yield SignalValue::Current(kdim, k, (_left.value().clone(), v));
+                                }
+                                SignalValue::WindowEnd(..) => {
+                                    *_right = right.clone();
+                                    let (kdim, k, v) = right.into();
+                                    yield SignalValue::WindowEnd(
+                                        kdim,
+                                        k,
+                                        (_left.value().clone(), v),
+                                    );
+                                }
+                                SignalValue::Final(..) => {
+                                    let new_state = FullJoinItem::Left(_left.clone());
+                                    let (kdim, k, v) = right.into();
+                                    yield SignalValue::Final(kdim, k, (_left.value().clone(), v));
+                                    *state_ref = new_state;
+                                }
+
+                                _ => unreachable!(),
+                            },
+                            FullJoinItem::Right(_right) => match right {
+                                SignalValue::Current(..)
+                                | SignalValue::WindowStart(..)
+                                | SignalValue::Initial(..) => {
+                                    *_right = right.clone();
+                                }
+                                SignalValue::WindowEnd(..) | SignalValue::Final(..) => {
+                                    occupied_entry.remove();
+                                }
+                            },
+                            FullJoinItem::Left(_left) => match right {
+                                SignalValue::Initial(..) => {
+                                    let new_state =
+                                        FullJoinItem::Both(_left.clone(), right.clone());
+                                    let (kdim, k, v) = right.into();
+                                    yield SignalValue::Initial(kdim, k, (_left.value().clone(), v));
+                                    *state_ref = new_state;
+                                }
+                                SignalValue::WindowStart(..) => {
+                                    let new_state =
+                                        FullJoinItem::Both(_left.clone(), right.clone());
+                                    let (kdim, k, v) = right.into();
+                                    yield SignalValue::WindowStart(
+                                        kdim,
+                                        k,
+                                        (_left.value().clone(), v),
+                                    );
+                                    *state_ref = new_state;
+                                }
+                                _ => unreachable!(),
+                            },
+                        }
+                    }
+                    Entry::Vacant(vacant_entry) => match right {
+                        SignalValue::Current(..)
+                        | SignalValue::WindowStart(..)
+                        | SignalValue::Initial(..) => {
+                            vacant_entry.insert(FullJoinItem::Right(right));
+                        }
+                        _ => (),
+                    },
+                }
+            }
+        }
+    }
+}
+
+pub struct GroupStream<T> {
+    curr_x: Rc<Cell<Poll<Option<T>>>>,
+}
+
+impl<T> GroupStream<T> {
+    fn new() -> GroupStream<T> {
+        GroupStream {
+            curr_x: Rc::new(Cell::new(Poll::Pending)),
+        }
+    }
+}
+
+impl<T> Stream for GroupStream<T>
+where
+    T: Clone,
+{
+    type Item = T;
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let x = self.curr_x.replace(Poll::Pending);
+        match &x {
+            Poll::Ready(None) => {}
+            _ => {
+                cx.waker().wake_by_ref();
+            }
+        }
+        x
+    }
+}
+
+#[pin_project]
+struct Group<Fut, T> {
+    curr_x: Rc<Cell<Poll<Option<T>>>>,
+    #[pin]
+    future: Fut,
+}
+
+impl<Fut, T, O> Group<Fut, T>
+where
+    Fut: Future<Output = O>,
+{
+    fn new<F, K>(k: K, mut f: F) -> Group<Fut, T>
+    where
+        F: FnMut(K, GroupStream<T>) -> Fut,
+    {
+        let stream = GroupStream::new();
+        let curr_x = stream.curr_x.clone();
+        let future = f(k, stream);
+        Group { curr_x, future }
+    }
+
+    fn push(self: Pin<&mut Self>, x: Option<T>) -> Option<O> {
+        let waker = make_noop_waker();
+        let mut ctx = Context::from_waker(&waker);
+
+        let mut this = self.project();
+        this.curr_x.replace(Poll::Ready(x));
+        loop {
+            let res = this.future.as_mut().poll(&mut ctx);
+            match res {
+                Poll::Pending => {
+                    // Check if the stream's latest item has been consumed yet.
+                    // If not, we keep polling the future until it consumes it.
+                    let curr_x = this.curr_x.replace(Poll::Pending);
+                    match curr_x {
+                        Poll::Pending => {
+                            break None;
+                        }
+                        _ => {
+                            this.curr_x.replace(curr_x);
+                        }
+                    }
+                }
+                Poll::Ready(x) => break Some(x),
+            }
+        }
+    }
+}
+
+pub async fn group_by<T, S, K, KF, Fut, CF, Result>(
+    stream: S,
+    mut keyf: KF,
+    consume: CF,
+) -> BTreeMap<K, Result>
+where
+    T: Clone,
+    S: Stream<Item = T>,
+    K: Ord + Clone,
+    KF: FnMut(&T) -> K,
+    Fut: Future<Output = Result>,
+    CF: FnMut(K, GroupStream<T>) -> Fut + Clone,
+{
+    let mut group_map = BTreeMap::<K, Option<Pin<Box<Group<Fut, T>>>>>::new();
+    let mut res_map = BTreeMap::<K, Result>::new();
+
+    #[for_await]
+    for x in stream {
+        let k = keyf(&x);
+        match group_map.entry(k.clone()) {
+            Entry::Occupied(mut entry) => {
+                let group = entry.get_mut();
+                match group {
+                    // Group already finished and result already in res_map,
+                    // nothing to do.
+                    None => {}
+                    // We have a group already allocated, push some data into it
+                    Some(group) => match group.as_mut().push(Some(x)) {
+                        // If we have the final result for that group, insert it
+                        // in res_map and then mark the group as completed using
+                        // None in group_map
+                        Some(x) => {
+                            res_map.insert(k, x);
+                            entry.insert(None);
+                        }
+                        None => {}
+                    },
+                }
+            }
+            Entry::Vacant(entry) => {
+                let mut group = Box::pin(Group::new(k.clone(), consume.clone()));
+                entry.insert(match group.as_mut().push(Some(x)) {
+                    Some(x) => {
+                        res_map.insert(k, x);
+                        None
+                    }
+                    None => Some(group),
+                });
+            }
+        }
+    }
+
+    // Close the stream for each aggregation function still consuming it.
+    for (k, group) in group_map {
+        match group {
+            None => {}
+            Some(mut group) => {
+                let res = group.as_mut().push(None);
+                match res {
+                    None => panic!(
+                        "The aggregation function failed to terminate when the stream was closed"
+                    ),
+                    Some(x) => {
+                        res_map.insert(k.clone(), x);
+                    }
+                }
+            }
+        }
+    }
+    res_map
+}
+
+#[pin_project]
+pub struct BatchStream<S>
+where
+    S: Stream,
+{
+    finished: bool,
+    #[pin]
+    inner: S,
+    batch: Rc<Cell<Vec<S::Item>>>,
+    batch_size: usize,
+}
+
+impl<S> BatchStream<S>
+where
+    S: Stream,
+{
+    fn new(stream: S) -> Self {
+        BatchStream {
+            inner: stream,
+            finished: false,
+            batch: Rc::new(Cell::new(Vec::new())),
+            batch_size: 0,
+        }
+    }
+}
+
+// TODO: maybe we can avoid the Vec<> allocation by yielding salves of e.g.
+// Batch::Consecutive<T> and let the consumer know when the salve is finished
+// with Batch::Finished, so they can stop polling when they know it will block
+// for good.
+// => Not useful since the user will probably need to process the batch twice
+// anyway and will therefore need to allocate its own Vec<>.
+// => That said the Vec<> could be reused so we avoid allocating all the time.
+// => Maybe we can somehow return a ref to a Vec<> from poll_next() directly ?
+impl<S> Stream for BatchStream<S>
+where
+    S: Stream,
+    S::Item: Clone,
+{
+    type Item = Rc<Cell<Vec<S::Item>>>;
+
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let mut this = self.as_mut().project();
+        if *this.finished {
+            Poll::Ready(None)
+        } else {
+            // Steal the Vec behind the Rc if as no-one else kept
+            // a reference to it to avoid a new allocation.
+            if let Some(vec) = Rc::get_mut(this.batch) {
+                let vec = vec.get_mut();
+                vec.clear();
+
+                loop {
+                    match this.inner.as_mut().poll_next(cx) {
+                        Poll::Ready(Some(x)) => vec.push(x),
+                        Poll::Pending => {
+                            return if vec.is_empty() {
+                                Poll::Pending
+                            } else {
+                                *this.batch_size = vec.len();
+                                Poll::Ready(Some(this.batch.clone()))
+                            }
+                        }
+                        Poll::Ready(None) => {
+                            *this.finished = true;
+                            return Poll::Ready(if vec.is_empty() {
+                                None
+                            } else {
+                                *this.batch_size = vec.len();
+                                Some(this.batch.clone())
+                            });
+                        }
+                    }
+                }
+            } else {
+                // // Otherwise, existing users can keep using the vector and
+                // // we simply allocate a new one. Use the previous vector
+                // // length for this new vector as it is quite likely that the
+                // // stream is following a specific pattern of yielding N
+                // // items at a time.
+                let mut vec = Vec::with_capacity(*this.batch_size);
+                loop {
+                    match this.inner.as_mut().poll_next(cx) {
+                        Poll::Ready(Some(x)) => vec.push(x),
+                        Poll::Pending => {
+                            return if vec.is_empty() {
+                                Poll::Pending
+                            } else {
+                                *this.batch_size = vec.len();
+                                let batch = Rc::new(Cell::new(vec));
+                                *this.batch = batch.clone();
+                                Poll::Ready(Some(batch))
+                            }
+                        }
+                        Poll::Ready(None) => {
+                            *this.finished = true;
+                            return Poll::Ready(if vec.is_empty() {
+                                None
+                            } else {
+                                *this.batch_size = vec.len();
+                                let batch = Rc::new(Cell::new(vec));
+                                *this.batch = batch.clone();
+                                Some(batch)
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub trait StreamExt: Stream {
+    // type JoinedStream<F1, T2, S2, F2, K>;
+
+    // fn left_join<F1, T2, S2, F2, K>(
+    //     self,
+    //     f1: F1,
+    //     s2: S2,
+    //     f2: F2,
+    // ) -> Self::JoinedStream<F1, T2, S2, F2, K>
+    // where
+    //     S2: Stream<Item = T2>,
+    //     F1: FnMut(&Self::Item) -> K,
+    //     F2: FnMut(&T2) -> K,
+    //     K: Ord,
+    //     Self::Item: Clone,
+    //     Self: Sized,
+    //     T2: Clone;
+
+    // type ModifiedStream;
+    fn apply<F, T>(self, f: F) -> T
+    where
+        Self: Sized,
+        F: FnOnce(Self) -> T;
+
+    fn batch(self) -> BatchStream<Self>
+    where
+        Self: Sized;
+}
+
+impl<S: Stream> StreamExt for S {
+    #[inline(always)]
+    fn apply<F, T>(self, f: F) -> T
+    where
+        F: FnOnce(Self) -> T,
+    {
+        f(self)
+    }
+
+    #[inline(always)]
+    fn batch(self) -> BatchStream<Self> {
+        BatchStream::new(self)
+    }
+
+    // type JoinedStream<F1, T2, S2, F2, K> = impl Stream<Item = (Self::Item, Option<T2>)>;
+    // fn left_join<F1, T2, S2, F2, K>(
+    //     self,
+    //     f1: F1,
+    //     s2: S2,
+    //     f2: F2,
+    // ) -> Self::JoinedStream<F1, T2, S2, F2, K>
+    // where
+    //     S2: Stream<Item = T2>,
+    //     F1: FnMut(&Self::Item) -> K,
+    //     F2: FnMut(&T2) -> K,
+    //     K: Ord,
+    //     Self::Item: Clone,
+    //     Self: Sized,
+    //     T2: Clone,
+    // {
+    //     left_join(self, f1, s2, f2)
+    // }
+}
+
+#[pin_project]
+pub struct SelectOrderedStream<S1, S2> {
+    #[pin]
+    s1: Fuse<S1>,
+    #[pin]
+    s2: Fuse<S2>,
+}
+
+pub fn select_ordered<S1, S2, T>(s1: S1, s2: S2) -> SelectOrderedStream<S1, S2>
+where
+    S1: Stream<Item = T>,
+    S2: Stream<Item = T>,
+{
+    SelectOrderedStream {
+        s1: s1.fuse(),
+        s2: s2.fuse(),
+    }
+}
+
+impl<S1, S2, T> Stream for SelectOrderedStream<S1, S2>
+where
+    S1: Stream<Item = T>,
+    S2: Stream<Item = T>,
+{
+    type Item = T;
+
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let this = self.project();
+
+        return match this.s1.poll_next(cx) {
+            x @ Poll::Ready(_) => x,
+            _ => this.s2.poll_next(cx),
+        };
+    }
+}
+
+type ErrorMsg = std::string::String;
+
+#[derive(Clone, Debug, Serialize, PartialEq, Eq, JsonSchema)]
+pub enum AnalysisError {
+    #[serde(rename = "input")]
+    Input(ErrorMsg),
+    #[serde(rename = "serialization")]
+    Serialization(ErrorMsg),
+}
+
+// Allow serializing any Box<dyn AnalysisValue>, which is not possible with
+// serde alone since Serialize is not object-safe.
+pub trait AnalysisValue: Debug + erased_serde::Serialize {
+    fn get_schema(&self) -> RootSchema;
+}
+serialize_trait_object!(AnalysisValue);
+impl<T: Serialize + Debug + JsonSchema> AnalysisValue for T {
+    fn get_schema(&self) -> RootSchema {
+        schema_for!(T)
+    }
+}
+
+fn serialize_ok<S: Serializer>(x: &Box<dyn AnalysisValue>, s: S) -> Result<S::Ok, S::Error> {
+    #[derive(Serialize)]
+    struct WithSchema<T> {
+        schema: RootSchema,
+        value: T,
+    }
+    WithSchema {
+        schema: x.get_schema(),
+        value: x,
+    }
+    .serialize(s)
+}
+
+#[derive(Debug, Serialize)]
+pub enum AnalysisResult {
+    #[serde(rename = "err")]
+    Err(AnalysisError),
+    #[serde(rename = "ok")]
+    #[serde(serialize_with = "serialize_ok")]
+    Ok(Box<dyn AnalysisValue>),
+}
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct Map<K, V>(Vec<(K, V)>);
+
+impl<K, V> Map<K, V> {
+    fn new(map: BTreeMap<K, V>) -> Self {
+        Map(map.into_iter().collect())
+    }
+}
+
+#[derive(Debug, Serialize, JsonSchema)]
+struct Table<Item> {
+    columns: Vec<&'static str>,
+    data: Vec<Item>,
+}
+
+pub trait Row {
+    type AsTuple;
+    type AsRefTuple<'a>;
+    fn columns() -> Vec<&'static str>;
+}
+
+impl AnalysisResult {
+    pub fn new<T: AnalysisValue + JsonSchema + 'static>(x: T) -> Self {
+        AnalysisResult::Ok(Box::new(x))
+    }
+
+    pub async fn from_row_stream<S, Item>(stream: S) -> Self
+    where
+        S: Stream<Item = Item>,
+        Item: Row + Into<<Item as Row>::AsTuple>,
+        <Item as Row>::AsTuple: Serialize + JsonSchema + Debug + 'static,
+    {
+        // Convert the records to tuples for efficient JSON encoding.
+        let data: Vec<Item::AsTuple> = stream.map(Into::into).collect().await;
+        let columns = Item::columns();
+        let data = Table { data, columns };
+        Self::new(data)
+    }
+
+    pub fn from_map<K, V>(map: BTreeMap<K, V>) -> AnalysisResult
+    where
+        K: Serialize + JsonSchema + Debug + 'static,
+        V: Serialize + JsonSchema + Debug + 'static,
+    {
+        Self::new(Map::new(map))
+    }
+}
+
+pub struct Analysis<S: EventStream> {
+    pub name: &'static str,
+    pub eventreq: EventReq,
+    pub f: Box<
+        dyn Fn(S, &Value) -> Pin<Box<dyn Future<Output = AnalysisResult> + 'static>> + Send + Sync,
+    >,
+}
+
+impl<S> Analysis<S>
+where
+    S: EventStream + 'static,
+{
+    pub fn new<Fut, P>(name: &'static str, f: fn(S, P) -> Fut, eventreq: EventReq) -> Analysis<S>
+    where
+        Fut: Future<Output = AnalysisResult> + 'static,
+        P: for<'de> Deserialize<'de> + 'static,
+        S: EventStream,
+    {
+        Analysis {
+            name,
+            f: Box::new(move |stream, x| {
+                Box::pin(match serde_json::value::from_value(x.clone()) {
+                    Ok(x) => f(stream, x).right_future(),
+                    Err(error) => {
+                        async move { AnalysisResult::Err(AnalysisError::Input(error.to_string())) }
+                            .left_future()
+                    }
+                })
+            }),
+            eventreq,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum EventWindow {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "time")]
+    Time(Timestamp, Timestamp),
+}
+
+pub trait HasEventReq {
+    fn eventreq() -> EventReq;
+}
+
+#[macro_export]
+macro_rules! analysis {
+    (name: $name:ident, events: $events:tt, ($stream:ident: EventStream, $param:ident: $param_ty:ty) $body:block) => {
+        pub async fn $name<S: EventStream>($stream: S, $param: $param_ty) -> AnalysisResult {
+            $body
+        }
+
+        #[allow(non_camel_case_types)]
+        pub struct $name {}
+
+        impl $crate::analysis::HasEventReq for $name {
+            fn eventreq() -> $crate::eventreq::EventReq {
+                $crate::event_req!($events)
+            }
+        }
+    };
+}
+
+macro_rules! build_analyses_descriptors {
+    ($($path:path),* $(,)?) => {
+        [
+            $(
+                Analysis::new(
+                    stringify!($path),
+                    $path,
+                    <$path as HasEventReq>::eventreq(),
+                ),
+            )*
+        ]
+    };
+}
+
+pub fn get_analyses<SelectFn>() -> BTreeMap<&'static str, Analysis<TraceEventStream<SelectFn>>>
+where
+    SelectFn: Clone + FnMut(&Event) -> Option<<Event as HasKDim>::KDim> + 'static,
+{
+    // The content of this file is a single call to
+    // build_analyses_descriptors!() containing the reference to all the
+    // analyses in the crate.
+    let analyses = include!(concat!(env!("OUT_DIR"), "/analyses_list.rs"));
+
+    let mut map = BTreeMap::new();
+    analyses.map(|ana| map.insert(ana.name, ana));
+    map
+}

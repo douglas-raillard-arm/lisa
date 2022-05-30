@@ -1,0 +1,47 @@
+[package]
+name = "lisa-rust-analysis"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+futures-async-stream = "0.2"
+futures-core = { version = "0.3", default-features = false }
+futures = "0.3"
+# async-std = "1.12.0"
+pin-project = "1.0"
+# pin-cell = "0.2.0"
+num-rational = { version = "0.4", default-features = false }
+
+serde = { version = "1.0", features = ["derive", "alloc"] }
+# For no_std environent:
+# serde_json = { version = "1.0", default-features = false, features = ["alloc"]}
+serde_json = { version = "1.0", default-features = false, features = ["std"]}
+
+smartstring = { version = "1.0", features = ["serde"]}
+
+erased-serde = {version = "0.3"}
+schemars = {version = "0.8"}
+
+# CLI only
+clap = { version = "3.0", features = ["derive"] }
+memmap = "0.7"
+itertools = "0.10"
+[target.'cfg(target_arch = "x86_64")'.dependencies]
+mimalloc = {version = "0.1", default-features = false }
+
+[build-dependencies]
+regex = "1"
+glob = "0.3"
+
+[profile.release]
+strip = "debuginfo"
+# debug = 1
+# lto = "fat"
+# lto = "thin"
+
+
+# Static build:
+# rustup target add x86_64-unknown-linux-musl
+# RUSTFLAGS='-C target-feature=+crt-static' cargo build --release --target x86_64-unknown-linux-musl
