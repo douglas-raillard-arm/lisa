@@ -24,6 +24,35 @@ use crate::{
     eventreq::EventReq,
 };
 
+macro_rules! make_row_struct {
+    ($(#[$attr:meta])* struct $name:ident { $($field_name:ident : $field_type:ty),+ $(,)?} ) => {
+        $(#[$attr])* struct $name { $($field_name: $field_type),+ }
+
+        impl crate::analysis::Row for $name {
+            type AsTuple = ($($field_type),+);
+
+            fn columns() -> ::std::vec::Vec<&'static str> {
+                vec![$(stringify!($field_name)),+]
+            }
+        }
+
+        impl From<<$name as crate::analysis::Row>::AsTuple> for $name {
+            fn from(x: <$name as crate::analysis::Row>::AsTuple) -> $name {
+                let ($($field_name),+) = x;
+                $name{ $($field_name),+ }
+            }
+        }
+
+        impl From<$name> for <$name as crate::analysis::Row>::AsTuple {
+            fn from(x: $name) -> <$name as crate::analysis::Row>::AsTuple {
+                ($(x.$field_name),+)
+            }
+        }
+    }
+}
+
+mod test;
+
 #[derive(Clone)]
 pub struct RawEventStream {
     last_seen: EventID,
@@ -523,33 +552,6 @@ pub trait Row {
     fn columns() -> Vec<&'static str>;
 }
 
-macro_rules! make_row_struct {
-    ($(#[$attr:meta])* struct $name:ident { $($field_name:ident : $field_type:ty),+ $(,)?} ) => {
-        $(#[$attr])* struct $name { $($field_name: $field_type),+ }
-
-        impl crate::analysis::Row for $name {
-            type AsTuple = ($($field_type),+);
-
-            fn columns() -> ::std::vec::Vec<&'static str> {
-                vec![$(stringify!($field_name)),+]
-            }
-        }
-
-        impl From<<$name as crate::analysis::Row>::AsTuple> for $name {
-            fn from(x: <$name as crate::analysis::Row>::AsTuple) -> $name {
-                let ($($field_name),+) = x;
-                $name{ $($field_name),+ }
-            }
-        }
-
-        impl From<$name> for <$name as crate::analysis::Row>::AsTuple {
-            fn from(x: $name) -> <$name as crate::analysis::Row>::AsTuple {
-                ($(x.$field_name),+)
-            }
-        }
-    }
-}
-
 impl AnalysisResult {
     pub fn new<T: AnalysisValue + JsonSchema + 'static>(x: T) -> Self {
         AnalysisResult::Ok(Box::new(x))
@@ -603,43 +605,60 @@ where
     }
 }
 
-mod test;
-use crate::analysis::test::{hello, hello2};
-
-pub fn get_analyses<SelectFn>() -> BTreeMap<&'static str, Analysis<TraceEventStream<SelectFn>>>
-where
-    SelectFn: Clone + FnMut(&Event) -> Option<<Event as HasKDim>::KDim> + 'static,
-{
-    let analyses = vec![
-        Analysis::new(
-            "hello",
-            hello,
-            EventReq::AndGroup(vec![
-                EventReq::SingleEvent("sched_switch"),
-                EventReq::SingleEvent("cpu_frequency"),
-            ]),
-        ),
-        Analysis::new(
-            "hello2",
-            hello2,
-            EventReq::AndGroup(vec![
-                EventReq::SingleEvent("sched_wakeup"),
-                EventReq::SingleEvent("sched_switch"),
-                EventReq::SingleEvent("task_rename"),
-            ]),
-        ),
-    ];
-    let mut map = BTreeMap::new();
-    for analysis in analyses {
-        map.insert(analysis.name, analysis);
-    }
-    map
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum EventWindow {
     #[serde(rename = "none")]
     None,
     #[serde(rename = "time")]
     Time(Timestamp, Timestamp),
+}
+
+pub trait HasEventReq {
+    fn eventreq() -> EventReq;
+}
+
+#[macro_export]
+macro_rules! analysis {
+    (name: $name:ident, events: $events:tt, ($stream:ident: EventStream, $param:ident: $param_ty:ty) $body:block) => {
+        pub async fn $name<S: EventStream>($stream: S, $param: $param_ty) -> AnalysisResult {
+            $body
+        }
+
+        #[allow(non_camel_case_types)]
+        pub struct $name {}
+
+        impl $crate::analysis::HasEventReq for $name {
+            fn eventreq() -> $crate::eventreq::EventReq {
+                $crate::event_req!($events)
+            }
+        }
+    };
+}
+
+macro_rules! build_analyses_descriptors {
+    ($($path:path),* $(,)?) => {
+        [
+            $(
+                Analysis::new(
+                    stringify!($path),
+                    $path,
+                    <$path as HasEventReq>::eventreq(),
+                ),
+            )*
+        ]
+    };
+}
+
+pub fn get_analyses<SelectFn>() -> BTreeMap<&'static str, Analysis<TraceEventStream<SelectFn>>>
+where
+    SelectFn: Clone + FnMut(&Event) -> Option<<Event as HasKDim>::KDim> + 'static,
+{
+    // The content of this file is a single call to
+    // build_analyses_descriptors!() containing the reference to all the
+    // analyses in the crate.
+    let analyses = include!(concat!(env!("OUT_DIR"), "/analyses_list.rs"));
+
+    let mut map = BTreeMap::new();
+    analyses.map(|ana| map.insert(ana.name, ana));
+    map
 }

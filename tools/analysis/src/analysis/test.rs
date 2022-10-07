@@ -1,5 +1,6 @@
 use core::fmt::Debug;
 
+use futures::StreamExt;
 use futures::stream::Stream;
 use futures_async_stream::{for_await, stream};
 
@@ -10,6 +11,8 @@ use crate::{
     analysis::{both, AnalysisResult, EventStream, SignalUpdate, SignalValue},
     event::{Comm, Event, EventData, Freq, Timestamp, CPU, PID},
 };
+
+use crate::analysis;
 pub(crate) use make_row_struct;
 
 #[stream(item = SignalUpdate<CPU, Freq>)]
@@ -278,12 +281,6 @@ async fn tasks_state<T: TaskID + 'static>(x: &Event) {
     }
 }
 
-pub async fn hello<S: EventStream>(stream: S, _x: Option<u32>) -> AnalysisResult {
-    AnalysisResult::new(sum(stream.fork()).await)
-}
-
-use futures::StreamExt;
-
 make_row_struct! {
     struct MyStateRow {
         ts: Timestamp,
@@ -314,6 +311,29 @@ fn mystate<S: EventStream>(stream: S) -> impl Stream<Item = MyStateRow> {
     })
 }
 
-pub async fn hello2<S: EventStream>(stream: S, _x: Option<u32>) -> AnalysisResult {
-    AnalysisResult::from_row_stream(mystate(stream)).await
+crate::const_event_req!(EVENTS1, ("sched_switch" and "cpu_frequency"));
+
+analysis! {
+    name:
+    hello,
+    events: ({EVENTS1}),
+    (stream: EventStream, _x: Option<u32>) {
+        AnalysisResult::new(sum(stream.fork()).await)
+    }
+}
+
+analysis! {
+    name: hello2,
+    events: ("sched_wakeup" and "sched_switch" and "task_rename"),
+    (stream: EventStream, _x: Option<u32>) {
+        AnalysisResult::from_row_stream(mystate(stream)).await
+    }
+}
+
+analysis! {
+    name: hello3,
+    events: ("sched_wakeup" and "sched_switch" and "task_rename"),
+    (stream: EventStream, _x: ()) {
+        AnalysisResult::from_row_stream(mystate(stream)).await
+    }
 }

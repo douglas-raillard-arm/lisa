@@ -487,10 +487,17 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
 
             raise KeyError('Could not find data in cache')
 
+        def fixup_spec(spec):
+            spec = dict(spec)
+            spec['name'] = f"crate::analysis::{spec['name']}"
+            # If the analysis uses unit for the args type, serde expects None
+            spec['args'] = spec.get('args')
+            return spec
+
         analyses = list(analyses)
         if analyses:
+            analyses = list(map(FrozenDict, map(fixup_spec, analyses)))
 
-            analyses = list(map(FrozenDict, analyses))
             exceps = {}
             results = {}
             not_in_cache = list()

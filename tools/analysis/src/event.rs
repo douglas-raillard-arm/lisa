@@ -216,6 +216,9 @@ impl Util {
 }
 derive_arith!(Util, Util, u32);
 
+// TODO: figure out if we could be compatible with non-kernel events as well
+// easily.
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Event {
     #[serde(skip)]
