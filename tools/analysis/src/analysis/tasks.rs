@@ -210,8 +210,8 @@ enum TaskFinishedReason {
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, JsonSchema)]
 enum TaskState {
-    Waking,
-    Active,
+    Waking{cpu: CPU},
+    Active(CPU, u32),
     // Preempted is TaskState::Inactive(KernelState::Running)
     Inactive(KernelTaskState),
     Finished(TaskFinishedReason),
@@ -227,11 +227,13 @@ enum TaskState {
 async fn tasks_state<T: TaskID + 'static>(x: &Event) {
     match &x.data {
         EventData::EventSchedWakeup(fields) => {
-            yield SignalUpdate::Update(T::new(&fields.pid, &fields.comm), TaskState::Waking)
+
+            yield SignalUpdate::Update(T::new(&fields.pid, &fields.comm), TaskState::Waking{cpu: fields.target_cpu})
         }
         EventData::EventSchedSwitch(fields) => {
             let prev_kernel = KernelTaskState::from(fields.prev_state);
             let prev_id = T::new(&fields.prev_pid, &fields.prev_comm);
+            let cpu = fields.__cpu;
             // The task is switched out in 2 cases only:
             // 1. It is dead
             // 2. It is preempted, or otherwise stopped (e.g. SIGSTOP)
@@ -262,7 +264,7 @@ async fn tasks_state<T: TaskID + 'static>(x: &Event) {
             }
             yield SignalUpdate::Update(
                 T::new(&fields.next_pid, &fields.next_comm),
-                TaskState::Active,
+                TaskState::Active(cpu,1),
             )
         }
         // If we don't store the comm, changes to the comm are irrelevant. If we
@@ -282,14 +284,14 @@ async fn tasks_state<T: TaskID + 'static>(x: &Event) {
 }
 
 make_row_struct! {
-    struct MyStateRow {
+    struct TaskstateRow {
         ts: Timestamp,
         task: Comm,
         state: TaskState,
     }
 }
 
-fn mystate<S: EventStream>(stream: S) -> impl Stream<Item = MyStateRow> {
+fn _tasks_states<S: EventStream>(stream: S) -> impl Stream<Item = TaskstateRow> {
     stream.demux(&tasks_state::<Comm>).filter_map(|x| async {
         match x {
             SignalValue::Current(ts, task, state) => {
@@ -297,9 +299,9 @@ fn mystate<S: EventStream>(stream: S) -> impl Stream<Item = MyStateRow> {
                 // Some((ts.into(), task.into(), state.into()))
                 // Some(TupleConvert::convert((ts, task, state, Row::<u8>(1))))
                 // Some(row!(Timestamp(ts), task, state))
-                // Some(MyStateRow{ts: Timestamp(ts), task: task, state: state})
+                // Some(TaskstateRow{ts: Timestamp(ts), task: task, state: state})
                 // Some((ts.into(), task, state).into())
-                Some(MyStateRow {
+                Some(TaskstateRow {
                     ts: ts.into(),
                     task,
                     state,
@@ -326,7 +328,7 @@ analysis! {
     name: hello2,
     events: ("sched_wakeup" and "sched_switch" and "task_rename"),
     (stream: EventStream, _x: Option<u32>) {
-        AnalysisResult::from_row_stream(mystate(stream)).await
+        AnalysisResult::from_row_stream(_tasks_states(stream)).await
     }
 }
 
@@ -334,6 +336,14 @@ analysis! {
     name: hello3,
     events: ("sched_wakeup" and "sched_switch" and "task_rename"),
     (stream: EventStream, _x: ()) {
-        AnalysisResult::from_row_stream(mystate(stream)).await
+        AnalysisResult::from_row_stream(_tasks_states(stream)).await
+    }
+}
+
+analysis! {
+    name: tasks_states,
+    events: ("sched_wakeup" and "sched_switch" and "task_rename"),
+    (stream: EventStream, _x: ()) {
+        AnalysisResult::from_row_stream(_tasks_states(stream)).await
     }
 }

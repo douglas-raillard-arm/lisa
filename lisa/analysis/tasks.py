@@ -25,6 +25,7 @@ import holoviews as hv
 import bokeh.models
 
 from lisa.analysis.base import TraceAnalysisBase
+from lisa.analysis.rust import rust_analysis, Run
 from lisa.utils import memoized, kwargs_forwarded_to, deprecate
 from lisa.datautils import df_filter_task_ids, series_rolling_apply, series_refit_index, df_refit_index, df_deduplicate, df_split_signals, df_add_delta, df_window, df_update_duplicates, df_combine_duplicates
 from lisa.trace import requires_events, will_use_events_from, may_use_events, TaskID, CPU, MissingTraceEventError
@@ -270,7 +271,8 @@ class TasksAnalysis(TraceAnalysisBase):
     @requires_events('sched_switch', 'sched_wakeup')
     @will_use_events_from('task_rename')
     @may_use_events('sched_wakeup_new')
-    def _df_tasks_states(self, tasks=None, return_one_df=False):
+    @rust_analysis
+    async def _df_tasks_states(self, tasks=None, return_one_df=False):
         """
         Compute tasks states for all tasks.
 
@@ -369,6 +371,8 @@ class TasksAnalysis(TraceAnalysisBase):
             df = df_filter_task_ids(df, tasks)
 
         df = df_window(df, window=self.trace.window)
+        df2 = await Run(name='tasks::tasks_states')
+        breakpoint()
 
         # Return a unique dataframe with new columns added
         if return_one_df:

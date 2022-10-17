@@ -51,7 +51,7 @@ macro_rules! make_row_struct {
     }
 }
 
-mod test;
+mod tasks;
 
 #[derive(Clone)]
 pub struct RawEventStream {

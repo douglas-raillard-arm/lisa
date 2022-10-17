@@ -209,10 +209,10 @@ def _post_process_data(data, normalize_time):
 
 
         class ProductType(Type):
-            def __init__(self, name, items, names=None):
+            def __init__(self, name, items, names):
                 super().__init__(name)
                 self.items = list(items)
-                self.names = names or list(range(len(items)))
+                self.names = names
                 assert len(self.items) == len(self.names)
 
             @property
@@ -224,6 +224,16 @@ def _post_process_data(data, normalize_time):
                 params = ', '.join(map(str, self.items))
                 return f'{name}({params})'
 
+        class TupleProductType(ProductType):
+            def __init__(self, name, items):
+                super().__init__(
+                    name=name,
+                    items=items,
+                    names=list(range(len(items)))
+                )
+
+        class StructProductType(ProductType):
+            pass
 
         def infer_adt(name, schema):
             _name, schema = deref(schema)
@@ -234,7 +244,7 @@ def _post_process_data(data, normalize_time):
                     infer_adt(None, _schema)
                     for _schema in schema['items']
                 ]
-                return ProductType(name, items)
+                return TupleProductType(name, items)
             elif 'properties' in schema:
                 items = [
                     (_name, infer_adt(None, _schema))
@@ -245,7 +255,8 @@ def _post_process_data(data, normalize_time):
                 else:
                     names = []
                     items = []
-                return ProductType(name, items, names)
+
+                return StructProductType(name, items, names)
             elif 'oneOf' in schema:
                 variants = schema['oneOf']
                 ctors = {}
@@ -279,12 +290,23 @@ def _post_process_data(data, normalize_time):
             elif isinstance(adt, ProductType):
                 if adt.items:
                     cols, expands = zip(*map(expand_adt, adt.items))
-                    def expand(x):
-                        return [
-                            __x
-                            for expand, _x in zip(expands, x)
-                            for __x in expand(_x)
-                        ]
+
+                    if isinstance(adt, TupleProductType):
+                        def expand(x):
+                            return [
+                                __x
+                                for expand, _x in zip(expands, x)
+                                for __x in expand(_x)
+                            ]
+                    elif isinstance(adt, StructProductType):
+                        def expand(x):
+                            return [
+                                _x
+                                for expand, field in zip(expands, adt.names)
+                                for _x in expand(x[field])
+                            ]
+                    else:
+                        raise TypeError(f'Unknown product type: {adt.__class__}')
 
                     cols = [
                         (
@@ -1027,7 +1049,7 @@ def rust_analysis(f):
     @functools.wraps(f)
     def wrapper(self, *args, **kwargs):
         coro = f(self, *args, **kwargs)
-        return self._run_coros([coro])[0]
+        return self.trace.ana._rust._run_coros([coro])[0]
 
     wrapper.asyn = f
     return wrapper
