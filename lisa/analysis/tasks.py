@@ -371,7 +371,8 @@ class TasksAnalysis(TraceAnalysisBase):
             df = df_filter_task_ids(df, tasks)
 
         df = df_window(df, window=self.trace.window)
-        df2 = await Run(name='tasks::tasks_states')
+        df2 = await Run(name='tasks::tasks_states', args=dict(track_comm=add_rename))
+        df3 = await Run(name='tasks::tasks_states', args=dict(track_comm=True))
         breakpoint()
 
         # Return a unique dataframe with new columns added

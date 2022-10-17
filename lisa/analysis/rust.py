@@ -32,7 +32,7 @@ from pathlib import Path
 import uuid
 import shlex
 import copy
-from collections.abc import Mapping
+from collections.abc import Mapping, Iterable
 import inspect
 
 import ujson
@@ -509,16 +509,9 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
 
             raise KeyError('Could not find data in cache')
 
-        def fixup_spec(spec):
-            spec = dict(spec)
-            spec['name'] = f"crate::analysis::{spec['name']}"
-            # If the analysis uses unit for the args type, serde expects None
-            spec['args'] = spec.get('args')
-            return spec
-
         analyses = list(analyses)
         if analyses:
-            analyses = list(map(FrozenDict, map(fixup_spec, analyses)))
+            analyses = list(map(FrozenDict, analyses))
 
             exceps = {}
             results = {}
@@ -534,7 +527,11 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
             if not_in_cache:
                 checkers, cli_specs = zip(*map(resolve, not_in_cache))
                 checker = AndTraceEventChecker(checkers)
-                cli_spec = json.dumps(list(map(dict, cli_specs)))
+                cli_spec = json.dumps(
+                    list(map(dict, cli_specs)),
+                    # Turn FrozenDict into a dict
+                    default=dict,
+                )
                 if window is None:
                     window = '"none"'
                 else:
@@ -851,6 +848,29 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
         final = {}
         to_send = dict.fromkeys(coros, None)
 
+        def fixup_desc(desc):
+            desc = dict(desc)
+            desc['name'] = f"crate::analysis::{desc['name']}"
+            # If the analysis uses unit for the args type, serde expects None
+            args = desc.get('args')
+
+            def traverse(x):
+                if isinstance(x, Mapping):
+                    return FrozenDict({
+                        k: traverse(v)
+                        for k, v in x.items()
+                    })
+                elif isinstance(x, str):
+                    return x
+                elif isinstance(x, Iterable):
+                    return list(map(traverse, x))
+                else:
+                    return x
+
+            desc['args'] = traverse(args)
+            return FrozenDict(desc)
+
+
         while True:
             requests = {}
             for coro, x in list(to_send.items()):
@@ -872,7 +892,7 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
 
             if to_send:
                 descs = {
-                    FrozenDict(desc): coro
+                    fixup_desc(desc): coro
                     for coro, request in requests.items()
                     for desc in request
                 }

@@ -1,7 +1,6 @@
 use core::fmt::Debug;
 
-use futures::StreamExt;
-use futures::stream::Stream;
+use futures::{stream::Stream, StreamExt};
 use futures_async_stream::{for_await, stream};
 
 use schemars::JsonSchema;
@@ -210,8 +209,8 @@ enum TaskFinishedReason {
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, JsonSchema)]
 enum TaskState {
-    Waking{cpu: CPU},
-    Active(CPU, u32),
+    Waking(CPU),
+    Active(CPU),
     // Preempted is TaskState::Inactive(KernelState::Running)
     Inactive(KernelTaskState),
     Finished(TaskFinishedReason),
@@ -227,8 +226,10 @@ enum TaskState {
 async fn tasks_state<T: TaskID + 'static>(x: &Event) {
     match &x.data {
         EventData::EventSchedWakeup(fields) => {
-
-            yield SignalUpdate::Update(T::new(&fields.pid, &fields.comm), TaskState::Waking{cpu: fields.target_cpu})
+            yield SignalUpdate::Update(
+                T::new(&fields.pid, &fields.comm),
+                TaskState::Waking(fields.target_cpu),
+            )
         }
         EventData::EventSchedSwitch(fields) => {
             let prev_kernel = KernelTaskState::from(fields.prev_state);
@@ -264,7 +265,7 @@ async fn tasks_state<T: TaskID + 'static>(x: &Event) {
             }
             yield SignalUpdate::Update(
                 T::new(&fields.next_pid, &fields.next_comm),
-                TaskState::Active(cpu,1),
+                TaskState::Active(cpu),
             )
         }
         // If we don't store the comm, changes to the comm are irrelevant. If we
@@ -283,31 +284,44 @@ async fn tasks_state<T: TaskID + 'static>(x: &Event) {
     }
 }
 
+#[derive(Serialize, JsonSchema, Debug)]
+enum DynamicTaskID {
+    PID(PID),
+    Comm(Comm),
+    PIDComm(PID, Comm),
+}
+
+impl From<PID> for DynamicTaskID {
+    fn from(pid: PID) -> DynamicTaskID {
+        DynamicTaskID::PID(pid)
+    }
+}
+
+impl From<Comm> for DynamicTaskID {
+    fn from(comm: Comm) -> DynamicTaskID {
+        DynamicTaskID::Comm(comm)
+    }
+}
+
+impl From<(PID, Comm)> for DynamicTaskID {
+    fn from(pidcomm: (PID, Comm)) -> DynamicTaskID {
+        let (pid, comm) = pidcomm;
+        DynamicTaskID::PIDComm(pid, comm)
+    }
+}
+
 make_row_struct! {
     struct TaskstateRow {
         ts: Timestamp,
-        task: Comm,
+        task: DynamicTaskID,
         state: TaskState,
     }
 }
 
-fn _tasks_states<S: EventStream>(stream: S) -> impl Stream<Item = TaskstateRow> {
-    stream.demux(&tasks_state::<Comm>).filter_map(|x| async {
+fn _tasks_states<S: EventStream, T: TaskID + Ord + Into<DynamicTaskID> + 'static>(stream: S) -> impl Stream<Item = TaskstateRow> {
+    stream.demux(&tasks_state::<T>).filter_map(|x| async {
         match x {
-            SignalValue::Current(ts, task, state) => {
-                // if task == "big_1-1" {
-                // Some((ts.into(), task.into(), state.into()))
-                // Some(TupleConvert::convert((ts, task, state, Row::<u8>(1))))
-                // Some(row!(Timestamp(ts), task, state))
-                // Some(TaskstateRow{ts: Timestamp(ts), task: task, state: state})
-                // Some((ts.into(), task, state).into())
-                Some(TaskstateRow {
-                    ts: ts.into(),
-                    task,
-                    state,
-                })
-                // }
-            }
+            SignalValue::Current(ts, task, state) => Some(TaskstateRow { ts, task: task.into(), state }),
             _ => None,
         }
     })
@@ -328,7 +342,7 @@ analysis! {
     name: hello2,
     events: ("sched_wakeup" and "sched_switch" and "task_rename"),
     (stream: EventStream, _x: Option<u32>) {
-        AnalysisResult::from_row_stream(_tasks_states(stream)).await
+        AnalysisResult::from_row_stream(_tasks_states::<_, Comm>(stream)).await
     }
 }
 
@@ -336,14 +350,23 @@ analysis! {
     name: hello3,
     events: ("sched_wakeup" and "sched_switch" and "task_rename"),
     (stream: EventStream, _x: ()) {
-        AnalysisResult::from_row_stream(_tasks_states(stream)).await
+        AnalysisResult::from_row_stream(_tasks_states::<_, Comm>(stream)).await
     }
+}
+
+#[derive(Deserialize, JsonSchema, Debug)]
+pub struct TasksStatesParams {
+    track_comm: bool,
 }
 
 analysis! {
     name: tasks_states,
     events: ("sched_wakeup" and "sched_switch" and "task_rename"),
-    (stream: EventStream, _x: ()) {
-        AnalysisResult::from_row_stream(_tasks_states(stream)).await
+    (stream: EventStream, args: TasksStatesParams) {
+        if args.track_comm {
+            AnalysisResult::from_row_stream(_tasks_states::<_, (PID, Comm)>(stream)).await
+        } else {
+            AnalysisResult::from_row_stream(_tasks_states::<_, PID>(stream)).await
+        }
     }
 }
