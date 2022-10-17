@@ -371,7 +371,21 @@ class TasksAnalysis(TraceAnalysisBase):
             df = df_filter_task_ids(df, tasks)
 
         df = df_window(df, window=self.trace.window)
+        # TODO: find out in what situation we need to track_comm
+        # => It looks like we always want to display the comm, but only in some
+        #    circumstances will we use it to use the TASK_RENAMED state.
+        #    Moreover, AFAIR the python code only tracks the state per PID, so
+        #    the rust per-Comm tracking feature cannot be used here.
         df2 = await Run(name='tasks::tasks_states', args=dict(track_comm=add_rename))
+        df2_renamed = df2.rename(columns={
+            'state.Waking': 'target_cpu',
+            'state.Active': 'cpu',
+            'task.0': 'pid',
+            'task.1': 'comm',
+        })
+        df2_renamed.index.name = 'Time'
+        df2_renamed['target_cpu'] = df2_renamed['target_cpu'].fillna(-1).astype('int32')
+
         df3 = await Run(name='tasks::tasks_states', args=dict(track_comm=True))
         breakpoint()
 

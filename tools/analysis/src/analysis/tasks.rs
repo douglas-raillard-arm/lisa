@@ -284,29 +284,19 @@ async fn tasks_state<T: TaskID + 'static>(x: &Event) {
     }
 }
 
-#[derive(Serialize, JsonSchema, Debug)]
-enum DynamicTaskID {
-    PID(PID),
-    Comm(Comm),
-    PIDComm(PID, Comm),
-}
+#[derive(Debug, Serialize, JsonSchema)]
+struct DynamicTaskID(PID, Option<Comm>);
 
 impl From<PID> for DynamicTaskID {
-    fn from(pid: PID) -> DynamicTaskID {
-        DynamicTaskID::PID(pid)
-    }
-}
-
-impl From<Comm> for DynamicTaskID {
-    fn from(comm: Comm) -> DynamicTaskID {
-        DynamicTaskID::Comm(comm)
+    fn from(pid: PID) -> Self {
+        DynamicTaskID(pid, None)
     }
 }
 
 impl From<(PID, Comm)> for DynamicTaskID {
-    fn from(pidcomm: (PID, Comm)) -> DynamicTaskID {
+    fn from(pidcomm: (PID, Comm)) -> Self {
         let (pid, comm) = pidcomm;
-        DynamicTaskID::PIDComm(pid, comm)
+        DynamicTaskID(pid, Some(comm))
     }
 }
 
@@ -342,7 +332,7 @@ analysis! {
     name: hello2,
     events: ("sched_wakeup" and "sched_switch" and "task_rename"),
     (stream: EventStream, _x: Option<u32>) {
-        AnalysisResult::from_row_stream(_tasks_states::<_, Comm>(stream)).await
+        AnalysisResult::from_row_stream(_tasks_states::<_, PID>(stream)).await
     }
 }
 
@@ -350,7 +340,7 @@ analysis! {
     name: hello3,
     events: ("sched_wakeup" and "sched_switch" and "task_rename"),
     (stream: EventStream, _x: ()) {
-        AnalysisResult::from_row_stream(_tasks_states::<_, Comm>(stream)).await
+        AnalysisResult::from_row_stream(_tasks_states::<_, PID>(stream)).await
     }
 }
 

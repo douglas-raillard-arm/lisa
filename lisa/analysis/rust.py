@@ -207,6 +207,14 @@ def _post_process_data(data, normalize_time):
                 )
                 return f'{self.name}{{{ctors}}}'
 
+        class OptionType(Type):
+            def __init__(self, name, typ):
+                super().__init__(name)
+                self.typ = typ
+
+            def __str__(self):
+                return f'Option({self.typ})'
+
 
         class ProductType(Type):
             def __init__(self, name, items, names):
@@ -257,24 +265,40 @@ def _post_process_data(data, normalize_time):
                     items = []
 
                 return StructProductType(name, items, names)
-            elif 'oneOf' in schema:
-                variants = schema['oneOf']
+            elif 'oneOf' in schema or 'anyOf' in schema:
+                try:
+                    variants = schema['oneOf']
+                except KeyError:
+                    variants = schema['anyOf']
+
                 ctors = {}
                 for variant in variants:
+                    ctor, variant = deref(variant)
+
                     if 'enum' in variant:
                         _ctors = variant['enum']
                         ctors.update(dict.fromkeys(_ctors, UnitType()))
                     elif variant['type'] == 'object':
                         ctor, = variant['required']
                         ctors[ctor] = infer_adt(None, variant['properties'][ctor])
-                return SumType(name, ctors)
+                    else:
+                        ctors[ctor] = infer_adt(None, variant)
+
+                if None in ctors:
+                    assert len(ctors) == 2
+                    ctor, = (ctor for ctor in ctors if ctor is not None)
+                    return OptionType(name, ctors[ctor])
+                else:
+                    return SumType(name, ctors)
             else:
                 try:
                     typ = schema['format']
                 except KeyError:
                     typ = schema['type']
 
-                if name is None:
+                if typ == 'null':
+                    return UnitType()
+                elif name is None:
                     return BasicType(typ)
                 else:
                     return NewType(name, BasicType(typ))
@@ -285,6 +309,8 @@ def _post_process_data(data, normalize_time):
             elif isinstance(adt, NewType):
                 [(typ, col, _)], expand = expand_adt(adt.typ)
                 return ([(typ, col, adt)], expand)
+            elif isinstance(adt, OptionType):
+                return expand_adt(adt.typ)
             elif isinstance(adt, UnitType):
                 return ([], None)
             elif isinstance(adt, ProductType):
