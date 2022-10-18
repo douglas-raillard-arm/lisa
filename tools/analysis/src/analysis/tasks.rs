@@ -300,63 +300,50 @@ impl From<(PID, Comm)> for DynamicTaskID {
     }
 }
 
+// fn _tasks_states<S: EventStream, T: TaskID + Ord + Into<DynamicTaskID> + 'static>(stream: S) -> impl Stream<Item = TaskstateRow> {
+//     stream.demux(&tasks_state::<T>).filter_map(|x| async {
+//         match x {
+//             SignalValue::Current(ts, task, state) => Some(TaskstateRow { ts, task: task.into(), state }),
+//             _ => None,
+//         }
+//     })
+// }
+
+// crate::const_event_req!(EVENTS1,  ("sched_wakeup" and "sched_switch" and "task_rename"));
+
+// analysis! {
+//     name:
+//     hello,
+//     events: ({EVENTS1}),
+//     (stream: EventStream, _x: Option<u32>) {
+//         AnalysisResult::from_row_stream(_tasks_states::<_, PID>(stream)).await
+//     }
+// }
+
+// #[derive(Deserialize, JsonSchema, Debug)]
+// pub struct TasksStatesParams {
+//     track_comm: bool,
+// }
+
 make_row_struct! {
     struct TaskstateRow {
         ts: Timestamp,
-        task: DynamicTaskID,
+        pid: PID,
         state: TaskState,
     }
-}
-
-fn _tasks_states<S: EventStream, T: TaskID + Ord + Into<DynamicTaskID> + 'static>(stream: S) -> impl Stream<Item = TaskstateRow> {
-    stream.demux(&tasks_state::<T>).filter_map(|x| async {
-        match x {
-            SignalValue::Current(ts, task, state) => Some(TaskstateRow { ts, task: task.into(), state }),
-            _ => None,
-        }
-    })
-}
-
-crate::const_event_req!(EVENTS1, ("sched_switch" and "cpu_frequency"));
-
-analysis! {
-    name:
-    hello,
-    events: ({EVENTS1}),
-    (stream: EventStream, _x: Option<u32>) {
-        AnalysisResult::new(sum(stream.fork()).await)
-    }
-}
-
-analysis! {
-    name: hello2,
-    events: ("sched_wakeup" and "sched_switch" and "task_rename"),
-    (stream: EventStream, _x: Option<u32>) {
-        AnalysisResult::from_row_stream(_tasks_states::<_, PID>(stream)).await
-    }
-}
-
-analysis! {
-    name: hello3,
-    events: ("sched_wakeup" and "sched_switch" and "task_rename"),
-    (stream: EventStream, _x: ()) {
-        AnalysisResult::from_row_stream(_tasks_states::<_, PID>(stream)).await
-    }
-}
-
-#[derive(Deserialize, JsonSchema, Debug)]
-pub struct TasksStatesParams {
-    track_comm: bool,
 }
 
 analysis! {
     name: tasks_states,
     events: ("sched_wakeup" and "sched_switch" and "task_rename"),
-    (stream: EventStream, args: TasksStatesParams) {
-        if args.track_comm {
-            AnalysisResult::from_row_stream(_tasks_states::<_, (PID, Comm)>(stream)).await
-        } else {
-            AnalysisResult::from_row_stream(_tasks_states::<_, PID>(stream)).await
-        }
+    (stream: EventStream, args: ()) {
+        AnalysisResult::from_row_stream(
+            stream.demux(&tasks_state::<PID>).filter_map(|x| async {
+                match x {
+                    SignalValue::Current(ts, pid, state) => Some(TaskstateRow { ts, pid, state }),
+                    _ => None,
+                }
+            })
+        ).await
     }
 }

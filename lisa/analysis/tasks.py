@@ -376,7 +376,7 @@ class TasksAnalysis(TraceAnalysisBase):
         #    circumstances will we use it to use the TASK_RENAMED state.
         #    Moreover, AFAIR the python code only tracks the state per PID, so
         #    the rust per-Comm tracking feature cannot be used here.
-        df2 = await Run(name='tasks::tasks_states', args=dict(track_comm=add_rename))
+        df2 = await Run(name='tasks::tasks_states')
         df2_renamed = df2.rename(columns={
             'state.Waking': 'target_cpu',
             'state.Active': 'cpu',
@@ -386,7 +386,6 @@ class TasksAnalysis(TraceAnalysisBase):
         df2_renamed.index.name = 'Time'
         df2_renamed['target_cpu'] = df2_renamed['target_cpu'].fillna(-1).astype('int32')
 
-        df3 = await Run(name='tasks::tasks_states', args=dict(track_comm=True))
         breakpoint()
 
         # Return a unique dataframe with new columns added
