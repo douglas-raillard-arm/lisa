@@ -333,6 +333,7 @@ make_row_struct! {
     }
 }
 
+
 analysis! {
     name: tasks_states,
     events: ("sched_wakeup" and "sched_switch" and "task_rename"),

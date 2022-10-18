@@ -7,7 +7,7 @@ use std::{
 
 use futures::{
     future::FutureExt,
-    stream::Stream,
+    stream::{Stream, select},
     task::{Context, Poll},
     StreamExt,
 };
@@ -496,6 +496,53 @@ where
         }
     }
 }
+
+#[stream(item = (T1, Option<T2>))]
+pub async fn left_join<T1, S1, F1, T2, S2, F2, K>(s1: S1, mut f1: F1, s2: S2, mut f2: F2)
+    where
+    S1: Stream<Item=T1>,
+    S2: Stream<Item=T2>,
+    F1: FnMut(&T1) -> K,
+    F2: FnMut(&T2) -> K,
+    K: Ord,
+    T1: Clone,
+    T2: Clone,
+{
+    enum StreamID<T1, T2> {
+        First(T1),
+        Second(T2),
+    }
+
+    let s1 = s1.map(StreamID::<T1, T2>::First);
+    let s2 = s2.map(StreamID::<T1, T2>::Second);
+
+    let mut map = BTreeMap::<K, T2>::new();
+
+    #[for_await]
+    for x in select(s1, s2) {
+        match x {
+            StreamID::First(x) => {
+                let k = f1(&x);
+                let entry = map.entry(k);
+                match entry {
+                    Entry::Occupied(entry) => {
+                        yield (x, Some(entry.get().clone()));
+                    }
+                    _ => yield (x, None),
+                }
+            },
+            StreamID::Second(x) => {
+                let k = f2(&x);
+                map.insert(k, x);
+            },
+        }
+    }
+}
+
+
+
+
+
 
 type ErrorMsg = std::string::String;
 
