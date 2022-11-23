@@ -3,7 +3,11 @@
 #![feature(stmt_expr_attributes)]
 #![feature(proc_macro_hygiene)]
 #![feature(type_alias_impl_trait)]
-#![feature(generic_associated_types)]
+#![feature(btree_drain_filter)]
+#![feature(core_intrinsics)]
+#![feature(never_type)]
+#![feature(try_blocks)]
+#![feature(macro_metavar_expr)]
 
 // The musl libc allocator is pretty slow, switching to mimalloc or jemalloc
 // makes the resulting binary significantly faster, as we allocate pretty
@@ -14,10 +18,7 @@ use mimalloc::MiMalloc;
 #[cfg(target_arch = "x86_64")]
 static GLOBAL: MiMalloc = MiMalloc;
 
-use ::futures::{
-    future::{join_all, FutureExt},
-    pin_mut,
-};
+use ::futures::{future::join_all, pin_mut};
 use clap::Parser;
 use core::{
     fmt::Debug,
@@ -39,13 +40,14 @@ use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 
 mod analysis;
+mod arrow;
 mod event;
 mod eventreq;
 mod futures;
 mod string;
 
 use crate::{
-    analysis::{get_analyses, EventWindow, HasKDim, TraceEventStream},
+    analysis::{get_analyses, AnalysisConf, EventWindow, HasKDim, TraceEventStream, WindowUpdate},
     event::{Event, EventData, EventID},
     futures::make_noop_waker,
 };
@@ -63,19 +65,24 @@ enum Subcommands {
         #[clap(parse(from_os_str))]
         path: PathBuf,
         analyses: String,
-        #[clap(default_value = "\"none\"")]
+        #[clap(long, default_value = "\"none\"")]
         window: String,
+        #[clap(long)]
+        out_path: PathBuf,
     },
     List,
 }
 
-pub fn do_run<SelectFn, R: Read, F: Future<Output = T>, T: Debug + Serialize>(
+pub fn do_run<SelectFn, R, F, T>(
     mut stream: TraceEventStream<SelectFn>,
     fut: F,
     reader: R,
 ) -> Result<impl Debug + Serialize, String>
 where
-    SelectFn: FnMut(&Event) -> Option<<Event as HasKDim>::KDim>,
+    R: Read,
+    F: Future<Output = T>,
+    T: Debug + Serialize,
+    SelectFn: FnMut(&Event) -> WindowUpdate<<Event as HasKDim>::KDim>,
 {
     let events = Deserializer::from_reader(reader).into_iter::<Event>();
 
@@ -145,7 +152,7 @@ struct CliAnalysis {
     args: Value,
 }
 
-fn run(path: PathBuf, analyses: String, window: String) -> Result<(), String> {
+fn run(path: PathBuf, out_path: PathBuf, analyses: String, window: String) -> Result<(), String> {
     let reader = open_path(path)?;
     let map = get_analyses();
 
@@ -154,44 +161,49 @@ fn run(path: PathBuf, analyses: String, window: String) -> Result<(), String> {
 
     let anas: Vec<CliAnalysis> =
         serde_json::from_str(&analyses).map_err(|x| format!("Could not analyses JSON: {}", x))?;
-    let mut futures = vec![];
 
     let mut prev_selected = false;
     let stream = TraceEventStream::new(move |event: &Event| match window {
-        EventWindow::Time(start, stop) => {
-            let selected = event.ts <= stop && event.ts >= start;
-            let is_start = selected && !prev_selected;
-            let is_stop = !selected && prev_selected;
-            prev_selected = selected;
-
-            if is_start {
-                Some(start)
-            } else if is_stop {
-                Some(stop)
-            } else {
-                None
-            }
-        }
         EventWindow::None => match event {
             Event {
                 data: EventData::StartOfStream,
                 ..
-            } => Some(event.kdim()),
-            _ => None,
+            } => WindowUpdate::Start(event.to_kdim()),
+            _ => WindowUpdate::None,
         },
+        EventWindow::Time(start, end) => {
+            let selected = event.ts >= start && event.ts <= end;
+            let is_start = selected && !prev_selected;
+            let is_end = !selected && prev_selected;
+            prev_selected = selected;
+
+            if is_start {
+                WindowUpdate::Start(start)
+            } else if is_end {
+                // This window function only deals with a single window, so when
+                // it's finished, the stream will run out.
+                WindowUpdate::LastEnd(end)
+            } else {
+                WindowUpdate::None
+            }
+        }
     });
+
+    let conf = AnalysisConf {
+        stream: stream.clone(),
+        out_path: out_path,
+    };
+    let mut futures = vec![];
 
     for ana in anas {
         let args = ana.args;
         let ana = map
             .get(&ana.name as &str)
             .ok_or(format!("Analysis does not exist: {}", ana.name))?;
-        let fut = (ana.f)(stream.clone(), &args);
+        let fut = (ana.f)(&conf, &args);
         futures.push(fut);
     }
 
-    // TODO: join_all() seems to be faster
-    // let fut = JoinedFuture::new(futures);
     let fut = join_all(futures);
     let fut = Box::pin(fut);
     let x = do_run(stream, fut, reader)?;
@@ -207,10 +219,11 @@ fn run(path: PathBuf, analyses: String, window: String) -> Result<(), String> {
 }
 
 fn list() -> Result<(), String> {
-    let map: BTreeMap<_, _> = get_analyses::<fn(&Event) -> Option<<Event as HasKDim>::KDim>>()
-        .into_iter()
-        .map(|(name, ana)| (name, BTreeMap::from([("eventreq", ana.eventreq)])))
-        .collect();
+    let map: BTreeMap<_, _> =
+        get_analyses::<fn(&Event) -> WindowUpdate<<Event as HasKDim>::KDim>>()
+            .into_iter()
+            .map(|(name, ana)| (name, BTreeMap::from([("eventreq", ana.eventreq)])))
+            .collect();
 
     let map =
         serde_json::ser::to_string(&map).map_err(|x| format!("could not encode JSON: {:?}", x))?;
@@ -225,7 +238,8 @@ fn main() -> Result<(), String> {
             path,
             analyses,
             window,
-        } => run(path, analyses, window),
+            out_path,
+        } => run(path, out_path, analyses, window),
         Subcommands::List => list(),
     }
 }

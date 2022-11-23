@@ -1,10 +1,16 @@
 use core::{
-    cmp::max, fmt::Debug, future::Future, hint::unreachable_unchecked, mem::swap, pin::Pin,
+    cmp::max,
+    fmt::Debug,
+    future::Future,
+    hint::unreachable_unchecked,
+    mem::{replace, swap, take},
+    pin::Pin,
 };
 
 use std::{
     cell::Cell,
     collections::{btree_map::Entry, BTreeMap},
+    path::{Path, PathBuf},
     rc::Rc,
 };
 
@@ -16,12 +22,18 @@ use futures::{
     StreamExt as FuturesStreamExt,
 };
 
+use arrow2_convert::{field::ArrowField, serialize::ArrowSerialize};
 use erased_serde::serialize_trait_object;
 use futures_async_stream::{for_await, stream};
 use pin_project::pin_project;
-use schemars::{schema::RootSchema, schema_for, JsonSchema};
+use schemars::{
+    gen::SchemaGenerator,
+    schema::{RootSchema, Schema},
+    schema_for, JsonSchema,
+};
 use serde::{Deserialize, Serialize, Serializer};
 use serde_json::value::Value;
+use uuid::Uuid;
 
 use crate::{
     event::{Event, EventData, EventID, Timestamp},
@@ -29,7 +41,7 @@ use crate::{
     futures::make_noop_waker,
 };
 
-macro_rules! make_row_struct {
+macro_rules! make_table_struct {
     ($(#[$attr:meta])* struct $name:ident { $($field_name:ident : $field_type:ty),+ $(,)?} ) => {
         $(#[$attr])* struct $name { $($field_name: $field_type),+ }
 
@@ -246,7 +258,29 @@ impl<'a, KDim, K, V> From<&'a SignalValue<KDim, K, V>> for (&'a KDim, &'a K, &'a
     }
 }
 
-pub enum SignalUpdate<K, V, UpdateFn = fn(Option<&V>) -> Option<V>> {
+pub trait SignalUpdateFn<K, V> {
+    // The function will not be able to return the SignalUpdate::UpdateWith
+    // variant, as this would require taking an arbitrary amount of generic
+    // parameter.
+    fn call(self, k: &K, v: Option<&V>) -> SignalUpdate<K, V, !>;
+}
+
+impl<K, V, F> SignalUpdateFn<K, V> for F
+where
+    F: FnOnce(&K, Option<&V>) -> SignalUpdate<K, V, !>,
+{
+    fn call(self, k: &K, v: Option<&V>) -> SignalUpdate<K, V, !> {
+        self(k, v)
+    }
+}
+
+impl<K, V> SignalUpdateFn<K, V> for ! {
+    fn call(self, _: &K, _: Option<&V>) -> SignalUpdate<K, V, !> {
+        self
+    }
+}
+
+pub enum SignalUpdate<K, V, UpdateFn = !> {
     Update(K, V),
     UpdateWith(K, UpdateFn),
     Finished(K),
@@ -274,9 +308,6 @@ pub trait MultiplexedStream: Stream
 where
     Self::Item: HasKDim,
 {
-    // TODO: Using GAT makes the trait not object-safe. Are we cool with that ?
-    // Otherwise we will need to revert back to a Box::pin()
-
     // SplitFn needs to be a parameter since the actual DemuxStream type will
     // embed a value of type SplitFn in implementations.
     type DemuxStream<K, V, SplitFn, UpdateFn>: Stream<
@@ -293,7 +324,7 @@ where
 
         K: Ord + Eq + Clone,
         V: Clone + Eq,
-        UpdateFn: FnOnce(Option<&V>) -> Option<V>,
+        UpdateFn: SignalUpdateFn<K, V>,
         SplitFn: for<'a> Splitter<'a, Self::Item, K, V, UpdateFn>;
 }
 
@@ -324,9 +355,16 @@ impl<SelectFn> TraceEventStream<SelectFn> {
     }
 }
 
+pub enum WindowUpdate<KDim> {
+    None,
+    Start(KDim),
+    End(KDim),
+    LastEnd(KDim),
+}
+
 impl<SelectFn> Stream for TraceEventStream<SelectFn>
 where
-    SelectFn: FnMut(&Event) -> Option<<Event as HasKDim>::KDim>,
+    SelectFn: FnMut(&Event) -> WindowUpdate<<Event as HasKDim>::KDim>,
 {
     type Item = Event;
 
@@ -338,8 +376,10 @@ where
                 Poll::Ready(Some(x)) => {
                     let last_selected = *this.last_selected;
                     let selected = match (this.select)(x) {
-                        Some(_) => !last_selected,
-                        None => last_selected,
+                        WindowUpdate::None => last_selected,
+                        WindowUpdate::Start(_) => true,
+                        WindowUpdate::End(_) => false,
+                        WindowUpdate::LastEnd(_) => return Poll::Ready(None),
                     };
                     *this.last_selected = selected;
 
@@ -357,7 +397,7 @@ where
 
 impl<SelectFn> MultiplexedStream for TraceEventStream<SelectFn>
 where
-    SelectFn: FnMut(&Event) -> Option<<Event as HasKDim>::KDim>,
+    SelectFn: FnMut(&Event) -> WindowUpdate<<Event as HasKDim>::KDim>,
 {
     type DemuxStream<K, V, SplitFn, UpdateFn> =
         impl Stream<Item = SignalValue<<Self::Item as HasKDim>::KDim, K, V>>;
@@ -373,7 +413,7 @@ where
 
         K: Ord + Eq + Clone,
         V: Clone + Eq,
-        UpdateFn: FnOnce(Option<&V>) -> Option<V>,
+        UpdateFn: SignalUpdateFn<K, V>,
         SplitFn: for<'a> Splitter<'a, Self::Item, K, V, UpdateFn>,
     {
         _demux(self.stream, self.select, split)
@@ -382,7 +422,7 @@ where
 
 impl<SelectFn> EventStream for TraceEventStream<SelectFn>
 where
-    SelectFn: Clone + FnMut(&Event) -> Option<<Event as HasKDim>::KDim>,
+    SelectFn: Clone + FnMut(&Event) -> WindowUpdate<<Event as HasKDim>::KDim>,
 {
     fn fork(&self) -> Self {
         self.clone()
@@ -391,19 +431,19 @@ where
 
 pub trait HasKDim {
     type KDim: Clone;
-    fn kdim(&self) -> Self::KDim;
+    fn to_kdim(&self) -> Self::KDim;
 }
 
 impl HasKDim for Event {
     type KDim = Timestamp;
-    fn kdim(&self) -> Self::KDim {
+    fn to_kdim(&self) -> Self::KDim {
         self.ts
     }
 }
 
 impl<KDim: Clone, K, V> HasKDim for SignalValue<KDim, K, V> {
     type KDim = KDim;
-    fn kdim(&self) -> Self::KDim {
+    fn to_kdim(&self) -> Self::KDim {
         self.kdim().clone()
     }
 }
@@ -412,7 +452,7 @@ impl<K, V1, V2, KDim: Clone> HasKDim
     for StreamPairItem<SignalValue<KDim, K, V1>, SignalValue<KDim, K, V2>>
 {
     type KDim = KDim;
-    fn kdim(&self) -> Self::KDim {
+    fn to_kdim(&self) -> Self::KDim {
         match self {
             StreamPairItem::Left(x) => x.kdim().clone(),
             StreamPairItem::Right(x) => x.kdim().clone(),
@@ -420,8 +460,51 @@ impl<K, V1, V2, KDim: Clone> HasKDim
     }
 }
 
-// TODO: rework the SelectFn API so that it's easier to write a correct
-// selection function (i.e. not based on toggling output)
+#[stream(item = SignalValue<KDim, K, V>)]
+async fn signal_dedup<KDim, K, V, S>(stream: S)
+where
+    K: Ord + Eq + Clone,
+    V: PartialEq + Clone,
+    KDim: Clone,
+    S: Stream<Item = SignalValue<KDim, K, V>>,
+{
+    let mut map: BTreeMap<K, V> = BTreeMap::new();
+
+    #[for_await]
+    for x in stream {
+        let do_yield = match &x {
+            SignalValue::Current(_, k, v) => match map.entry(k.clone()) {
+                Entry::Vacant(entry) => {
+                    entry.insert(v.clone());
+                    true
+                }
+                Entry::Occupied(mut entry) => {
+                    let _v = entry.get();
+                    if _v != v {
+                        entry.insert(v.clone());
+                        true
+                    } else {
+                        false
+                    }
+                }
+            },
+            SignalValue::Initial(_, k, v) => {
+                map.insert(k.clone(), v.clone());
+                true
+            }
+            SignalValue::Final(_, k, _) => {
+                map.remove(k);
+                true
+            }
+            _ => true,
+        };
+
+        if do_yield {
+            yield x;
+        }
+    }
+}
+
 #[inline]
 #[stream(item = SignalValue<<S::Item as HasKDim>::KDim, K, V>)]
 async fn _demux<S, K, V, SplitFn, SelectFn, UpdateFn>(
@@ -432,141 +515,215 @@ async fn _demux<S, K, V, SplitFn, SelectFn, UpdateFn>(
     // TODO: remove that
     V: Debug,
     K: Debug,
+    S::Item: Debug,
 
     K: Ord + Eq + Clone,
     V: Clone + Eq,
     S: Stream,
     S::Item: HasKDim,
-    SelectFn: FnMut(&S::Item) -> Option<<S::Item as HasKDim>::KDim>,
+    SelectFn: FnMut(&S::Item) -> WindowUpdate<<S::Item as HasKDim>::KDim>,
     SplitFn: for<'a> Splitter<'a, S::Item, K, V, UpdateFn>,
-    UpdateFn: FnOnce(Option<&V>) -> Option<V>,
+    UpdateFn: SignalUpdateFn<K, V>,
 {
-    let mut map: BTreeMap<K, V> = BTreeMap::new();
-    let mut prev_selected = false;
+    #[derive(Clone)]
+    enum Selection<KDim> {
+        Selected,
+        NotSelected(Option<KDim>),
+    }
+
+    // The compiler won't be able to inline the recursive call, but at least try
+    // to entice it to inline the first level.
+    #[inline(always)]
+    fn process<K, V, UpdateFn, Item>(
+        update: SignalUpdate<K, V, UpdateFn>,
+        map: &mut BTreeMap<K, (Option<V>, Option<V>, bool)>,
+        selected: Selection<Item::KDim>,
+        x: &Item,
+    ) -> Option<SignalValue<Item::KDim, K, V>>
+    where
+        K: Ord + Eq + Clone,
+        V: Clone + Eq,
+        Item: HasKDim,
+        UpdateFn: SignalUpdateFn<K, V>,
+    {
+        match update {
+            SignalUpdate::Update(k, v) => {
+                let (scurr, sinitial, _) =
+                    map.entry(k.clone()).or_insert_with(|| (None, None, false));
+
+                *scurr = Some(v.clone());
+
+                match selected {
+                    Selection::Selected => {
+                        *sinitial = None;
+                        match scurr {
+                            None => Some(SignalValue::Initial(x.to_kdim(), k, v)),
+                            _ => Some(SignalValue::Current(x.to_kdim(), k, v)),
+                        }
+                    }
+                    _ => {
+                        // At the beginning of the next window, we
+                        // will see the latest Initial.
+                        *sinitial = Some(v);
+                        None
+                    }
+                }
+            }
+            SignalUpdate::Finished(k) => {
+                let entry = map.entry(k.clone());
+                let mut temp;
+                let mut temp2;
+                let (scurr, sinitial, sfinal) = match entry {
+                    Entry::Occupied(entry) => match selected {
+                        Selection::Selected => {
+                            temp = entry.remove();
+                            &mut temp
+                        }
+                        _ => {
+                            temp2 = entry;
+                            temp2.get_mut()
+                        }
+                    },
+                    Entry::Vacant(_) => {
+                        temp = (None, None, false);
+                        &mut temp
+                    }
+                };
+
+                let scurr = replace(scurr, None);
+                match selected {
+                    Selection::Selected => {
+                        scurr.map(|scurr| SignalValue::Final(x.to_kdim(), k, scurr))
+                    }
+                    Selection::NotSelected(last_window_end) => {
+                        *sinitial = None;
+                        // Preserve an existing Final value, so that we only save
+                        // the earliest Final after the end of a window.
+                        if *sfinal {
+                            *sfinal = false;
+                            // If it is before the beginning of the first
+                            // window, we may not have any "last_window_end" to
+                            // work with, in which case we simply do not emit
+                            // any Final value. There would be little point in
+                            // doing so anyway.
+                            match last_window_end {
+                                Some(last_window_end) => {
+                                    scurr.map(|scurr| SignalValue::Final(last_window_end, k, scurr))
+                                }
+                                None => None,
+                            }
+                        } else {
+                            None
+                        }
+                    }
+                }
+            }
+            SignalUpdate::FinishedWithUpdate(k, v) => {
+                let entry = map.entry(k.clone());
+                let mut temp;
+                let mut temp2;
+                let (scurr, sinitial, sfinal) = match entry {
+                    Entry::Occupied(entry) => match selected {
+                        Selection::Selected => {
+                            temp = entry.remove();
+                            &mut temp
+                        }
+                        _ => {
+                            temp2 = entry;
+                            temp2.get_mut()
+                        }
+                    },
+                    Entry::Vacant(_) => {
+                        temp = (None, None, false);
+                        &mut temp
+                    }
+                };
+
+                let scurr = replace(scurr, None);
+                match selected {
+                    Selection::Selected => scurr.map(|_| SignalValue::Final(x.to_kdim(), k, v)),
+                    Selection::NotSelected(last_window_end) => {
+                        *sinitial = None;
+                        // Preserve an existing Final value, so that we only save
+                        // the earliest Final after the end of a window.
+                        if *sfinal {
+                            *sfinal = false;
+                            match last_window_end {
+                                Some(last_window_end) => {
+                                    scurr.map(|_| SignalValue::Final(last_window_end, k, v))
+                                }
+                                None => None,
+                            }
+                        } else {
+                            None
+                        }
+                    }
+                }
+            }
+            SignalUpdate::UpdateWith(k, f) => {
+                let scurr = match map.get(&k) {
+                    Some((Some(v), _, _)) => Some(v),
+                    _ => None,
+                };
+                process(f.call(&k, scurr), map, selected, x)
+            }
+        }
+    }
+
+    let mut map: BTreeMap<K, (Option<V>, Option<V>, bool)> = BTreeMap::new();
+    let mut selected = Selection::NotSelected(None);
 
     #[for_await]
     for x in stream {
-        // Window-related events
-        let selected = match select(&x) {
-            Some(kdim) => {
-                // End of window
-                if prev_selected {
-                    // We don't care about the order, as signals are assumed to be
-                    // independent
-                    for (k, v) in map.iter() {
-                        yield SignalValue::WindowEnd(kdim.clone(), k.clone(), v.clone());
+        match select(&x) {
+            WindowUpdate::None => (),
+            WindowUpdate::Start(kdim) => {
+                // We don't care about the order, as signals are assumed to be
+                // independent
+                for (k, (v, sinitial, sfinal)) in map.iter_mut() {
+                    *sfinal = false;
+
+                    let sinitial = take(sinitial);
+                    if let Some(v) = sinitial {
+                        yield SignalValue::Initial(kdim.clone(), k.clone(), v);
                     }
-                // Start of window
-                } else {
-                    for (k, v) in map.iter() {
+
+                    if let Some(v) = v {
                         yield SignalValue::WindowStart(kdim.clone(), k.clone(), v.clone());
                     }
                 }
-                !prev_selected
+                selected = Selection::Selected;
             }
-            None => prev_selected,
-        };
-
-        #[for_await]
-        for update in splitter.split(&x) {
-            match update {
-                SignalUpdate::Update(k, v) => {
-                    let entry = map.entry(k.clone());
-                    let (initial, redundant) = match entry {
-                        Entry::Occupied(mut entry) => {
-                            // TODO: Do we really want that in all cases if we
-                            // want to e.g. count the number of frequency
-                            // transition ?
-
-                            // Only let through updates that actually change the
-                            // signal value.
-                            let redundant = entry.get() == &v;
-                            if !redundant {
-                                entry.insert(v.clone());
-                            }
-                            (false, redundant)
-                        }
-                        Entry::Vacant(entry) => {
-                            entry.insert(v.clone());
-                            (true, false)
-                        }
-                    };
-
-                    if selected && !redundant {
-                        let kdim = x.kdim();
-                        if initial {
-                            yield SignalValue::Initial(kdim, k, v)
-                        } else {
-                            yield SignalValue::Current(kdim, k, v);
-                        }
+            WindowUpdate::End(kdim) => {
+                for (k, (v, _, _)) in map.iter() {
+                    if let Some(v) = v {
+                        yield SignalValue::WindowEnd(kdim.clone(), k.clone(), v.clone());
                     }
                 }
-                SignalUpdate::UpdateWith(k, f) => {
-                    let entry = map.entry(k.clone());
-                    match entry {
-                        Entry::Occupied(mut entry) => {
-                            let kdim = x.kdim();
-                            let v = entry.get();
-                            match f(Some(v)) {
-                                Some(_v) => {
-                                    // TODO: Do we really want that in all cases if we
-                                    // want to e.g. count the number of frequency
-                                    // transition ?
+                selected = Selection::NotSelected(Some(kdim));
+            }
 
-                                    // Only yield if the value changed
-                                    if &_v != v {
-                                        entry.insert(_v.clone());
-                                        if selected {
-                                            yield SignalValue::Current(kdim, k, _v);
-                                        }
-                                    }
-                                }
-                                // TODO: We might want to finish with a specific value to avoid the duplicated Current and Final.
-                                // => maybe the function should simply return a
-                                // SignalUpdate instead of an Option<V> ?
-                                None => {
-                                    let v = entry.remove();
-                                    if selected {
-                                        yield SignalValue::Final(kdim, k, v);
-                                    }
-                                }
-                            }
-                        }
-                        Entry::Vacant(entry) => match f(None) {
-                            Some(v) => {
-                                entry.insert(v.clone());
-                                if selected {
-                                    let kdim = x.kdim();
-                                    yield SignalValue::Initial(kdim, k, v);
-                                }
-                            }
-                            None => {}
-                        },
-                    };
-                }
-                SignalUpdate::Finished(k) => {
-                    // We expect a Finished update to come after an Update update,
-                    // so since it's the only place where keys are removed, the key
-                    // should be present. If it's not present, we simply ignore it
-                    // as it indicates a double-Finished.
-                    match map.remove(&k) {
-                        Some(removed) if selected => yield SignalValue::Final(x.kdim(), k, removed),
-                        _ => (),
+            WindowUpdate::LastEnd(kdim) => {
+                for (k, (v, _, _)) in map.iter() {
+                    if let Some(v) = v {
+                        yield SignalValue::WindowEnd(kdim.clone(), k.clone(), v.clone());
                     }
                 }
-                SignalUpdate::FinishedWithUpdate(k, v) => {
-                    // We expect a Finished update to come after an Update update,
-                    // so since it's the only place where keys are removed, the key
-                    // should be present. If it's not present, we simply ignore it
-                    // as it indicates a double-Finished.
-                    if !map.remove(&k).is_none() {
-                        yield SignalValue::Final(x.kdim(), k, v);
-                    }
-                }
+                // The stream is considered finished when we receive the
+                // Finished update, as it marks the end of the last window.
+                break;
             }
         }
 
-        prev_selected = selected;
+        #[for_await]
+        for update in splitter.split(&x) {
+            match process(update, &mut map, selected.clone(), &x) {
+                Some(_x) => {
+                    yield _x;
+                }
+                None => (),
+            }
+        }
     }
 }
 
@@ -686,12 +843,12 @@ where
     KDim: Clone + Ord,
 {
     type KDim = KDim;
-    fn kdim(&self) -> Self::KDim {
+    fn to_kdim(&self) -> Self::KDim {
         use FullJoinItem::*;
         match self {
-            Left(x) => x.kdim(),
-            Right(x) => x.kdim(),
-            Both(l, r) => max(l.kdim(), r.kdim()),
+            Left(x) => x.to_kdim(),
+            Right(x) => x.to_kdim(),
+            Both(l, r) => max(l.to_kdim(), r.to_kdim()),
         }
     }
 }
@@ -1259,7 +1416,7 @@ where
         let mut ctx = Context::from_waker(&waker);
 
         let mut this = self.project();
-        this.curr_x.replace(Poll::Ready(x));
+        this.curr_x.set(Poll::Ready(x));
         loop {
             let res = this.future.as_mut().poll(&mut ctx);
             match res {
@@ -1272,7 +1429,7 @@ where
                             break None;
                         }
                         _ => {
-                            this.curr_x.replace(curr_x);
+                            this.curr_x.set(curr_x);
                         }
                     }
                 }
@@ -1380,14 +1537,6 @@ where
     }
 }
 
-// TODO: maybe we can avoid the Vec<> allocation by yielding salves of e.g.
-// Batch::Consecutive<T> and let the consumer know when the salve is finished
-// with Batch::Finished, so they can stop polling when they know it will block
-// for good.
-// => Not useful since the user will probably need to process the batch twice
-// anyway and will therefore need to allocate its own Vec<>.
-// => That said the Vec<> could be reused so we avoid allocating all the time.
-// => Maybe we can somehow return a ref to a Vec<> from poll_next() directly ?
 impl<S> Stream for BatchStream<S>
 where
     S: Stream,
@@ -1559,7 +1708,7 @@ where
         let this = self.project();
 
         return match this.s1.poll_next(cx) {
-            x @ Poll::Ready(_) => x,
+            x @ Poll::Ready(Some(_)) => x,
             _ => this.s2.poll_next(cx),
         };
     }
@@ -1619,10 +1768,54 @@ impl<K, V> Map<K, V> {
 }
 
 #[derive(Debug, Serialize, JsonSchema)]
-struct Table<Item> {
+struct InbandTable<Item> {
     columns: Vec<&'static str>,
     data: Vec<Item>,
 }
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub enum OutofbandTableFormat {
+    Feather,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OutofbandTable<P>
+where
+    P: AsRef<Path> + JsonSchema,
+{
+    path: P,
+    format: OutofbandTableFormat,
+    schema: RootSchema,
+    columns: Vec<&'static str>,
+}
+
+// Hack: since RootSchema itself does not implement JsonSchema, use a
+// placeholder implementation.
+// https://github.com/GREsau/schemars/issues/191
+const _: () = {
+    #[derive(JsonSchema)]
+    pub struct OutofbandTable<T> {
+        _phantom: std::marker::PhantomData<T>,
+    }
+
+    impl<P> JsonSchema for crate::analysis::OutofbandTable<P>
+    where
+        P: AsRef<Path> + JsonSchema,
+    {
+        #[inline]
+        fn schema_name() -> std::string::String {
+            <OutofbandTable<P> as JsonSchema>::schema_name()
+        }
+        #[inline]
+        fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+            <OutofbandTable<P> as JsonSchema>::json_schema(gen)
+        }
+        #[inline]
+        fn is_referenceable() -> bool {
+            <OutofbandTable<P> as JsonSchema>::is_referenceable()
+        }
+    }
+};
 
 pub trait Row {
     type AsTuple;
@@ -1631,37 +1824,85 @@ pub trait Row {
 }
 
 impl AnalysisResult {
-    pub fn new<T: AnalysisValue + JsonSchema + 'static>(x: T) -> Self {
+    fn _new<T: AnalysisValue + JsonSchema + 'static>(x: T) -> Self {
         AnalysisResult::Ok(Box::new(x))
     }
 
-    pub async fn from_row_stream<S, Item>(stream: S) -> Self
-    where
-        S: Stream<Item = Item>,
-        Item: Row + Into<<Item as Row>::AsTuple>,
-        <Item as Row>::AsTuple: Serialize + JsonSchema + Debug + 'static,
-    {
-        // Convert the records to tuples for efficient JSON encoding.
-        let data: Vec<Item::AsTuple> = stream.map(Into::into).collect().await;
-        let columns = Item::columns();
-        let data = Table { data, columns };
-        Self::new(data)
+    pub fn new<T: AnalysisValue + JsonSchema + 'static, EventStream>(
+        x: T,
+    ) -> AnalysisResultBuilder<EventStream> {
+        Box::new(move |_conf| Box::pin(async { Self::_new(x) }))
     }
 
-    pub fn from_map<K, V>(map: BTreeMap<K, V>) -> AnalysisResult
+    pub fn from_row_stream<S, Item, EventStream>(stream: S) -> AnalysisResultBuilder<EventStream>
+    where
+        S: Stream<Item = Item> + 'static,
+        Item:
+            Row + Into<<Item as Row>::AsTuple> + ArrowSerialize + ArrowField<Type = Item> + 'static,
+        <Item as Row>::AsTuple: Serialize + JsonSchema + Debug + 'static,
+    {
+        Box::new(move |conf| {
+            Box::pin(async move {
+                // TODO: add a runtime switch for JSON vs feather output
+
+                // Convert the records to tuples for efficient JSON encoding.
+                // let data: Vec<Item::AsTuple> = stream.map(Into::into).collect().await;
+                // let columns = Item::columns();
+                // let data = InbandTable { data, columns };
+
+                let id = Uuid::new_v4();
+                let path = format!("{id}.feather");
+                let path = conf.out_path.join(path);
+
+                let data: arrow2::error::Result<OutofbandTable<PathBuf>> = try {
+                    crate::arrow::write_stream(&path, stream).await?;
+                    OutofbandTable {
+                        path: path,
+                        format: OutofbandTableFormat::Feather,
+                        columns: Item::columns(),
+                        schema: schema_for!(Item::AsTuple),
+                    }
+                };
+
+                match data {
+                    Err(err) => AnalysisResult::Err(AnalysisError::Serialization(err.to_string())),
+                    Ok(data) => Self::_new(data),
+                }
+            })
+        })
+    }
+
+    pub async fn from_map<K, V, EventStream>(
+        map: BTreeMap<K, V>,
+    ) -> AnalysisResultBuilder<EventStream>
     where
         K: Serialize + JsonSchema + Debug + 'static,
         V: Serialize + JsonSchema + Debug + 'static,
     {
-        Self::new(Map::new(map))
+        Box::new(move |_conf| Box::pin(async { Self::_new(Map::new(map)) }))
     }
+}
+
+type AnalysisResultBuilder<S> = Box<
+    dyn for<'a> FnOnce(&'a AnalysisConf<S>) -> Pin<Box<dyn Future<Output = AnalysisResult> + 'a>>,
+>;
+
+#[derive(Clone, Debug)]
+pub struct AnalysisConf<S> {
+    pub stream: S,
+    pub out_path: PathBuf,
 }
 
 pub struct Analysis<S: EventStream> {
     pub name: &'static str,
     pub eventreq: EventReq,
     pub f: Box<
-        dyn Fn(S, &Value) -> Pin<Box<dyn Future<Output = AnalysisResult> + 'static>> + Send + Sync,
+        dyn for<'a> Fn(
+                &'a AnalysisConf<S>,
+                &Value,
+            ) -> Pin<Box<dyn Future<Output = AnalysisResult> + 'a>>
+            + Send
+            + Sync,
     >,
 }
 
@@ -1669,17 +1910,18 @@ impl<S> Analysis<S>
 where
     S: EventStream + 'static,
 {
-    pub fn new<Fut, P>(name: &'static str, f: fn(S, P) -> Fut, eventreq: EventReq) -> Analysis<S>
+    pub fn new<Fut, P, F>(name: &'static str, f: F, eventreq: EventReq) -> Analysis<S>
     where
-        Fut: Future<Output = AnalysisResult> + 'static,
+        F: Fn(S, P) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = AnalysisResultBuilder<S>> + 'static,
         P: for<'de> Deserialize<'de> + 'static,
         S: EventStream,
     {
         Analysis {
             name,
-            f: Box::new(move |stream, x| {
+            f: Box::new(move |conf, x| {
                 Box::pin(match serde_json::value::from_value(x.clone()) {
-                    Ok(x) => f(stream, x).right_future(),
+                    Ok(x) => { f(conf.stream.fork(), x).then(move |x| x(conf)) }.right_future(),
                     Err(error) => {
                         async move { AnalysisResult::Err(AnalysisError::Input(error.to_string())) }
                             .left_future()
@@ -1706,7 +1948,10 @@ pub trait HasEventReq {
 #[macro_export]
 macro_rules! analysis {
     (name: $name:ident, events: $events:tt, ($stream:ident: EventStream, $param:ident: $param_ty:ty) $body:block) => {
-        pub async fn $name<S: EventStream>($stream: S, $param: $param_ty) -> AnalysisResult {
+        pub async fn $name<S: EventStream + 'static>(
+            $stream: S,
+            $param: $param_ty,
+        ) -> $crate::analysis::AnalysisResultBuilder<S> {
             $body
         }
 
@@ -1737,7 +1982,7 @@ macro_rules! build_analyses_descriptors {
 
 pub fn get_analyses<SelectFn>() -> BTreeMap<&'static str, Analysis<TraceEventStream<SelectFn>>>
 where
-    SelectFn: Clone + FnMut(&Event) -> Option<<Event as HasKDim>::KDim> + 'static,
+    SelectFn: Clone + FnMut(&Event) -> WindowUpdate<<Event as HasKDim>::KDim> + 'static,
 {
     // The content of this file is a single call to
     // build_analyses_descriptors!() containing the reference to all the

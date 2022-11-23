@@ -268,6 +268,7 @@ class TasksAnalysis(TraceAnalysisBase):
 
         return rt_tasks
 
+    @TraceAnalysisBase.cache
     @rust_analysis(analyses=['tasks::tasks_states'])
     async def _df_tasks_states(self, tasks=None, return_one_df=False):
         """
@@ -315,19 +316,25 @@ class TasksAnalysis(TraceAnalysisBase):
         else:
             df = df.copy(deep=True)
 
+
         df.index.name = 'Time'
-        df = df.rename(columns={
-            'state.Waking.target_cpu': 'target_cpu',
-        })
+        df = df.rename(
+            columns={
+                'state.Waking.target_cpu': 'target_cpu',
+            },
+            copy=False,
+        )
         df['target_cpu'] = df['target_cpu'].fillna(-1).astype('int32')
 
         # TODO: move to datautils
         def df_merge_columns(df, out, cols):
-            df = df.copy(deep=False)
-
-            df[out] = df[cols[0]]
-            for col in cols:
-                df[out] = df[out].fillna(df[col])
+            if cols:
+                fst, *cols = cols
+                merged = df[fst]
+                for col in cols:
+                    merged = merged.fillna(df[col])
+                df = df.copy(deep=False)
+                df[out] = merged
             return df
 
         df = df_merge_columns(df, 'cpu', ['state.Active.cpu', 'state.Inactive.cpu', 'state.Waking.src_cpu'])

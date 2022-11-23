@@ -1,11 +1,13 @@
 use core::fmt::Debug;
 use std::fmt::Write;
 
-use futures::{stream::Stream, StreamExt as FuturesStreamExt};
+use futures::stream::Stream;
 use futures_async_stream::{for_await, stream};
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+
+use arrow2_convert::ArrowField;
 
 use crate::{
     analysis::{AnalysisResult, EventStream, SignalUpdate},
@@ -14,8 +16,10 @@ use crate::{
     string::String,
 };
 
+use ::macro_rules_attribute::apply;
+
 use crate::analysis;
-pub(crate) use make_row_struct;
+pub(crate) use make_table_struct;
 
 #[stream(item = SignalUpdate<CPU, Freq>)]
 async fn cpufreq(x: &Event) {
@@ -167,7 +171,8 @@ impl TaskID for Task {
 // This is a limited set of state compared to what can be described in struct
 // task_struct, but sched_switch will only dump states with only one bit set and
 // a state listed in the TASK_REPORT mask
-#[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize, JsonSchema, ArrowField)]
+#[arrow_field(type = "sparse")]
 enum KernelTaskState {
     Running,
     Interruptible,
@@ -226,14 +231,232 @@ impl From<u32> for KernelTaskState {
     }
 }
 
-#[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize, JsonSchema)]
+#[macro_export]
+macro_rules! variant_structs {
+    (
+        // type_meta will be applied on all the variant type definitions created
+        // by this macro. This ensures macros like Clone will work as expected,
+        // since all the "children" types will get the #[derive()] as well.
+        $( #[$type_meta:meta] )*
+        $vis:vis enum $name:ident {
+            $(
+                // variant_meta will be applied on the variant itself, but not
+                // on the payload type definition created for it. This allows
+                // using e.g. #[serde(skip)] on some variants and retain the
+                // expected behavior.
+                $( #[$variant_meta:meta] )*
+                $variant:ident
+
+                // Named fields
+                $(
+                    {
+                        $(
+                            $named_field:ident: $named_field_ty:ty
+                        ),*
+                        $(,)?
+                    }
+                )?
+                // Positional fields
+                $(
+                    (
+                        $(
+                            $unnamed_field_ty:ty
+                        ),*
+                        $(,)?
+                    )
+                )?
+            ),*
+            $(,)?
+        }
+    ) => {
+        ::paste::paste! {
+            variant_structs!(
+                @variants1
+                {$(#[$type_meta])*}
+                $(
+                    // If we did not have fields for the variant, we don't
+                    // generate a struct.
+                    $(
+                        #[automatically_derived]
+                        $vis struct [<$name $variant>] {
+                            $(
+                                $vis $named_field: $named_field_ty
+                            ),*
+                        }
+                    )?
+                    $(
+                        #[automatically_derived]
+                        $vis struct [<$name $variant>] (
+                            $(
+                                $vis $unnamed_field_ty
+                            ),*
+                        );
+
+                    )?
+                )*
+            );
+
+
+            // Define the enum itself.
+            $( #[$type_meta] )*
+            $vis enum $name {
+                $(
+                    $( #[$variant_meta] )*
+                    $variant
+                    $(
+                        // Repeat the enclosing $(...)? as many times as
+                        // $named_field_ty repeats. This can be 0 or 1 time,
+                        // depending on whether there was any field to that
+                        // variant.
+                        ${ignore(named_field_ty)}
+                        ([<$name $variant>])
+                    )?
+                    $(
+                        ${ignore(unnamed_field_ty)}
+                        ([<$name $variant>])
+                    )?
+                ),*
+            }
+
+            // Implement constructor for each variant, to avoid having to refer
+            // to the new variant types all the time.
+            #[automatically_derived]
+            impl $name
+            {
+                $(
+                    $(
+                        #[allow(nonstandard_style)]
+                        #[inline]
+                        $vis fn [<new_ $variant>] ($($named_field: $named_field_ty),*) -> $name {
+                            $name :: $variant
+                            (
+                                [<$name $variant>]
+                                {
+                                    $(
+                                        $named_field
+                                    ),*
+                                }
+                            )
+                        }
+                    )?
+                    $(
+                        #[allow(nonstandard_style)]
+                        #[inline]
+                        $vis fn [<new_ $variant>] ($([<x ${index()}>] : $unnamed_field_ty),*) -> $name {
+                            $name :: $variant
+                            (
+                                [<$name $variant>]
+                                (
+                                    // Repeat as many times as $unnamed_field_ty
+                                    // and at each repetition, create an
+                                    // identifier that is "xN" with N being the
+                                    // current repetition count.
+                                    $(
+                                        ${ignore(unnamed_field_ty)}
+                                        [<x ${index()}>]
+                                    ),*
+                                )
+                            )
+                        }
+                    )?
+                )*
+            }
+
+            // Allow converting to and from the tuple equivalent to the tuple
+            // struct.
+            $(
+                $(
+                    #[automatically_derived]
+                    impl From<[<$name $variant>]> for ($($unnamed_field_ty,)*) {
+                        #[inline]
+                        fn from(x: [<$name $variant>]) -> Self {
+                            (
+                                $(
+                                    ${ignore(unnamed_field_ty)}
+                                    x.${index()},
+                                )*
+                            )
+                        }
+                    }
+
+                    #[automatically_derived]
+                    impl From<($($unnamed_field_ty,)*)> for [<$name $variant>] {
+                        #[inline]
+                        fn from(x: ($($unnamed_field_ty,)*)) -> Self {
+                            [<$name $variant>]
+                            (
+                                $(
+                                    ${ignore(unnamed_field_ty)}
+                                    x.${index()},
+                                )*
+                            )
+                        }
+                    }
+                )?
+            )*
+        }
+    };
+
+    // These levels are only there to turn "meta [a, b, c, ...]" into "[meta a,
+    // meta b, meta c, ...]" so that we can apply meta to each variant.
+    // Otherwise, it would complain about repetition levels not matching.
+    (@variants1 $meta:tt $($variants:item)*) => {
+        variant_structs!(@variants2 $($meta $variants)*);
+    };
+
+    (@variants2 $({ $(#[$meta:meta])* } $variants:item)*) => {
+        $(
+            $(#[$meta])*
+            $variants
+        )*
+    }
+}
+
+macro_rules! row_enum {
+    ($item:item) => {
+        // All the attributes applied below variant_structs will be applied to
+        // each variant struct generated as well.
+        #[apply(variant_structs)]
+
+        #[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize, JsonSchema, ArrowField)]
+        // We use type = "sparse" because type = "dense" is broken currently:
+        // https://github.com/DataEngineeringLabs/arrow2-convert/issues/86
+        #[arrow_field(type = "sparse")]
+        $item
+    };
+}
+
+macro_rules! row_struct {
+    ($item:item) => {
+        #[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize, JsonSchema, ArrowField)]
+        $item
+    };
+}
+
+#[apply(variant_structs)]
+#[derive(Clone)]
+enum Foo {
+    Bar,
+    Bar3(),
+    Bar4 {},
+    Bar5(u32),
+    Bar1(u8, u64),
+    Bar2 { old1: Comm, new1: Comm },
+}
+
+// #[apply(row_struct)]
+// struct Foo2 {
+//     x: u8,
+// }
+
+#[apply(row_enum)]
 enum TaskFinishedReason {
     Zombie,
     Dead,
     Renamed { old: Comm, new: Comm },
 }
 
-#[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize, JsonSchema)]
+#[apply(row_enum)]
 enum TaskState {
     Waking {
         src_cpu: CPU,
@@ -251,12 +474,6 @@ enum TaskState {
         reason: TaskFinishedReason,
     },
 }
-
-// impl Display for TaskState {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "{:?}", self)
-//     }
-// }
 
 #[stream(item = SignalUpdate<T, TaskState>)]
 async fn tasks_state<T: TaskID + 'static>(x: &Event) {
@@ -291,51 +508,33 @@ async fn tasks_state<T: TaskID + 'static>(x: &Event) {
                 KernelTaskState::Zombie => {
                     yield SignalUpdate::FinishedWithUpdate(
                         prev_id,
-                        TaskState::Finished {
-                            reason: TaskFinishedReason::Zombie,
-                        },
+                        TaskState::new_Finished(TaskFinishedReason::Zombie),
                     );
                 }
                 KernelTaskState::Dead => {
                     yield SignalUpdate::FinishedWithUpdate(
                         prev_id,
-                        TaskState::Finished {
-                            reason: TaskFinishedReason::Dead,
-                        },
+                        TaskState::new_Finished(TaskFinishedReason::Dead),
                     );
                 }
                 // We could still have KernelTaskState::Running, but that means
                 // the task has been preempted.
-                _ => {
-                    yield SignalUpdate::Update(
-                        prev_id,
-                        TaskState::Inactive {
-                            cpu,
-                            kernel_state: prev_kernel,
-                        },
-                    )
-                }
+                _ => yield SignalUpdate::Update(prev_id, TaskState::new_Inactive(cpu, prev_kernel)),
             }
-            yield SignalUpdate::Update(next_id, TaskState::Active { cpu })
+            yield SignalUpdate::Update(next_id, TaskState::new_Active(cpu))
         }
         EventData::EventSchedWakeup(fields) => {
             let task = Task::new(&fields.pid, &fields.__cpu);
             yield SignalUpdate::Update(
                 T::new(&task, &fields.comm),
-                TaskState::Waking {
-                    src_cpu: fields.__cpu,
-                    target_cpu: fields.target_cpu,
-                },
+                TaskState::new_Waking(fields.__cpu, fields.target_cpu),
             )
         }
         EventData::EventSchedWakeupNew(fields) => {
             let task = Task::new(&fields.pid, &fields.__cpu);
             yield SignalUpdate::Update(
                 T::new(&task, &fields.comm),
-                TaskState::Waking {
-                    src_cpu: fields.__cpu,
-                    target_cpu: fields.target_cpu,
-                },
+                TaskState::new_Waking(fields.__cpu, fields.target_cpu),
             )
         }
         // If we don't store the comm, changes to the comm are irrelevant. If we
@@ -347,20 +546,19 @@ async fn tasks_state<T: TaskID + 'static>(x: &Event) {
             let id = T::new(&task, &fields.oldcomm);
             yield SignalUpdate::FinishedWithUpdate(
                 id,
-                TaskState::Finished {
-                    reason: TaskFinishedReason::Renamed {
-                        old: fields.oldcomm.clone(),
-                        new: fields.newcomm.clone(),
-                    },
-                },
+                TaskState::new_Finished(TaskFinishedReason::new_Renamed(
+                    fields.oldcomm.clone(),
+                    fields.newcomm.clone(),
+                )),
             );
         }
         _ => {}
     }
 }
 
+// TODO: find a nicer way of declaring the events of a function
 const_event_req!(
-    tasks_state_event_req,
+    TASKS_STATE_EVENT_REQ,
     ("sched_wakeup" and "sched_wakeup_new" and "sched_switch" and "task_rename")
 );
 
@@ -373,7 +571,8 @@ async fn tasks_comm(x: &Event) {
                 let comm = Comm::from({
                     let mut comm = String::new();
                     let cpu: u32 = cpu.into();
-                    write!(comm, "swapper/{cpu}");
+                    write!(comm, "swapper/{cpu}")
+                        .expect("Formatting of CPU in swapper task name failed");
                     comm
                 });
                 SignalUpdate::Update(task, comm)
@@ -413,7 +612,7 @@ async fn tasks_comm(x: &Event) {
 }
 
 const_event_req!(
-    tasks_comm_event_req,
+    TASKS_COMM_EVENT_REQ,
     ("sched_wakeup" and "sched_wakeup_new" and "sched_switch" and "task_rename" and (optional: "sched_waking", "sched_process_free"))
 );
 
@@ -458,7 +657,6 @@ macro_rules! sql {
     ) => {
         {
             let stream = $from_stream;
-            // Then we apply the join on the filtered data.
             $(
                 let stream = sql!(@signal_joinf $signal_join_type)(
                     stream,
@@ -535,30 +733,43 @@ macro_rules! sql {
     };
 }
 
-make_row_struct! {
-    #[derive(Clone, Debug)]
-    struct TasksStatesRow {
-        ts: Timestamp,
-        pid: PID,
-        comm: Option<Comm>,
-        state: TaskState,
-    }
+// make__struct! {
+//     #[derive(Clone, Debug)]
+//     struct TasksStatesRow {
+//         ts: Timestamp,
+//         pid: PID,
+//         comm: Option<Comm>,
+//         state: TaskState,
+//     }
+// }
+
+#[derive(Clone, Debug, ArrowField)]
+#[apply(make_table_struct)]
+struct TasksStatesRow {
+    ts: Timestamp,
+    pid: PID,
+    comm: Option<Comm>,
+    state: TaskState,
 }
 
 analysis! {
     name: tasks_states,
-    events: ({tasks_comm_event_req} and {tasks_state_event_req}),
+    events: ({TASKS_COMM_EVENT_REQ} and {TASKS_STATE_EVENT_REQ}),
     (stream: EventStream, _args: ()) {
         let states = stream.fork().demux(&tasks_state::<Task>);
 
+        // TODO: find a way of filtering out Initial/Final values that are not
+        // inside the window.
+        //
+        // => Actually not, what we need is _demux() to never emit Initial/Final
+        // when not inside a window, and instead store the Initial/Final so that
+        // it can be yielded at the beginning of the next window.
         let rows = sql!(
             SELECT x in {
                 // if x.key() == &PID::new(5740) {
                 //     eprintln!("taken={x:?}");
                 // }
 
-
-                let _X = x.clone();
 
                 let (ts, task, (state, comm)) = x.into();
                 Some(TasksStatesRow { ts, pid: task.pid(), comm, state })
@@ -570,7 +781,8 @@ analysis! {
             // AGGREGATE WITH (count)
         );
 
-        AnalysisResult::from_row_stream(rows).await
+        AnalysisResult::from_row_stream(rows)
+        // |_| Box::pin(AnalysisResult::from_row_stream(rows))
 
         // let map = rows.await;
         // AnalysisResult::from_map(map)

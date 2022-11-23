@@ -1,7 +1,7 @@
 #! /bin/bash
 
 ALPINE_VERSION=v3.16
-ALPINE_BUILD_DEPENDENCIES=(bash curl musl-dev gcc)
+ALPINE_BUILD_DEPENDENCIES=(bash git curl musl-dev gcc)
 # We technically could cross compile, but would require to auto detect a cross linker, by setting e.g.:
 # export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-ld
 CROSS_COMPILATION_BROKEN=1
@@ -27,7 +27,7 @@ build_analysis() {
 
 download() {
     cp -a "$LISA_HOME/tools/analysis" .
-    cp "$LISA_HOME/LICENSE.txt" .
+    cp "$LISA_HOME/LICENSE.txt" analysis/
 }
 
 build() {

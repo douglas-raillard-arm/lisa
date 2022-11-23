@@ -36,6 +36,7 @@ from collections.abc import Mapping, Iterable
 from collections import Counter
 import inspect
 import textwrap
+from tempfile import TemporaryDirectory
 
 import ujson
 import pandas as pd
@@ -47,6 +48,7 @@ from lisa.utils import mp_spawn_pool, Loggable, nullcontext, measure_time, Froze
 from lisa._assets import HOST_BINARIES
 from lisa.version import VERSION_TOKEN
 from lisa.datautils import series_update_duplicates
+from lisa._feather import load_feather
 
 
 _RUST_ANALYSIS_PATH = HOST_BINARIES['lisa-rust-analysis']
@@ -352,16 +354,113 @@ def _infer_adt(whole_schema, sub_schema=None):
     return _do_infer_adt(name, schema, deref)
 
 
-def _post_process_data(data, normalize_time):
+def expand_adt(adt):
+    if isinstance(adt, BasicType):
+        def expand(l, i, x):
+            l[i] = x
+            return i + 1
+        return ([(None, adt.typ, adt)], expand)
+
+    elif isinstance(adt, NewType):
+        [(col, typ, _)], expand = expand_adt(adt.typ)
+        return ([(col, typ, adt)], expand)
+
+    elif isinstance(adt, OptionType):
+        return expand_adt(adt.typ)
+
+    elif isinstance(adt, UnitType):
+        def expand(l, i, x):
+            return i
+        return ([], expand)
+
+    elif isinstance(adt, ProductType):
+        if adt.items:
+            cols, expands = zip(*map(expand_adt, adt.items))
+
+            if isinstance(adt, TupleProductType):
+                def expand(l, i, x):
+                    for expand, _x in zip(expands, x):
+                        i = expand(l, i, _x)
+                    return i
+            elif isinstance(adt, StructProductType):
+                def expand(l, i, x):
+                    for expand, field in zip(expands, adt.names):
+                        i = expand(l, i, x[field])
+                    return i
+            else:
+                raise TypeError(f'Unknown product type: {adt.__class__}')
+
+            cols = [
+                (
+                    f'{i}.{col}' if col else str(i),
+                    typ,
+                    adt
+                )
+                for i, _cols in zip(adt.names, cols)
+                for col, typ, adt in _cols
+            ]
+            return (cols, expand)
+        else:
+            raise ValueError(f'Product type with no constructor: {adt}')
+
+    elif isinstance(adt, SumType):
+        if adt.ctors:
+            variants = {
+                ctor: (cols, expand)
+                for (ctor, (cols, expand)) in (
+                    (ctor, expand_adt(variant_adt))
+                    for ctor, variant_adt in adt.ctors.items()
+                )
+                if cols
+            }
+            variants = sorted(variants.items())
+
+            cols = [
+                (f'{name}.{col}' if col else name, typ, adt)
+                for name, (cols, _) in variants
+                for col, typ, adt in cols
+            ]
+            nr_cols = len(cols) + 1
+
+            variant_names, _ = zip(*variants)
+            variant_cols = [cols for _, (cols, _) in variants]
+            variant_index = list(itertools.accumulate([0] + list(map(len, variant_cols))))
+            variant_index = {
+                name: (index + 1, expand)
+                for name, index, (_, (_, expand)) in zip(variant_names, variant_index, variants)
+            }
+
+            def expand(l, i, x):
+                # Fast check for dict as we typically expand loads of
+                # them in dataframes
+                if type(x) is dict:
+                    x, v = x.popitem()
+                    l[i] = x
+                    index, expand = variant_index[x]
+                    i = expand(l, i + index, v)
+                else:
+                    l[i] = x
+
+                return i + nr_cols
+
+            cols = [(None, 'category', adt)] + cols
+            return (cols, expand)
+        else:
+            raise ValueError(f'Sum type with no constructor: {adt}')
+    else:
+        raise ValueError(f'Unknown type: {adt}')
+
+
+def _post_process_data(data, normalize_time, out_path):
     schema = data['schema']
     value = data['value']
 
     adt = _infer_adt(schema)
     traverse, fmt = _make_traversal(adt, normalize_time)
-    return (traverse(value), fmt)
+    return (traverse(value, out_path), fmt)
 
 
-def _identity(x):
+def _traverse_identity(x, _):
     return x
 
 
@@ -390,108 +489,48 @@ def _make_traversal(adt, normalize_time):
         if adt.name == 'Timestamp':
             return _fixup_ts
         else:
-            return _identity
+            return _traverse_identity
 
-    if isinstance(adt, StructProductType) and adt.name and adt.name.startswith('Table_for'):
-        def expand_basic(l, i, x):
-            l[i] = x
-            return i + 1
+    if isinstance(adt, StructProductType) and adt.name and adt.name.startswith('OutofbandTable_for_'):
+        def traverse(value, out_path):
+            path = Path(value['path'])
+            path = out_path / path
+            assert value['format'] == 'Feather'
 
-        def expand_adt(adt):
-            if isinstance(adt, BasicType):
-                return ([(None, adt.typ, adt)], expand_basic)
-            elif isinstance(adt, NewType):
-                [(typ, col, _)], expand = expand_adt(adt.typ)
-                return ([(typ, col, adt)], expand)
-            elif isinstance(adt, OptionType):
-                return expand_adt(adt.typ)
-            elif isinstance(adt, UnitType):
-                def expand(l, i, x):
-                    return i
-                return ([], expand)
-            elif isinstance(adt, ProductType):
-                if adt.items:
-                    cols, expands = zip(*map(expand_adt, adt.items))
+            columns = value['columns']
+            row_schema = value['schema']
+            row_adt = _infer_adt(row_schema)
 
-                    if isinstance(adt, TupleProductType):
-                        def expand(l, i, x):
-                            for expand, _x in zip(expands, x):
-                                i = expand(l, i, _x)
-                            return i
-                    elif isinstance(adt, StructProductType):
-                        def expand(l, i, x):
-                            for expand, field in zip(expands, adt.names):
-                                i = expand(l, i, x[field])
-                            return i
-                    else:
-                        raise TypeError(f'Unknown product type: {adt.__class__}')
+            assert len(row_adt.items) == len(columns)
+            row_adt.names = columns
 
-                    cols = [
-                        (
-                            f'{i}.{col}' if col else str(i),
-                            typ,
-                            adt
-                        )
-                        for i, _cols in zip(adt.names, cols)
-                        for col, typ, adt in _cols
-                    ]
-                    return (cols, expand)
-                else:
-                    raise ValueError(f'Product type with no constructor: {adt}')
-            elif isinstance(adt, SumType):
-                if adt.ctors:
-                    variants = {
-                        ctor: (cols, expand)
-                        for (ctor, (cols, expand)) in (
-                            (ctor, expand_adt(variant_adt))
-                            for ctor, variant_adt in adt.ctors.items()
-                        )
-                        if cols
-                    }
-                    variants = sorted(variants.items())
+            typed_cols, _  = expand_adt(row_adt)
+            columns, _, _ = zip(*typed_cols)
 
-                    cols = [
-                        (f'{name}.{col}' if col else name, typ, adt)
-                        for name, (cols, _) in variants
-                        for col, typ, adt in cols
-                    ]
-                    nr_cols = len(cols) + 1
+            # arrow2_convert represents Rust enums as UnionArray. For variants
+            # that have no payload (unit payload), it pretends the type is
+            # bool. When expanded, this would give rise to a bool column that
+            # is of no use.
+            df = load_feather(path, columns=set(columns))
+            assert set(df.columns) == set(columns)
 
-                    variant_names, _ = zip(*variants)
-                    variant_cols = [cols for _, (cols, _) in variants]
-                    variant_index = list(itertools.accumulate([0] + list(map(len, variant_cols))))
-                    variant_index = {
-                        name: (index + 1, expand)
-                        for name, index, (_, (_, expand)) in zip(variant_names, variant_index, variants)
-                    }
+            for _col, _, _adt in typed_cols:
+                if isinstance(_adt, NewType):
+                    f = make_newtype_fixer(_adt)
+                    if f is not _traverse_identity:
+                        df[_col] = f(df[_col])
 
-                    def expand(l, i, x):
-                        # Fast check for dict as we typically expand loads of
-                        # them in dataframes
-                        if type(x) is dict:
-                            x, v = x.popitem()
-                            l[i] = x
-                            index, expand = variant_index[x]
-                            i = expand(l, i + index, v)
-                        else:
-                            l[i] = x
+            df.set_index(columns[0], inplace=True)
+            return df
 
-                        return i + nr_cols
+        return (traverse, 'parquet')
 
-                    cols = [(None, 'category', adt)] + cols
-                    return (cols, expand)
-                else:
-                    raise ValueError(f'Sum type with no constructor: {adt}')
-            else:
-                raise ValueError(f'Unknown type: {adt}')
-
-
-
+    elif isinstance(adt, StructProductType) and adt.name and adt.name.startswith('InbandTable_for_'):
         # Each row is a tuple of values, so it will map to a
         # ProductType
         row_adt = adt['data'].typ
 
-        def traverse(value):
+        def traverse(value, _):
             columns = value['columns']
             assert len(columns) > 0
 
@@ -508,15 +547,10 @@ def _make_traversal(adt, normalize_time):
                 _expand(l, 0, x)
                 return l
 
-            import cProfile
-
-            # with cProfile.Profile() as pr:
-            if True:
-                df = pd.DataFrame.from_records(
-                    tuple(map(expand, value['data'])),
-                    columns=columns,
-                )
-            # pr.print_stats(sort='tottime')
+            df = pd.DataFrame.from_records(
+                tuple(map(expand, value['data'])),
+                columns=columns,
+            )
 
             # Use nullable types
             json_pd_dtypes = {
@@ -543,7 +577,7 @@ def _make_traversal(adt, normalize_time):
             for col, _, adt in typed_cols:
                 if isinstance(adt, NewType):
                     f = make_newtype_fixer(adt)
-                    if f is not _identity:
+                    if f is not _traverse_identity:
                         df[col] = f(df[col])
 
             df.set_index(columns[0], inplace=True)
@@ -556,12 +590,12 @@ def _make_traversal(adt, normalize_time):
         traverse_k = make_traversal(k_adt)
         traverse_v = make_traversal(v_adt)
 
-        if traverse_k is _identity and traverse_v is _identity:
-            traverse = dict
+        if traverse_k is _traverse_identity and traverse_v is _traverse_identity:
+            traverse = lambda value, _: dict(x)
         else:
-            def traverse(value):
+            def traverse(value, out_path):
                 return {
-                    traverse_k(k): traverse_v(v)
+                    traverse_k(k, out_path): traverse_v(v, out_path)
                     for k, v in value
                 }
 
@@ -572,12 +606,12 @@ def _make_traversal(adt, normalize_time):
             _name: make_traversal(_adt)
             for _name, _adt in adt.named_items
         }
-        if all(f is _identity for f in traversals.values()):
-            traverse = _identity
+        if all(f is _traverse_identity for f in traversals.values()):
+            traverse = _traverse_identity
         else:
-            def traverse(value):
+            def traverse(value, out_path):
                 return {
-                    _name: _traverse(value[_name])
+                    _name: _traverse(value[_name], out_path)
                     for (_name, _traverse) in traversals.items()
                 }
         return (traverse, 'json')
@@ -585,12 +619,12 @@ def _make_traversal(adt, normalize_time):
     elif isinstance(adt, TupleProductType):
         traversals = tuple(map(make_traversal, adt.items))
 
-        if all(f is _identity for f in traversals):
-            traverse = _identity
+        if all(f is _traverse_identity for f in traversals):
+            traverse = _traverse_identity
         else:
-            def traverse(value):
+            def traverse(value, out_path):
                 return tuple(
-                    _traverse(_value)
+                    _traverse(_value, out_path)
                     for _traverse, _value in zip(traversals, value)
                 )
         return (traverse, 'json')
@@ -601,11 +635,11 @@ def _make_traversal(adt, normalize_time):
             for _ctor, _adt in adt.ctors.items()
         }
 
-        def traverse(value):
+        def traverse(value, out_path):
             if isinstance(value, Mapping):
                 ctor, = value
                 v = value[ctor]
-                data = (ctor, traversals[ctor](v))
+                data = (ctor, traversals[ctor](v, out_path))
             else:
                 data = (value, None)
             return data
@@ -616,25 +650,25 @@ def _make_traversal(adt, normalize_time):
         _traverse, _fmt = _make_traversal(adt.typ, normalize_time=normalize_time)
         _fixup = make_newtype_fixer(adt)
 
-        if _traverse is _identity and _fixup is _identity:
-            traverse = _identity
+        if _traverse is _traverse_identity and _fixup is _traverse_identity:
+            traverse = _traverse_identity
         else:
-            def traverse(value):
-                return _fixup(_traverse(value))
+            def traverse(value, out_path):
+                return _fixup(_traverse(value, out_path))
 
         return (traverse, _fmt)
 
     elif isinstance(adt, OptionType):
         _traverse = make_traversal(adt.typ)
 
-        if _traverse is _identity:
-            traverse = _identity
+        if _traverse is _traverse_identity:
+            traverse = _traverse_identity
         else:
-            def traverse(value):
+            def traverse(value, out_path):
                 if value is None:
                     data = None
                 else:
-                    data = _traverse(value)
+                    data = _traverse(value, out_path)
                 return data
 
         # TODO: DataFrame is not a JSON encodable type, so Option<DataFrame>
@@ -647,12 +681,12 @@ def _make_traversal(adt, normalize_time):
     elif isinstance(adt, ArrayType):
         _traverse = make_traversal(adt.typ)
 
-        if _traverse is _identity:
-            traverse = _identity
+        if _traverse is _traverse_identity:
+            traverse = _traverse_identity
         else:
-            def traverse(value):
+            def traverse(value, out_path):
                 return [
-                    _traverse(x)
+                    _traverse(x, out_path)
                     for x in value
                 ]
 
@@ -660,8 +694,8 @@ def _make_traversal(adt, normalize_time):
         # will fail to serialize correctly.
         return (traverse, 'json')
 
-    elif isinstance(adt, BasicType):
-        return (_identity, 'json')
+    elif isinstance(adt, (BasicType, UnitType)):
+        return (_traverse_identity, 'json')
 
     else:
         raise TypeError(f'Could not traverse unknown adt ({adt.__class__}): {adt}')
@@ -673,6 +707,25 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
     """
 
     name = '_rust'
+
+    def __init__(self, trace, proxy=None):
+        def get_base(trace):
+            if isinstance(trace, TraceView):
+                return get_base(trace.base_trace)
+            else:
+                return trace
+
+        base_trace = get_base(trace)
+
+        # We play a trick here: self.trace is the base trace and self._trace is
+        # the actual trace that was passed. This makes @TraceAnalysisBase.cache
+        # consider the base trace for the state, so we can manipulate any
+        # window manually within this class
+        self._trace = trace
+        super().__init__(
+            trace=base_trace,
+            proxy=base_trace.ana,
+        )
 
     @property
     def _metadata(self):
@@ -697,7 +750,7 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
         return completed.stdout
 
     def call_anas(self, analyses):
-        trace = self.trace
+        trace = self._trace
         cache = trace._cache
         window = self._trace_window
 
@@ -764,36 +817,50 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
                     window = '"none"'
                 else:
                     window = f'{{"time": [{window[0]}, {window[1]}]}}'
+                window = ['--window', window]
 
-                with measure_time() as measure:
-                    stdout = self._do_call_ana(event_checker=checker, cli_args=[cli_spec, window])
+                with TemporaryDirectory() as out_path:
+                    out_path = Path(out_path)
+                    cli_args = [
+                        cli_spec,
+                        *window,
+                        '--out-path', out_path,
+                    ]
 
-                # Consider that running multiple analysis takes the same time as
-                # running just one, as the time is dominated by iterating over the
-                # events.
-                compute_cost = measure.delta
-                computed = ujson.loads(stdout)
+                    with measure_time() as measure:
+                        stdout = self._do_call_ana(event_checker=checker, cli_args=cli_args)
 
-                for spec, data in zip(not_in_cache, computed):
-                    try:
-                        data = data['ok']
-                    except KeyError:
-                        err = data['err']
+                    # Consider that running multiple analysis takes the same time as
+                    # running just one, as the time is dominated by iterating over the
+                    # events.
+                    compute_cost = measure.delta
+                    computed = ujson.loads(stdout)
 
-                        if isinstance(err, str) and err.startswith('invalid type'):
-                            excep = TypeError(err)
+                    for spec, data in zip(not_in_cache, computed):
+                        try:
+                            data = data['ok']
+                        except KeyError:
+                            err = data['err']
+
+                            if isinstance(err, str) and err.startswith('invalid type'):
+                                excep = TypeError(err)
+                            else:
+                                excep = ValueError(err)
+
+                            exceps[spec] = excep
                         else:
-                            excep = ValueError(err)
 
-                        exceps[spec] = excep
-                    else:
-                        data, fmt = _post_process_data(
-                            data=data,
-                            normalize_time=(self.trace.basetime if trace.normalize_time else None),
-                        )
-                        cache_desc = make_cache_desc(spec=spec, fmt=fmt)
-                        cache.insert(cache_desc, data, compute_cost=compute_cost, write_swap=True)
-                        results[spec] = data
+                            with measure_time() as measure:
+                                data, fmt = _post_process_data(
+                                    data=data,
+                                    normalize_time=(self._trace.basetime if trace.normalize_time else None),
+                                    out_path=out_path,
+                                )
+                            _compute_cost = compute_cost + measure.delta
+
+                            cache_desc = make_cache_desc(spec=spec, fmt=fmt)
+                            cache.insert(cache_desc, data, compute_cost=_compute_cost, write_swap=True)
+                            results[spec] = data
 
             return [
                 (results.get(spec), exceps.get(spec))
@@ -803,7 +870,7 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
             return []
 
     def _do_call_ana(self, event_checker, cli_args):
-        trace = self.trace
+        trace = self._trace
 
         def run_ana(populated, json_path):
             if populated and json_path:
@@ -934,17 +1001,8 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
             return (stdout, available_events)
 
     @property
-    def _full_trace(self):
-        def full(trace):
-            if isinstance(trace, TraceView):
-                return full(trace.base_trace)
-            else:
-                return trace
-        return full(self.trace)
-
-    @property
     def _trace_window(self):
-        trace = self.trace
+        trace = self._trace
         if isinstance(trace, TraceView):
             window = trace.window
             if trace.normalize_time:
@@ -956,7 +1014,7 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
 
     @property
     def _dump_json_lines(self):
-        if self._full_trace.trace_path.endswith('.dat'):
+        if self.trace.trace_path.endswith('.dat'):
             return self._dat_dump_json
         else:
             return self._generic_dump_json
@@ -994,7 +1052,7 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
                 key=operator.itemgetter('__ts'),
             )
 
-        trace = self._full_trace
+        trace = self.trace
         data = event_records(trace, events)
         start = {
             '__type': '__lisa_event_stream_start',
@@ -1028,7 +1086,7 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
             own event on the tracepoint and "unroll" the event (e.g. one event
             emitted per CPU in the cpumask).
         """
-        trace = self._full_trace
+        trace = self.trace
 
         cmd = TxtTraceParser._tracecmd_report(
             path=trace.trace_path,
@@ -1069,7 +1127,11 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
             record = None
             for record, txt in pool.imap(_json_line, lines, chunksize=4096):
                 available_events.add(record['__type'])
-                cpus.add(record['__cpu'])
+
+                try:
+                    cpus.add(record['__cpu'])
+                except KeyError:
+                    pass
                 f.write(txt + '\n')
 
             # Dump the event stream end event
@@ -1097,7 +1159,7 @@ class RustAnalysis(TraceAnalysisBase, Loggable):
             # Update the metadata we gathered so far, to avoid costly
             # re-computation from the normal parser (especially time-range that
             # requires scanning the whole trace).
-            self.trace._cache.update_metadata(metadata)
+            self._trace._cache.update_metadata(metadata)
 
             return {
                 event.decode()

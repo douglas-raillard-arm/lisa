@@ -48,9 +48,15 @@ def _convert_value(x):
     return x
 
 
-_TRACE_CMD_REGEX = regex_re.compile(
-    rb'\s*(?P<__comm>.*?)\s*\[(?P<__cpu>[0-9]+)\]\s*(?P<__ts>[0-9.]+):\s*(?P<__type>\S+):(?:\s*(?P<field>\S+)=(?P<value>(.*?(?=(?: \S+=)|$))))*'
+_TRACE_CMD_REGEX_COMMON = (
+    rb'\s*(?P<__comm>.*?)\s*\[(?P<__cpu>[0-9]+)\]\s*(?P<__ts>[0-9.]+):'
 )
+
+_TRACE_CMD_REGEX = regex_re.compile(
+    _TRACE_CMD_REGEX_COMMON + rb'\s*(?P<__type>\S+):(?:\s*(?P<field>\S+)=(?P<value>(.*?(?= \S+=|$))))*'
+)
+
+_TRACE_CMD_REGEX_COMMON = regex_re.compile(_TRACE_CMD_REGEX_COMMON)
 
 
 def _json_record(line):
@@ -81,8 +87,16 @@ def _json_line(line):
     try:
         record = _json_record(line)
     except ValueError:
+        match = _TRACE_CMD_REGEX_COMMON.match(line)
+        if match is None:
+            # We need a value to avoid parsing failure in the Rust code.
+            ts = 0
+        else:
+            ts = int(float(match.captures('__ts') * 1e9))
+
         record = {
             '__type': b'__lisa_unknown_event',
+            '__ts': ts,
             'data': line,
         }
 

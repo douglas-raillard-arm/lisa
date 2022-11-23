@@ -9,6 +9,17 @@ use serde::{de, Deserialize, Serialize};
 
 use crate::string::String;
 
+use crate::arrow::newtype_impl_arrow_field;
+
+newtype_impl_arrow_field!(Comm, String);
+newtype_impl_arrow_field!(Freq, u32);
+newtype_impl_arrow_field!(CPU, u32);
+newtype_impl_arrow_field!(Load, u32);
+newtype_impl_arrow_field!(Util, u32);
+newtype_impl_arrow_field!(PID, u64);
+newtype_impl_arrow_field!(Prio, u64);
+newtype_impl_arrow_field!(Timestamp, u64);
+
 #[inline(always)]
 fn optional<'de, In, NullValue, Out, D>(
     deserializer: D,
@@ -141,6 +152,12 @@ pub struct Timestamp(u64);
 impl Timestamp {
     pub fn new(ts: u64) -> Timestamp {
         Timestamp(ts)
+    }
+}
+
+impl From<u64> for Timestamp {
+    fn from(x: u64) -> Timestamp {
+        Timestamp(x)
     }
 }
 
@@ -320,7 +337,6 @@ pub struct EventSchedSwitchFields {
     pub __cpu: CPU,
     pub prev_comm: Comm,
     pub next_comm: Comm,
-    // TODO: decode the state into an enum
     pub prev_state: u32,
     pub prev_pid: PID,
     pub next_pid: PID,

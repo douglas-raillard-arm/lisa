@@ -2602,7 +2602,7 @@ class TraceCache(Loggable):
     be stored in the cache by analysis method.
     """
 
-    INIT_SWAP_COST = 1e-7
+    INIT_SWAP_COST = 1e-8
     """
     Somewhat arbitrary number, must be small enough so that we write at
     least one dataset to the cache, which will allow us getting a better
