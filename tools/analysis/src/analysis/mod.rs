@@ -12,6 +12,7 @@ use std::{
     collections::{btree_map::Entry, BTreeMap},
     path::{Path, PathBuf},
     rc::Rc,
+    sync::{Arc, Mutex},
 };
 
 use futures::{
@@ -80,11 +81,46 @@ macro_rules! make_table_struct {
 
 mod tasks;
 
+// Unsound type to test the perf impact of an actual Mutex
+pub struct FakeMutex<T>(Cell<T>);
+pub struct FakeMutexGuard<'a, T>(&'a FakeMutex<T>);
+
+use core::ops::Deref;
+use core::ops::DerefMut;
+
+impl<'a, T> Deref for FakeMutexGuard<'a, T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe {
+            &*self.0.0.as_ptr()
+        }
+    }
+}
+
+impl<T> FakeMutex<T> {
+    fn new(x: T) -> Self {
+        FakeMutex(Cell::new(x))
+    }
+    #[inline]
+    fn lock<'a>(&'a self) -> Option<FakeMutexGuard<'a, T>> {
+        Some(FakeMutexGuard(&self))
+    }
+}
+
+unsafe impl<T> Send for FakeMutex<T> {}
+unsafe impl<T> Sync for FakeMutex<T> {}
+
+type MyMutex<T> = Mutex<T>;
+// type MyMutex<T> = FakeMutex<T>;
+
+
 #[derive(Clone)]
 pub struct RawEventStream {
     last_seen: EventID,
     closed: bool,
-    pub curr_event: Rc<Cell<Option<Event>>>,
+    // TODO: remove the Mutex somehow
+    pub curr_event: Arc<MyMutex<Cell<Option<Event>>>>,
 }
 
 impl RawEventStream {
@@ -95,7 +131,7 @@ impl RawEventStream {
             // Encapsulate the current event into an Rc<Refcell<>> so that all
             // the RawEventStream derived from this one will share the same
             // "slot".
-            curr_event: Rc::new(Cell::new(None)),
+            curr_event: Arc::new(MyMutex::new(Cell::new(None))),
         }
     }
 }
@@ -110,29 +146,34 @@ impl Stream for RawEventStream {
             let mut closed = false;
             let mut last_seen = self.last_seen;
 
-            // Temporarily replace the event in the stream by None, we will put
-            // it back later.
-            let event = self.curr_event.replace(None);
+            let res = {
+                let curr_event = self.curr_event.as_ref().lock().unwrap();
 
-            let res = match &event {
-                None => Poll::Pending,
-                Some(event) => {
-                    last_seen = event.id;
-                    if self.last_seen == event.id {
-                        Poll::Pending
-                    } else {
-                        closed = match event.data {
-                            EventData::EndOfStream => true,
-                            _ => false,
-                        };
-                        Poll::Ready(Some(event.clone()))
+                // Temporarily replace the event in the stream by None, we will put
+                // it back later.
+                let event = curr_event.replace(None);
+
+                let res = match &event {
+                    None => Poll::Pending,
+                    Some(event) => {
+                        last_seen = event.id;
+                        if self.last_seen == event.id {
+                            Poll::Pending
+                        } else {
+                            closed = match event.data {
+                                EventData::EndOfStream => true,
+                                _ => false,
+                            };
+                            Poll::Ready(Some(event.clone()))
+                        }
                     }
-                }
-            };
+                };
 
-            // Put the event back in the stream for another consumer to look at
-            // it.
-            self.curr_event.replace(event);
+                // Put the event back in the stream for another consumer to look at
+                // it.
+                curr_event.replace(event);
+                res
+            };
 
             self.last_seen = last_seen;
             self.closed = closed;
@@ -288,7 +329,7 @@ pub enum SignalUpdate<K, V, UpdateFn = !> {
 }
 
 pub trait Splitter<'a, I, K, V, UpdateFn> {
-    type SplitStream: Stream<Item = SignalUpdate<K, V, UpdateFn>> + 'a;
+    type SplitStream: Send + Stream<Item = SignalUpdate<K, V, UpdateFn>> + 'a;
     fn split(self: &Self, x: &'a I) -> Self::SplitStream;
 }
 
@@ -296,7 +337,7 @@ impl<'a, F, I, R, K, V, UpdateFn> Splitter<'a, I, K, V, UpdateFn> for F
 where
     (F, I, R, K, V, UpdateFn): 'a,
     F: Fn(&'a I) -> R,
-    R: Stream<Item = SignalUpdate<K, V, UpdateFn>> + 'a,
+    R: Send + Stream<Item = SignalUpdate<K, V, UpdateFn>> + 'a,
 {
     type SplitStream = impl Stream<Item = SignalUpdate<K, V, UpdateFn>>;
     fn split(&self, x: &'a I) -> Self::SplitStream {
@@ -310,7 +351,7 @@ where
 {
     // SplitFn needs to be a parameter since the actual DemuxStream type will
     // embed a value of type SplitFn in implementations.
-    type DemuxStream<K, V, SplitFn, UpdateFn>: Stream<
+    type DemuxStream<K: Send, V: Send, SplitFn: for<'a> Splitter<'a, Self::Item, K, V, UpdateFn> + Send, UpdateFn: Send>: Send + Stream<
         Item = SignalValue<<Self::Item as HasKDim>::KDim, K, V>,
     >;
     fn demux<K, V, SplitFn, UpdateFn>(
@@ -322,10 +363,10 @@ where
         K: Debug,
         V: Debug,
 
-        K: Ord + Eq + Clone,
-        V: Clone + Eq,
-        UpdateFn: SignalUpdateFn<K, V>,
-        SplitFn: for<'a> Splitter<'a, Self::Item, K, V, UpdateFn>;
+        K: Send + Ord + Eq + Clone,
+        V: Send + Clone + Eq,
+        UpdateFn: Send + SignalUpdateFn<K, V>,
+        SplitFn: for<'a> Splitter<'a, Self::Item, K, V, UpdateFn> + Send;
 }
 
 pub trait EventStream: MultiplexedStream<Item = Event> {
@@ -351,7 +392,12 @@ impl<SelectFn> TraceEventStream<SelectFn> {
     }
 
     pub fn set_curr_event(&mut self, event: Event) {
-        self.stream.curr_event.replace(Some(event));
+        self.stream
+            .curr_event
+            .as_ref()
+            .lock()
+            .unwrap()
+            .replace(Some(event));
     }
 }
 
@@ -397,10 +443,14 @@ where
 
 impl<SelectFn> MultiplexedStream for TraceEventStream<SelectFn>
 where
-    SelectFn: FnMut(&Event) -> WindowUpdate<<Event as HasKDim>::KDim>,
+    SelectFn: Send + FnMut(&Event) -> WindowUpdate<<Event as HasKDim>::KDim>,
 {
-    type DemuxStream<K, V, SplitFn, UpdateFn> =
-        impl Stream<Item = SignalValue<<Self::Item as HasKDim>::KDim, K, V>>;
+    type DemuxStream<
+        K: Send,
+        V: Send,
+        SplitFn: for<'a> Splitter<'a, Self::Item, K, V, UpdateFn> + Send,
+        UpdateFn: Send,
+    > = impl Send + Stream<Item = SignalValue<<Self::Item as HasKDim>::KDim, K, V>>;
 
     fn demux<K, V, SplitFn, UpdateFn>(
         self,
@@ -411,10 +461,10 @@ where
         K: Debug,
         V: Debug,
 
-        K: Ord + Eq + Clone,
-        V: Clone + Eq,
-        UpdateFn: SignalUpdateFn<K, V>,
-        SplitFn: for<'a> Splitter<'a, Self::Item, K, V, UpdateFn>,
+        K: Send + Ord + Eq + Clone,
+        V: Send + Clone + Eq,
+        UpdateFn: Send + SignalUpdateFn<K, V>,
+        SplitFn: for<'a> Splitter<'a, Self::Item, K, V, UpdateFn> + Send,
     {
         _demux(self.stream, self.select, split)
     }
@@ -422,7 +472,7 @@ where
 
 impl<SelectFn> EventStream for TraceEventStream<SelectFn>
 where
-    SelectFn: Clone + FnMut(&Event) -> WindowUpdate<<Event as HasKDim>::KDim>,
+    SelectFn: Clone + Send + FnMut(&Event) -> WindowUpdate<<Event as HasKDim>::KDim>,
 {
     fn fork(&self) -> Self {
         self.clone()
@@ -517,13 +567,13 @@ async fn _demux<S, K, V, SplitFn, SelectFn, UpdateFn>(
     K: Debug,
     S::Item: Debug,
 
-    K: Ord + Eq + Clone,
-    V: Clone + Eq,
-    S: Stream,
-    S::Item: HasKDim,
-    SelectFn: FnMut(&S::Item) -> WindowUpdate<<S::Item as HasKDim>::KDim>,
+    K: Send + Ord + Eq + Clone,
+    V: Send + Clone + Eq,
+    S: Send + Stream,
+    S::Item: Send + HasKDim,
+    SelectFn: Send + FnMut(&S::Item) -> WindowUpdate<<S::Item as HasKDim>::KDim>,
     SplitFn: for<'a> Splitter<'a, S::Item, K, V, UpdateFn>,
-    UpdateFn: SignalUpdateFn<K, V>,
+    UpdateFn: Send + SignalUpdateFn<K, V>,
 {
     #[derive(Clone)]
     enum Selection<KDim> {
@@ -680,33 +730,84 @@ async fn _demux<S, K, V, SplitFn, SelectFn, UpdateFn>(
             WindowUpdate::Start(kdim) => {
                 // We don't care about the order, as signals are assumed to be
                 // independent
-                for (k, (v, sinitial, sfinal)) in map.iter_mut() {
-                    *sfinal = false;
+                let mut iter = map.iter_mut().into_iter();
 
-                    let sinitial = take(sinitial);
-                    if let Some(v) = sinitial {
-                        yield SignalValue::Initial(kdim.clone(), k.clone(), v);
+                loop {
+                    let mut initial_item = None;
+                    let mut final_item = None;
+                    match iter.next() {
+                        Some(i) => {
+                            let (k, (v, sinitial, sfinal)) = i;
+                            *sfinal = false;
+
+                            let sinitial = take(sinitial);
+                            if let Some(v) = sinitial {
+                                initial_item =
+                                    Some(SignalValue::Initial(kdim.clone(), k.clone(), v));
+                            }
+
+                            if let Some(v) = v {
+                                final_item = Some(SignalValue::WindowStart(
+                                    kdim.clone(),
+                                    k.clone(),
+                                    v.clone(),
+                                ));
+                            }
+                        }
+                        None => break,
                     }
-
-                    if let Some(v) = v {
-                        yield SignalValue::WindowStart(kdim.clone(), k.clone(), v.clone());
+                    if let Some(item) = initial_item {
+                        yield item;
+                    }
+                    if let Some(item) = final_item {
+                        yield item;
                     }
                 }
                 selected = Selection::Selected;
             }
             WindowUpdate::End(kdim) => {
-                for (k, (v, _, _)) in map.iter() {
-                    if let Some(v) = v {
-                        yield SignalValue::WindowEnd(kdim.clone(), k.clone(), v.clone());
+                let mut iter = map.iter_mut().into_iter();
+                loop {
+                    let mut item = None;
+                    match iter.next() {
+                        Some(i) => {
+                            let (k, (v, _, _)) = i;
+                            if let Some(v) = v {
+                                item = Some(SignalValue::WindowEnd(
+                                    kdim.clone(),
+                                    k.clone(),
+                                    v.clone(),
+                                ));
+                            }
+                        }
+                        None => break,
+                    }
+                    if let Some(item) = item {
+                        yield item;
                     }
                 }
                 selected = Selection::NotSelected(Some(kdim));
             }
 
             WindowUpdate::LastEnd(kdim) => {
-                for (k, (v, _, _)) in map.iter() {
-                    if let Some(v) = v {
-                        yield SignalValue::WindowEnd(kdim.clone(), k.clone(), v.clone());
+                let mut iter = map.iter_mut().into_iter();
+                loop {
+                    let mut item = None;
+                    match iter.next() {
+                        Some(i) => {
+                            let (k, (v, _, _)) = i;
+                            if let Some(v) = v {
+                                item = Some(SignalValue::WindowEnd(
+                                    kdim.clone(),
+                                    k.clone(),
+                                    v.clone(),
+                                ));
+                            }
+                        }
+                        None => break,
+                    }
+                    if let Some(item) = item {
+                        yield item;
                     }
                 }
                 // The stream is considered finished when we receive the
@@ -1736,7 +1837,7 @@ impl<T: Serialize + Debug + JsonSchema> AnalysisValue for T {
     }
 }
 
-fn serialize_ok<S: Serializer>(x: &Box<dyn AnalysisValue>, s: S) -> Result<S::Ok, S::Error> {
+fn serialize_ok<S: Serializer>(x: &Box<dyn AnalysisValue + Send>, s: S) -> Result<S::Ok, S::Error> {
     #[derive(Serialize)]
     struct WithSchema<T> {
         schema: RootSchema,
@@ -1755,7 +1856,7 @@ pub enum AnalysisResult {
     Err(AnalysisError),
     #[serde(rename = "ok")]
     #[serde(serialize_with = "serialize_ok")]
-    Ok(Box<dyn AnalysisValue>),
+    Ok(Box<dyn AnalysisValue + Send>),
 }
 
 #[derive(Debug, Serialize, JsonSchema)]
@@ -1824,11 +1925,11 @@ pub trait Row {
 }
 
 impl AnalysisResult {
-    fn _new<T: AnalysisValue + JsonSchema + 'static>(x: T) -> Self {
+    fn _new<T: AnalysisValue + JsonSchema + Send + 'static>(x: T) -> Self {
         AnalysisResult::Ok(Box::new(x))
     }
 
-    pub fn new<T: AnalysisValue + JsonSchema + 'static, EventStream>(
+    pub fn new<T: AnalysisValue + JsonSchema + Send + 'static, EventStream>(
         x: T,
     ) -> AnalysisResultBuilder<EventStream> {
         Box::new(move |_conf| Box::pin(async { Self::_new(x) }))
@@ -1836,9 +1937,13 @@ impl AnalysisResult {
 
     pub fn from_row_stream<S, Item, EventStream>(stream: S) -> AnalysisResultBuilder<EventStream>
     where
-        S: Stream<Item = Item> + 'static,
-        Item:
-            Row + Into<<Item as Row>::AsTuple> + ArrowSerialize + ArrowField<Type = Item> + 'static,
+        S: Stream<Item = Item> + Send + 'static,
+        Item: Row
+            + Into<<Item as Row>::AsTuple>
+            + ArrowSerialize
+            + ArrowField<Type = Item>
+            + Send
+            + 'static,
         <Item as Row>::AsTuple: Serialize + JsonSchema + Debug + 'static,
     {
         Box::new(move |conf| {
@@ -1876,16 +1981,15 @@ impl AnalysisResult {
         map: BTreeMap<K, V>,
     ) -> AnalysisResultBuilder<EventStream>
     where
-        K: Serialize + JsonSchema + Debug + 'static,
-        V: Serialize + JsonSchema + Debug + 'static,
+        K: Serialize + JsonSchema + Debug + Send + 'static,
+        V: Serialize + JsonSchema + Debug + Send + 'static,
     {
         Box::new(move |_conf| Box::pin(async { Self::_new(Map::new(map)) }))
     }
 }
 
-type AnalysisResultBuilder<S> = Box<
-    dyn for<'a> FnOnce(&'a AnalysisConf<S>) -> Pin<Box<dyn Future<Output = AnalysisResult> + 'a>>,
->;
+type AnalysisResultBuilder<S> =
+    Box<dyn FnOnce(AnalysisConf<S>) -> Pin<Box<dyn Future<Output = AnalysisResult> + Send>>>;
 
 #[derive(Clone, Debug)]
 pub struct AnalysisConf<S> {
@@ -1900,31 +2004,33 @@ pub struct Analysis<S: EventStream> {
         dyn for<'a> Fn(
                 &'a AnalysisConf<S>,
                 &Value,
-            ) -> Pin<Box<dyn Future<Output = AnalysisResult> + 'a>>
-            + Send
-            + Sync,
+            ) -> Pin<Box<dyn Future<Output = AnalysisResult> + Send + 'a>>
+            + Send,
     >,
 }
 
 impl<S> Analysis<S>
 where
-    S: EventStream + 'static,
+    S: EventStream + Clone + Send + 'static,
 {
     pub fn new<Fut, P, F>(name: &'static str, f: F, eventreq: EventReq) -> Analysis<S>
     where
-        F: Fn(S, P) -> Fut + Send + Sync + 'static,
-        Fut: Future<Output = AnalysisResultBuilder<S>> + 'static,
+        F: Fn(S, P) -> Fut + Send + 'static,
+        Fut: Future<Output = AnalysisResultBuilder<S>> + Send + 'static,
         P: for<'de> Deserialize<'de> + 'static,
         S: EventStream,
     {
         Analysis {
             name,
             f: Box::new(move |conf, x| {
-                Box::pin(match serde_json::value::from_value(x.clone()) {
-                    Ok(x) => { f(conf.stream.fork(), x).then(move |x| x(conf)) }.right_future(),
-                    Err(error) => {
-                        async move { AnalysisResult::Err(AnalysisError::Input(error.to_string())) }
-                            .left_future()
+                Box::pin({
+                    let conf = conf.clone();
+                    match serde_json::value::from_value(x.clone()) {
+                        Ok(x) => { f(conf.stream.fork(), x).then(move |x| x(conf)) }.right_future(),
+                        Err(error) => async move {
+                            AnalysisResult::Err(AnalysisError::Input(error.to_string()))
+                        }
+                        .left_future(),
                     }
                 })
             }),
@@ -1982,7 +2088,7 @@ macro_rules! build_analyses_descriptors {
 
 pub fn get_analyses<SelectFn>() -> BTreeMap<&'static str, Analysis<TraceEventStream<SelectFn>>>
 where
-    SelectFn: Clone + FnMut(&Event) -> WindowUpdate<<Event as HasKDim>::KDim> + 'static,
+    SelectFn: Clone + FnMut(&Event) -> WindowUpdate<<Event as HasKDim>::KDim> + Send + 'static,
 {
     // The content of this file is a single call to
     // build_analyses_descriptors!() containing the reference to all the

@@ -417,7 +417,6 @@ macro_rules! row_enum {
         // All the attributes applied below variant_structs will be applied to
         // each variant struct generated as well.
         #[apply(variant_structs)]
-
         #[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize, JsonSchema, ArrowField)]
         // We use type = "sparse" because type = "dense" is broken currently:
         // https://github.com/DataEngineeringLabs/arrow2-convert/issues/86
