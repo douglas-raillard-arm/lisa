@@ -34,7 +34,6 @@ use schemars::{
 };
 use serde::{Deserialize, Serialize, Serializer};
 use serde_json::value::Value;
-use uuid::Uuid;
 
 use crate::{
     event::{Event, EventData, EventID, Timestamp},
@@ -1928,7 +1927,7 @@ impl AnalysisResult {
     pub fn new<T: AnalysisValue + JsonSchema + Send + 'static, EventStream>(
         x: T,
     ) -> AnalysisResultBuilder<EventStream> {
-        Box::new(move |_conf| Box::pin(async { Self::_new(x) }))
+        Box::new(move |_conf, _name| Box::pin(async { Self::_new(x) }))
     }
 
     pub fn from_row_stream<S, Item, EventStream>(stream: S) -> AnalysisResultBuilder<EventStream>
@@ -1942,7 +1941,7 @@ impl AnalysisResult {
             + 'static,
         <Item as Row>::AsTuple: Serialize + JsonSchema + Debug + 'static,
     {
-        Box::new(move |conf| {
+        Box::new(move |conf, name| {
             Box::pin(async move {
                 // TODO: add a runtime switch for JSON vs feather output
 
@@ -1951,7 +1950,9 @@ impl AnalysisResult {
                 // let columns = Item::columns();
                 // let data = InbandTable { data, columns };
 
-                let id = Uuid::new_v4();
+                // use uuid::Uuid;
+                // let id = Uuid::new_v4();
+                let id = name;
                 let path = format!("{id}.feather");
                 let path = conf.out_path.join(path);
 
@@ -1980,12 +1981,16 @@ impl AnalysisResult {
         K: Serialize + JsonSchema + Debug + Send + 'static,
         V: Serialize + JsonSchema + Debug + Send + 'static,
     {
-        Box::new(move |_conf| Box::pin(async { Self::_new(Map::new(map)) }))
+        Box::new(move |_conf, _name| Box::pin(async { Self::_new(Map::new(map)) }))
     }
 }
 
-type AnalysisResultBuilder<S> =
-    Box<dyn FnOnce(AnalysisConf<S>) -> Pin<Box<dyn Future<Output = AnalysisResult> + Send>>>;
+type AnalysisResultBuilder<S> = Box<
+    dyn FnOnce(
+        AnalysisConf<S>,
+        &'static str,
+    ) -> Pin<Box<dyn Future<Output = AnalysisResult> + Send>>,
+>;
 
 #[derive(Clone, Debug)]
 pub struct AnalysisConf<S> {
@@ -2022,7 +2027,9 @@ where
                 Box::pin({
                     let conf = conf.clone();
                     match serde_json::value::from_value(x.clone()) {
-                        Ok(x) => { f(conf.stream.fork(), x).then(move |x| x(conf)) }.right_future(),
+                        Ok(x) => {
+                            { f(conf.stream.fork(), x).then(move |x| x(conf, name)) }.right_future()
+                        }
                         Err(error) => async move {
                             AnalysisResult::Err(AnalysisError::Input(error.to_string()))
                         }
