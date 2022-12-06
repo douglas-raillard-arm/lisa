@@ -85,16 +85,13 @@ mod tasks;
 pub struct FakeMutex<T>(Cell<T>);
 pub struct FakeMutexGuard<'a, T>(&'a FakeMutex<T>);
 
-use core::ops::Deref;
-use core::ops::DerefMut;
+use core::ops::{Deref, DerefMut};
 
 impl<'a, T> Deref for FakeMutexGuard<'a, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe {
-            &*self.0.0.as_ptr()
-        }
+        unsafe { &*self.0 .0.as_ptr() }
     }
 }
 
@@ -113,7 +110,6 @@ unsafe impl<T> Sync for FakeMutex<T> {}
 
 type MyMutex<T> = Mutex<T>;
 // type MyMutex<T> = FakeMutex<T>;
-
 
 #[derive(Clone)]
 pub struct RawEventStream {

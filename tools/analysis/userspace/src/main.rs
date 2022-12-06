@@ -1,14 +1,3 @@
-// #![feature(future_join)]
-#![feature(generators)]
-#![feature(stmt_expr_attributes)]
-#![feature(proc_macro_hygiene)]
-#![feature(type_alias_impl_trait)]
-#![feature(btree_drain_filter)]
-#![feature(core_intrinsics)]
-#![feature(never_type)]
-#![feature(try_blocks)]
-#![feature(macro_metavar_expr)]
-
 // The musl libc allocator is pretty slow, switching to mimalloc or jemalloc
 // makes the resulting binary significantly faster, as we allocate pretty
 // heavily when parsing JSON. mimalloc crate compiles much more quickly though.
@@ -27,7 +16,7 @@ use core::{
     task::{Context, Poll},
 };
 
-use memmap::Mmap;
+use memmap2::Mmap;
 use serde_json::Deserializer;
 use std::{
     collections::BTreeMap,
@@ -39,14 +28,7 @@ use std::{
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 
-mod analysis;
-mod arrow;
-mod event;
-mod eventreq;
-mod futures;
-mod string;
-
-use crate::{
+use analysis::{
     analysis::{get_analyses, AnalysisConf, EventWindow, HasKDim, TraceEventStream, WindowUpdate},
     event::{Event, EventData, EventID},
     futures::make_noop_waker,
