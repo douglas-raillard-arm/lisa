@@ -7,4 +7,6 @@ edition = "2021"
 
 [dependencies]
 nom = "7.1"
-smartstring = "1.0.1"
+nom_locate = "4.0"
+smartstring = "1.0"
+thiserror = "1.0"
