@@ -183,6 +183,8 @@ where
     }
 }
 
+// Not available in nom 7 but maybe will be there in nom 8:
+// https://github.com/rust-bakery/nom/issues/1422
 pub fn map_err<P, F, I, O, E, E2, MappedE>(mut parser: P, f: F) -> impl nom::Parser<I, O, E2>
 where
     P: nom::Parser<I, O, E>,
