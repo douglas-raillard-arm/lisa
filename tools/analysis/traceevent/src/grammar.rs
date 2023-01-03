@@ -38,6 +38,10 @@ pub trait PackratGrammar {
     // feature)
     fn wrap_rule<'i, 'p, O, E, P>(mut rule: P) -> Box<dyn Parser<Input<'i>, O, E> + 'p>
     where
+        // TODO: We currently discard all the context of the error by using ()
+        // instead of e.g. VerboseError. Maybe we need to build the map_err()
+        // inside wrap_rule() to give access to the whole NomError, so that the
+        // conversion function can do what it wants with it.
         P: 'p + Parser<Span<'i, Self>, O, NomError<Self::Error, ()>>,
         E: ParseError<Input<'i>> + FromExternalError<Input<'i>, Self::Error>,
         <Self as PackratGrammar>::State<'i>: Default,
