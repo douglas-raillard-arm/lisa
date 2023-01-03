@@ -23,8 +23,8 @@ use crate::{
     cparser::{CBasicType, CDeclaration, CExpr, CGrammar, CType},
     grammar::PackratGrammar,
     parser::{
-        lexeme, no_backtrack, null_terminated_str_parser, parenthesized, print, success_with,
-        to_str, Input, NomError,
+        lexeme, map_err, no_backtrack, null_terminated_str_parser, parenthesized, print,
+        success_with, to_str, Input, NomError,
     },
 };
 
@@ -257,7 +257,7 @@ where
                 }
 
                 let (_, mut declaration) =
-                    all_consuming::<_, _, E, _>(CGrammar::wrap_rule(CGrammar::declaration(abi)))
+                    all_consuming::<_, _, (), _>(CGrammar::wrap_rule(CGrammar::declaration(abi)))
                         .parse(declaration)
                         .map_err(|_| HeaderError::InvalidCDeclaration)?;
 
@@ -293,7 +293,10 @@ where
                 terminated(
                     alt((
                         separated_pair(
-                            lexeme(CGrammar::wrap_rule(CGrammar::identifier())),
+                            lexeme(map_err(
+                                CGrammar::wrap_rule(CGrammar::identifier()),
+                                |_: ()| HeaderError::InvalidCIdentifier,
+                            )),
                             char(':'),
                             delimited(
                                 opt(pair(lexeme(tag("type")), lexeme(tag("==")))),
@@ -412,10 +415,12 @@ where
         context(
             "printk format string",
             lexeme(map_res(
-                CGrammar::wrap_rule(CGrammar::string_literal()),
+                map_err(CGrammar::wrap_rule(CGrammar::string_literal()), |_: ()| {
+                    HeaderError::InvalidStringLiteral
+                }),
                 |expr| match expr {
                     CExpr::StringLiteral(s) => Ok(s),
-                    _ => Err(HeaderError::InvalidStringLiteral(expr)),
+                    _ => Err(HeaderError::InvalidStringLiteral),
                 },
             )),
         ),
@@ -424,7 +429,9 @@ where
             "printk args",
             lexeme(separated_list0(
                 lexeme(char(',')),
-                CGrammar::wrap_rule(CGrammar::expr(abi)),
+                map_err(CGrammar::wrap_rule(CGrammar::expr(abi)), |_: ()| {
+                    HeaderError::InvalidPrintkArg
+                }),
             )),
         ),
     )
@@ -452,7 +459,10 @@ where
                         "event name",
                         preceded(
                             lexeme(tag("name:")),
-                            lexeme(CGrammar::wrap_rule(CGrammar::identifier())),
+                            lexeme(map_err(
+                                CGrammar::wrap_rule(CGrammar::identifier()),
+                                |_: ()| HeaderError::InvalidCIdentifier,
+                            )),
                         ),
                     ),
                     context("event ID", preceded(lexeme(tag("ID:")), lexeme(txt_u32))),
@@ -497,6 +507,12 @@ pub enum HeaderError {
     #[error("Could not parse C declaration")]
     InvalidCDeclaration,
 
+    #[error("Could not parse C identifier")]
+    InvalidCIdentifier,
+
+    #[error("Could not parse printk argument")]
+    InvalidPrintkArg,
+
     #[error(
         "Size of type \"{typ:?}\" was inferred to be {inferred_size} but kernel reported {size}"
     )]
@@ -513,8 +529,8 @@ pub enum HeaderError {
         signed: bool,
     },
 
-    #[error("Expected a string literal, got: {0:?}")]
-    InvalidStringLiteral(CExpr),
+    #[error("Invalid string literal")]
+    InvalidStringLiteral,
 
     #[error("Invalid long size: {0:?}")]
     InvalidLongSize(Size),

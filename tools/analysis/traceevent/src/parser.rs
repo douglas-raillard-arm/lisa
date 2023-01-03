@@ -183,6 +183,30 @@ where
     }
 }
 
+pub fn map_err<P, F, I, O, E, E2, MappedE>(mut parser: P, f: F) -> impl nom::Parser<I, O, E2>
+where
+    P: nom::Parser<I, O, E>,
+    E: ParseError<I>,
+    E2: ParseError<I> + FromExternalError<I, MappedE>,
+    F: Fn(E) -> MappedE,
+    I: Clone,
+{
+    move |input: I| match parser.parse(input.clone()) {
+        Err(nom::Err::Error(e)) => Err(nom::Err::Error(E2::from_external_error(
+            input,
+            ErrorKind::Fail,
+            f(e),
+        ))),
+        Err(nom::Err::Failure(e)) => Err(nom::Err::Failure(E2::from_external_error(
+            input,
+            ErrorKind::Fail,
+            f(e),
+        ))),
+        Err(nom::Err::Incomplete(x)) => Err(nom::Err::Incomplete(x)),
+        Ok(x) => Ok(x),
+    }
+}
+
 pub fn success_with<F, I, O, E>(mut f: F) -> impl FnMut(I) -> nom::IResult<I, O, E>
 where
     F: FnMut() -> O,

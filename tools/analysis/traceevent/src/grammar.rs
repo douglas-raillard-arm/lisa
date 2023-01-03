@@ -9,13 +9,14 @@ use nom::{
 };
 use nom_locate::LocatedSpan;
 
-use crate::parser::{lexeme, parenthesized, print, to_str, Input};
+use crate::parser::{lexeme, parenthesized, print, to_str, Input, NomError};
 
 type Location = usize;
 pub type Span<'i, G> = LocatedSpan<Input<'i>, Rc<Vec<<G as PackratGrammar>::State<'i>>>>;
 
 pub trait PackratGrammar {
     type State<'i>;
+    type Error;
 
     fn make_span<'i>(input: Input<'i>) -> Span<'i, Self>
     where
@@ -37,17 +38,8 @@ pub trait PackratGrammar {
     // feature)
     fn wrap_rule<'i, 'p, O, E, P>(mut rule: P) -> Box<dyn nom::Parser<Input<'i>, O, E> + 'p>
     where
-        P: 'p
-            + nom::Parser<
-                Span<'i, Self>,
-                O,
-                // Instantiate the parser with a VerboseError as we are
-                // dealing with source code. Parse failures must be reported
-                // cleanly, and absolute performance is less relevant as the
-                // input is typically tiny.
-                nom::error::VerboseError<Span<'i, Self>>,
-            >,
-        E: ParseError<Input<'i>>,
+        P: 'p + nom::Parser<Span<'i, Self>, O, NomError<Self::Error, ()>>,
+        E: ParseError<Input<'i>> + ::nom::error::FromExternalError<Input<'i>, Self::Error>,
         <Self as PackratGrammar>::State<'i>: Default,
     {
         Box::new(move |input: Input<'i>| {
@@ -58,11 +50,17 @@ pub trait PackratGrammar {
                 // infrastructure.
                 Ok((i, o)) => Ok((*i.fragment(), o)),
 
-                // TODO: find a better mapping that preserves the error content
-                Err(_err) => Err(nom::Err::Error(E::from_error_kind(
+                Err(nom::Err::Error(err)) => Err(nom::Err::Error(E::from_external_error(
                     input,
                     nom::error::ErrorKind::Fail,
+                    err.data,
                 ))),
+                Err(nom::Err::Failure(err)) => Err(nom::Err::Failure(E::from_external_error(
+                    input,
+                    nom::error::ErrorKind::Fail,
+                    err.data,
+                ))),
+                Err(nom::Err::Incomplete(x)) => Err(nom::Err::Incomplete(x)),
             }
         })
     }
@@ -114,6 +112,7 @@ macro_rules! grammar {
                 // Using Rc<> allows cloning the LocatedSpan while sharing
                 // the packrat state.
                 type State<'i> = PackratState<'i>;
+                type Error = $grammar_error;
             }
 
             impl $grammar_name {
