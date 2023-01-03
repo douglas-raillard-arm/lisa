@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use nom::{
     character::complete::{char, multispace0},
-    error::ParseError,
+    error::{FromExternalError, ParseError},
     sequence::delimited,
     Finish as _, Parser,
 };
@@ -36,10 +36,10 @@ pub trait PackratGrammar {
     // Use Box<dyn ...> return type instead of impl as impl is not allowed in
     // traits for now (see return_position_impl_trait_in_trait unstable
     // feature)
-    fn wrap_rule<'i, 'p, O, E, P>(mut rule: P) -> Box<dyn nom::Parser<Input<'i>, O, E> + 'p>
+    fn wrap_rule<'i, 'p, O, E, P>(mut rule: P) -> Box<dyn Parser<Input<'i>, O, E> + 'p>
     where
-        P: 'p + nom::Parser<Span<'i, Self>, O, NomError<Self::Error, ()>>,
-        E: ParseError<Input<'i>> + ::nom::error::FromExternalError<Input<'i>, Self::Error>,
+        P: 'p + Parser<Span<'i, Self>, O, NomError<Self::Error, ()>>,
+        E: ParseError<Input<'i>> + FromExternalError<Input<'i>, Self::Error>,
         <Self as PackratGrammar>::State<'i>: Default,
     {
         Box::new(move |input: Input<'i>| {
