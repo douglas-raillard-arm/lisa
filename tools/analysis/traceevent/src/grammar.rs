@@ -41,7 +41,7 @@ pub trait PackratGrammar {
             + nom::Parser<
                 Span<'i, Self>,
                 O,
-                // Instantiate the parserr with a VerboseError as we are
+                // Instantiate the parser with a VerboseError as we are
                 // dealing with source code. Parse failures must be reported
                 // cleanly, and absolute performance is less relevant as the
                 // input is typically tiny.
