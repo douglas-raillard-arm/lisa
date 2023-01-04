@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use nom::{
     character::complete::{char, multispace0},
-    error::{FromExternalError, ParseError},
+    error::{ErrorKind, FromExternalError, ParseError},
     sequence::delimited,
     Finish as _, Parser,
 };
@@ -36,17 +36,17 @@ pub trait PackratGrammar {
     // Use Box<dyn ...> return type instead of impl as impl is not allowed in
     // traits for now (see return_position_impl_trait_in_trait unstable
     // feature)
-    fn wrap_rule<'i, 'p, O, E, P>(mut rule: P) -> Box<dyn Parser<Input<'i>, O, E> + 'p>
+    fn wrap_rule<'i, 'p, O, E, E2, E3, F, P>(
+        mut rule: P,
+        map_err: F,
+    ) -> Box<dyn Parser<Input<'i>, O, E3> + 'p>
     where
-        // TODO: We currently discard all the context of the error by using ()
-        // instead of e.g. VerboseError. Maybe we need to build the map_err()
-        // inside wrap_rule() to give access to the whole NomError, so that the
-        // conversion function can do what it wants with it.
-        P: 'p + Parser<Span<'i, Self>, O, NomError<Self::Error, ()>>,
-        E: ParseError<Input<'i>> + FromExternalError<Input<'i>, Self::Error>,
+        P: 'p + Parser<Span<'i, Self>, O, E>,
+        F: 'p + Fn(E) -> E2,
         <Self as PackratGrammar>::State<'i>: Default,
+        E3: FromExternalError<Input<'i>, E2>,
     {
-        Box::new(move |input: Input<'i>| {
+        Box::new(move |input| {
             let span = Self::make_span(input);
             match rule.parse(span) {
                 // Convert back from Span to Input so that the
@@ -54,15 +54,15 @@ pub trait PackratGrammar {
                 // infrastructure.
                 Ok((i, o)) => Ok((*i.fragment(), o)),
 
-                Err(nom::Err::Error(err)) => Err(nom::Err::Error(E::from_external_error(
+                Err(nom::Err::Error(err)) => Err(nom::Err::Error(E3::from_external_error(
                     input,
-                    nom::error::ErrorKind::Fail,
-                    err.data,
+                    ErrorKind::Fail,
+                    map_err(err),
                 ))),
-                Err(nom::Err::Failure(err)) => Err(nom::Err::Failure(E::from_external_error(
+                Err(nom::Err::Failure(err)) => Err(nom::Err::Failure(E3::from_external_error(
                     input,
-                    nom::error::ErrorKind::Fail,
-                    err.data,
+                    ErrorKind::Fail,
+                    map_err(err),
                 ))),
                 Err(nom::Err::Incomplete(x)) => Err(nom::Err::Incomplete(x)),
             }

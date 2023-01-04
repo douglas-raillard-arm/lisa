@@ -16,7 +16,7 @@ use nom::{
     multi::{fold_many0, many0, many0_count, many1, many_m_n, separated_list0},
     number::complete::{be_u32, be_u64, le_u32, le_u64, le_u8, u8},
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
-    IResult, Parser,
+    Finish as _, IResult, Parser,
 };
 
 use crate::{
@@ -257,9 +257,12 @@ where
                 }
 
                 let (_, mut declaration) =
-                    all_consuming::<_, _, (), _>(CGrammar::wrap_rule(CGrammar::declaration(abi)))
-                        .parse(declaration)
-                        .map_err(|_| HeaderError::InvalidCDeclaration)?;
+                    all_consuming(CGrammar::wrap_rule(CGrammar::declaration(abi), |_: ()| {
+                        HeaderError::InvalidCDeclaration
+                    }))
+                    .parse(declaration)
+                    .finish()
+                    .map_err(|err: NomError<_, ()>| err.data)?;
 
                 let signed = {
                     let signed: u8 = get!("signed");
@@ -293,10 +296,9 @@ where
                 terminated(
                     alt((
                         separated_pair(
-                            lexeme(map_err(
-                                CGrammar::wrap_rule(CGrammar::identifier()),
-                                |_: ()| HeaderError::InvalidCIdentifier,
-                            )),
+                            lexeme(CGrammar::wrap_rule(CGrammar::identifier(), |_: ()| {
+                                HeaderError::InvalidCIdentifier
+                            })),
                             char(':'),
                             delimited(
                                 opt(pair(lexeme(tag("type")), lexeme(tag("==")))),
@@ -415,7 +417,7 @@ where
         context(
             "printk format string",
             lexeme(map_res(
-                map_err(CGrammar::wrap_rule(CGrammar::string_literal()), |_: ()| {
+                CGrammar::wrap_rule(CGrammar::string_literal(), |_: ()| {
                     HeaderError::InvalidStringLiteral
                 }),
                 |expr| match expr {
@@ -429,9 +431,7 @@ where
             "printk args",
             lexeme(separated_list0(
                 lexeme(char(',')),
-                map_err(CGrammar::wrap_rule(CGrammar::expr(abi)), |_: ()| {
-                    HeaderError::InvalidPrintkArg
-                }),
+                CGrammar::wrap_rule(CGrammar::expr(abi), |_: ()| HeaderError::InvalidPrintkArg),
             )),
         ),
     )
@@ -459,10 +459,9 @@ where
                         "event name",
                         preceded(
                             lexeme(tag("name:")),
-                            lexeme(map_err(
-                                CGrammar::wrap_rule(CGrammar::identifier()),
-                                |_: ()| HeaderError::InvalidCIdentifier,
-                            )),
+                            lexeme(CGrammar::wrap_rule(CGrammar::identifier(), |_: ()| {
+                                HeaderError::InvalidCIdentifier
+                            })),
                         ),
                     ),
                     context("event ID", preceded(lexeme(tag("ID:")), lexeme(txt_u32))),
