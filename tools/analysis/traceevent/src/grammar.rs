@@ -1,15 +1,12 @@
-use core::{cell::Cell, fmt::Debug, str::from_utf8};
 use std::rc::Rc;
 
 use nom::{
-    character::complete::{char, multispace0},
-    error::{ErrorKind, FromExternalError, ParseError},
-    sequence::delimited,
-    Finish as _, Parser,
+    error::{ErrorKind, FromExternalError},
+    Parser,
 };
 use nom_locate::LocatedSpan;
 
-use crate::parser::{lexeme, parenthesized, print, to_str, Input, NomError};
+use crate::parser::Input;
 
 type Location = usize;
 pub type Span<'i, G> = LocatedSpan<Input<'i>, Rc<Vec<<G as PackratGrammar>::State<'i>>>>;
@@ -207,7 +204,7 @@ pub(crate) use grammar;
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
-    use crate::parser::test_parser;
+    use crate::parser::{lexeme, parenthesized, tests::test_parser, to_str};
 
     #[test]
     fn packrat_test() {
@@ -231,7 +228,6 @@ pub(crate) mod tests {
             bytes::complete::tag,
             character::complete::alpha1,
             combinator::{fail, recognize, success},
-            error::{context, ContextError, FromExternalError, ParseError},
             multi::many1,
             sequence::separated_pair,
         };

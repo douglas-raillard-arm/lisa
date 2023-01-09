@@ -1,5 +1,5 @@
-use core::{borrow::Borrow, cell::Cell, convert::TryFrom, fmt::Debug, str::from_utf8};
-use std::{rc::Rc, string::ToString};
+use core::{borrow::Borrow, convert::TryFrom, fmt::Debug, str::from_utf8};
+use std::string::ToString;
 
 use std::{collections::BTreeMap, string::String as StdString};
 
@@ -7,25 +7,21 @@ use smartstring::alias::String;
 
 use nom::{
     branch::alt,
-    bytes::complete::{is_a, is_not, tag, take, take_until},
-    character::complete::{
-        alpha1, alphanumeric1, char, multispace0, u32 as txt_u32, u64 as txt_u64,
-    },
-    combinator::{all_consuming, fail, map_res, opt, recognize, success},
-    error::{context, ContextError, ErrorKind, FromExternalError, ParseError},
-    multi::{fold_many0, many0, many0_count, many1, many_m_n, separated_list0},
-    number::complete::{be_u32, be_u64, le_u32, le_u64, le_u8, u8},
+    bytes::complete::{is_a, is_not, tag},
+    character::complete::{char, multispace0, u32 as txt_u32, u64 as txt_u64},
+    combinator::{all_consuming, map_res, opt},
+    error::{context, ContextError, FromExternalError, ParseError},
+    multi::{fold_many0, many0, separated_list0},
+    number::complete::{be_u32, be_u64, le_u32, le_u64},
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
-    Finish as _, IResult, Parser,
+    Finish as _, Parser,
 };
 
 use crate::{
     cparser::{CBasicType, CDeclaration, CExpr, CGrammar, CType},
     grammar::PackratGrammar,
-    parser::{
-        lexeme, map_err, no_backtrack, null_terminated_str_parser, parenthesized, print,
-        success_with, to_str, Input, NomError,
-    },
+    io::BorrowingRead,
+    parser::{lexeme, to_str, Input, NomError},
 };
 
 pub type Address = usize;
@@ -38,7 +34,7 @@ pub type Identifier = String;
 pub type Offset = isize;
 pub type EventId = u32;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum Endianness {
     Big,
     Little,
@@ -212,15 +208,15 @@ fn fixup_c_type(typ: CType, size: Size, signed: bool, abi: &Abi) -> Result<CType
     Ok(typ)
 }
 
-fn struct_fmt_parser<'a, 'abi, E>(
+fn struct_fmt_parser<'abi, 'a, E>(
     abi: &'abi Abi,
 ) -> impl nom::Parser<Input<'a>, StructFmt, E> + 'abi
 where
-    E: 'abi
-        + ParseError<Input<'a>>
+    E: ParseError<Input<'a>>
         + ContextError<Input<'a>>
         + FromExternalError<Input<'a>, HeaderError>
-        + Debug,
+        + Debug
+        + 'abi,
     'a: 'abi,
 {
     separated_list0(
@@ -404,14 +400,14 @@ enum PrintComponent {
 
 fn event_print_fmt_parser<'a, 'abi, E>(
     abi: &'abi Abi,
-) -> impl nom::Parser<Input<'a>, EventPrintFmt, E> + 'abi
+) -> impl nom::Parser<Input<'a>, EventPrintFmt, E> + 'a
 where
     E: 'abi
         + ParseError<Input<'a>>
         + ContextError<Input<'a>>
         + FromExternalError<Input<'a>, HeaderError>
         + Debug,
-    'a: 'abi,
+    'abi: 'a,
 {
     separated_pair(
         context(
@@ -445,10 +441,12 @@ where
 
 fn event_fmt_parser<'a, 'abi, E>(abi: &'abi Abi) -> impl nom::Parser<Input<'a>, EventFmt, E> + 'abi
 where
-    E: ParseError<Input<'a>>
+    E: 'a
+        + ParseError<Input<'a>>
         + ContextError<Input<'a>>
         + FromExternalError<Input<'a>, HeaderError>
         + Debug,
+    'abi: 'a,
 {
     move |input| {
         context(
@@ -497,6 +495,9 @@ where
 #[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum HeaderError {
+    #[error("Bad magic found")]
+    BadMagic,
+
     #[error("Could not decode UTF-8 string: {0}")]
     DecodeUtf8(StdString),
 
@@ -534,11 +535,31 @@ pub enum HeaderError {
     #[error("Invalid long size: {0:?}")]
     InvalidLongSize(Size),
 
+    #[error("Expected header page start")]
+    ExpectedHeaderPage,
+
+    #[error("Could not load header page as it is too large: {0} bytes")]
+    HeaderPageSizeTooLarge(u64),
+
+    #[error("Expected header event start")]
+    ExpectedHeaderEvent,
+
+    #[error("Could not load header event as it is too large: {0} bytes")]
+    HeaderEventSizeTooLarge(u64),
+
+    #[error("Could not load event formats as they are too large: {0} bytes")]
+    NrEventFmtTooLarge(u32),
+
     #[error("Unexpected event header value \"{value}\" for field \"{field}\"")]
     InvalidEventHeader { field: StdString, value: StdString },
 
-    #[error("Could not find the \"commit\" field in header page and therefore the kernel long size: {header_page:?}")]
-    NoCommitField { header_page: StdString },
+    #[error(
+        "Could not find the \"commit\" field in header page and therefore the kernel long size"
+    )]
+    NoCommitField,
+
+    #[error("Error while loading data: {0:?}")]
+    IoError(std::io::Error),
 
     #[error("Unknown error")]
     Unknown,
@@ -550,108 +571,100 @@ impl Default for HeaderError {
     }
 }
 
-pub type HeaderParseError<E> = NomError<HeaderError, E>;
-
-pub fn header<'a>(
-    input: Input<'a>,
-) -> nom::IResult<Input<'a>, Header, HeaderParseError<nom::error::Error<Input<'a>>>> {
-    header_parser().parse(input)
+impl From<std::io::Error> for HeaderError {
+    fn from(err: std::io::Error) -> Self {
+        HeaderError::IoError(err)
+    }
 }
 
-fn header_parser<'a, O, E>() -> impl nom::Parser<Input<'a>, O, NomError<HeaderError, E>>
-where
-    E: Debug + ParseError<Input<'a>> + ContextError<Input<'a>>,
-{
-    move |input| {
-        let (input, _) = tuple((tag([0x17, 0x08, 0x44]), tag(b"tracing"))).parse(input)?;
-        let (input, _version) = map_res(null_terminated_str_parser(), |s| {
-            from_utf8(s).map_err(|err| HeaderError::DecodeUtf8(err.to_string()))
-        })
-        .parse(input)?;
-
-        let (input, endianness) = map_res(le_u8, |endianness| match endianness {
-            0 => Ok(Endianness::Little),
-            1 => Ok(Endianness::Big),
-            x => Err(HeaderError::InvalidEndianness(x)),
-        })
-        .parse(input)?;
-
-        let abi = Abi {
-            long_size: None,
-            endianness,
-        };
-
-        let (input, _long_size) = le_u8(input)?;
-        let (input, _page_size) = abi.parse_u32(input)?;
-
-        // Header page
-        let (input, _) = tag(b"header_page\0")(input)?;
-        let (input, header_page_size) = abi.parse_u64(input)?;
-        let (input, header_page) = take(header_page_size)(input)?;
-        let (_, header_fields) = struct_fmt_parser(&abi).parse(header_page)?;
-
-        println!("{}", to_str(header_page));
-
-        // Fixup ABI with long_size
-        let (input, long_size) = map_res(success(()), |_| {
-            match header_fields.field_by_name("commit") {
-                Some(commit) => commit
-                    .size
-                    .try_into()
-                    .map_err(|size| HeaderError::InvalidLongSize(size)),
-                None => Err(HeaderError::NoCommitField {
-                    header_page: StdString::from_utf8_lossy(header_page).to_string(),
-                }),
-            }
-        })
-        .parse(input)?;
-
-        let abi = Abi {
-            long_size: Some(long_size),
-            ..abi
-        };
-
-        // Header event
-        let (input, _) = tag(b"header_event\0")(input)?;
-        let (input, header_event_size) = abi.parse_u64(input)?;
-        let (input, header_event) = take(header_event_size)(input)?;
-        header_event_parser().parse(header_event)?;
-
-        let (input, nr_event_fmts) = abi.parse_u32(input)?;
-        let nr_events_fmt = nr_event_fmts
-            .try_into()
-            .expect("could not convert u32 to usize");
-
-        println!("{}", to_str(header_event));
-        panic!("it worked");
-
-        let (_input, _event_fmts) = many_m_n(nr_events_fmt, nr_events_fmt, |input| {
-            let (input, size) = abi.parse_u64(input)?;
-            let (input, fmt) = take(size)(input)?;
-            eprintln!("XXXXXXXXXX {:?}", input.len());
-            let fmt = event_fmt_parser(&abi).parse(fmt)?;
-            Ok((input, fmt))
-        })
-        .parse(input)?;
-
-        // let (_, x) = take(10usize)(input)?;
-        // let x = from_utf8(x);
-        // println!("{x:?}");
-        // tag(b"tracing")(input)?;
-        todo!()
-        // Header {}
-
-        // let (input, length) = be_u16(input)?;
-        // take(length)(input)
+impl<E> From<NomError<HeaderError, E>> for HeaderError {
+    fn from(err: NomError<HeaderError, E>) -> Self {
+        err.data
     }
+}
+
+pub fn header<I>(mut input: I) -> Result<Header, HeaderError>
+where
+    I: BorrowingRead,
+{
+    input.read_tag(b"\x17\x08\x44tracing", HeaderError::BadMagic)??;
+
+    // TODO: check version and handle v6 and v7 headers
+    let _version = from_utf8(&input.read_null_terminated()?)
+        .map_err(|err| HeaderError::DecodeUtf8(err.to_string()))?;
+
+    let endianness: u8 = input.read_int(Endianness::Little)?;
+    let endianness = match endianness {
+        0 => Ok(Endianness::Little),
+        1 => Ok(Endianness::Big),
+        x => Err(HeaderError::InvalidEndianness(x)),
+    }?;
+
+    let abi = Abi {
+        long_size: None,
+        endianness,
+    };
+
+    let _long_size: u8 = input.read_int(endianness)?;
+    let _page_size: u32 = input.read_int(endianness)?;
+
+    // Header page
+    input.read_tag(b"header_page\0", HeaderError::ExpectedHeaderPage)??;
+    let header_page_size: u64 = input.read_int(endianness)?;
+    let header_page_size: usize = header_page_size
+        .try_into()
+        .map_err(|_| HeaderError::HeaderPageSizeTooLarge(header_page_size))?;
+
+    let header_fields = input.parse(header_page_size, |input| {
+        struct_fmt_parser(&abi).parse(input)
+    })??;
+
+    // Fixup ABI with long_size
+    let long_size = match header_fields.field_by_name("commit") {
+        Some(commit) => commit
+            .size
+            .try_into()
+            .map_err(|size| HeaderError::InvalidLongSize(size)),
+        None => Err(HeaderError::NoCommitField),
+    }?;
+
+    let _abi = Abi {
+        long_size: Some(long_size),
+        ..abi
+    };
+
+    // Header event
+    input.read_tag(b"header_event\0", HeaderError::ExpectedHeaderEvent)??;
+    let header_event_size: u64 = input.read_int(endianness)?;
+    let header_event_size: usize = header_event_size
+        .try_into()
+        .map_err(|_| HeaderError::HeaderEventSizeTooLarge(header_event_size))?;
+    input.parse(header_event_size, |input| {
+        header_event_parser().parse(input)
+    })??;
+
+    let nr_event_fmts: u32 = input.read_int(endianness)?;
+    let _nr_events_fmt: usize = nr_event_fmts
+        .try_into()
+        .map_err(|_| HeaderError::NrEventFmtTooLarge(nr_event_fmts))?;
+
+    panic!("it worked");
+
+    // let (_input, _event_fmts) = many_m_n(nr_events_fmt, nr_events_fmt, |input| {
+    //     let (input, size) = abi.parse_u64(input)?;
+    //     let (input, fmt) = take(size)(input)?;
+    //     eprintln!("XXXXXXXXXX {:?}", input.len());
+    //     let fmt = event_fmt_parser(&abi).parse(fmt)?;
+    //     Ok((input, fmt))
+    // })
+    // .parse(input)?;
 }
 
 #[cfg(test)]
 mod tests {
-    use nom::Finish;
 
     use super::*;
-    use crate::parser::test_parser;
+    use crate::parser::tests::test_parser;
 
     #[test]
     fn event_fmt_parser_test() {

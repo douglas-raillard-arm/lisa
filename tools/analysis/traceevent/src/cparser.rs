@@ -1,4 +1,4 @@
-use core::{borrow::Borrow, cell::Cell, convert::TryFrom, fmt::Debug, str::from_utf8};
+use core::{fmt::Debug, str::from_utf8};
 use std::{rc::Rc, string::ToString};
 
 use std::string::String as StdString;
@@ -8,22 +8,20 @@ use thiserror::Error;
 
 use nom::{
     branch::alt,
-    bytes::complete::{is_a, is_not, tag, take, take_until},
-    character::complete::{
-        alpha1, alphanumeric1, char, multispace0, u32 as txt_u32, u64 as txt_u64,
-    },
+    bytes::complete::{is_not, tag},
+    character::complete::{alpha1, alphanumeric1, char, u64 as txt_u64},
     combinator::{fail, map_res, opt, recognize, success},
-    error::{context, ErrorKind, FromExternalError, ParseError},
-    multi::{fold_many0, many0, many0_count, many1, many_m_n, separated_list0},
+    error::{ErrorKind, FromExternalError},
+    multi::{many0, many0_count, many1},
     number::complete::u8,
-    sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
-    IResult, Parser,
+    sequence::{delimited, pair, preceded, tuple},
+    Parser,
 };
 
 use crate::{
     grammar::grammar,
     header::{Abi, Identifier, LongSize, Size},
-    parser::{lexeme, no_backtrack, parenthesized, print, success_with, to_str, Input},
+    parser::{lexeme, no_backtrack, parenthesized, success_with},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -774,7 +772,7 @@ grammar! {
                     ),
                     char('"'),
                 )
-            )).map(|(prefix, seq)| CExpr::StringLiteral(seq))
+            )).map(|(_prefix, seq)| CExpr::StringLiteral(seq))
         }
 
         // TODO: parse literals properly, including hex
@@ -813,7 +811,11 @@ grammar! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{grammar::PackratGrammar, header::Endianness, parser::test_parser};
+    use crate::{
+        grammar::PackratGrammar,
+        header::Endianness,
+        parser::{tests::test_parser, Input},
+    };
 
     #[test]
     fn expr_test() {

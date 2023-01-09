@@ -1,25 +1,16 @@
 use core::{
     default::Default,
     fmt::{Debug, Display},
-    str::from_utf8,
 };
 use std::string::String as StdString;
 
 use nom::{
-    branch::alt,
-    bytes::complete::{is_a, is_not, tag, take, take_until},
-    character::complete::{
-        alpha1, alphanumeric1, char, multispace0, u32 as txt_u32, u64 as txt_u64,
-    },
-    combinator::{fail, map_res, opt, recognize, success},
-    error::{context, ContextError, ErrorKind, FromExternalError, ParseError, VerboseError},
-    multi::{fold_many0, many0, many0_count, many1, many_m_n, separated_list0},
-    number::complete::u8,
-    sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
-    Finish as _, IResult, Parser,
+    bytes::complete::{tag, take_until},
+    character::complete::{char, multispace0},
+    error::{ContextError, ErrorKind, FromExternalError, ParseError},
+    sequence::{delimited, terminated},
+    Parser,
 };
-
-use crate::grammar::{PackratGrammar, Span};
 
 pub type Input<'a> = &'a [u8];
 
@@ -252,46 +243,50 @@ impl DisplayErr for () {
 }
 
 #[cfg(test)]
-pub fn test_parser<I, O, T, P>(expected: O, input: I, mut parser: P)
-where
-    O: Debug + PartialEq,
-    T: DisplayErr,
-    P: Parser<I, O, NomError<T, VerboseError<I>>>,
-    I: nom::AsBytes + Clone,
-{
-    let parsed = parser.parse(input.clone()).finish();
-    let input = to_str(input.as_bytes());
-    match parsed {
-        Ok((_, parsed)) => {
-            assert_eq!(parsed, expected, "while parsing: {input:?}");
-        }
-        Err(err) => {
-            // Convert input from &[u8] to &str so convert_error() can
-            // display it.
-            let mut seen_context = false;
-            let inner = VerboseError {
-                errors: err
-                    .inner
-                    .errors
-                    .iter()
-                    // Preserve the leaf-most levels that don't have a
-                    // context, but after the first context is
-                    // encountered, display only levels with a context.
-                    // This makes the path much easier to follow if all
-                    // relevant levels are annotated correctly.
-                    .filter(|(_, kind)| match kind {
-                        nom::error::VerboseErrorKind::Context(..) => {
-                            seen_context = true;
-                            true
-                        }
-                        _ => !seen_context,
-                    })
-                    .map(|(s, err)| (to_str(s.as_bytes()), err.clone()))
-                    .collect(),
-            };
-            let loc = nom::error::convert_error(input.clone(), inner);
-            let err_data = err.data.display_err();
-            panic!("Could not parse {input:?}: {err_data} :\n{loc}")
+pub(crate) mod tests {
+    use super::*;
+    use nom::{error::VerboseError, Finish as _};
+    pub fn test_parser<I, O, T, P>(expected: O, input: I, mut parser: P)
+    where
+        O: Debug + PartialEq,
+        T: DisplayErr,
+        P: Parser<I, O, NomError<T, VerboseError<I>>>,
+        I: nom::AsBytes + Clone,
+    {
+        let parsed = parser.parse(input.clone()).finish();
+        let input = to_str(input.as_bytes());
+        match parsed {
+            Ok((_, parsed)) => {
+                assert_eq!(parsed, expected, "while parsing: {input:?}");
+            }
+            Err(err) => {
+                // Convert input from &[u8] to &str so convert_error() can
+                // display it.
+                let mut seen_context = false;
+                let inner = VerboseError {
+                    errors: err
+                        .inner
+                        .errors
+                        .iter()
+                        // Preserve the leaf-most levels that don't have a
+                        // context, but after the first context is
+                        // encountered, display only levels with a context.
+                        // This makes the path much easier to follow if all
+                        // relevant levels are annotated correctly.
+                        .filter(|(_, kind)| match kind {
+                            nom::error::VerboseErrorKind::Context(..) => {
+                                seen_context = true;
+                                true
+                            }
+                            _ => !seen_context,
+                        })
+                        .map(|(s, err)| (to_str(s.as_bytes()), err.clone()))
+                        .collect(),
+                };
+                let loc = nom::error::convert_error(input.clone(), inner);
+                let err_data = err.data.display_err();
+                panic!("Could not parse {input:?}: {err_data} :\n{loc}")
+            }
         }
     }
 }
