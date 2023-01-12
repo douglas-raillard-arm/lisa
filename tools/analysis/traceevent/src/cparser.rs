@@ -14,7 +14,7 @@ use nom::{
     error::{ErrorKind, FromExternalError},
     multi::{many0, many0_count, many1},
     number::complete::u8,
-    sequence::{delimited, pair, preceded, separated_pair, tuple, terminated},
+    sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
     Parser,
 };
 
@@ -40,7 +40,6 @@ pub enum CBasicType {
     U64,
     I64,
 
-    Typedef(Identifier),
     // Complete black box used in cases where we want to completely hide any
     // information about the type.
     Unknown,
@@ -49,6 +48,7 @@ pub enum CBasicType {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CType {
     Basic(CBasicType),
+    Typedef(Identifier),
     Struct(Identifier),
     Enum(Identifier),
     Union(Identifier),
@@ -457,7 +457,7 @@ grammar! {
                                 "s64" | "__s64" | "int64_t" => CType::Basic(CBasicType::I64),
                                 "u64" | "__u64" | "uint64_t" => CType::Basic(CBasicType::U64),
 
-                                _ => CType::Basic(CBasicType::Typedef(id)),
+                                _ => CType::Typedef(id),
                             }),
                         ),
                     )))
@@ -578,6 +578,7 @@ grammar! {
                                         Ok((false, CType::Pointer(Box::new(typ))))
                                     }
                                     typ @ CType::Basic(_)
+                                    | typ @ CType::Typedef(_)
                                     | typ @ CType::Struct(_)
                                     | typ @ CType::Enum(_)
                                     | typ @ CType::Union(..) => Ok((false, typ)),
@@ -1205,6 +1206,13 @@ mod tests {
             ),
         );
         test(
+            b"(type)1 ",
+            CExpr::Cast(
+                CType::Typedef("type".into()),
+                Box::new(CExpr::IntConstant(1)),
+            ),
+        );
+        test(
             b"-(int)1 ",
             CExpr::Minus(Box::new(CExpr::Cast(
                 CType::Basic(CBasicType::I32),
@@ -1288,7 +1296,6 @@ mod tests {
             ),
         );
 
-
         // Operator precedence
         test(
             b" 1 + 2 * 3",
@@ -1298,7 +1305,7 @@ mod tests {
                     Box::new(CExpr::IntConstant(2)),
                     Box::new(CExpr::IntConstant(3)),
                 )),
-            )
+            ),
         );
 
         test(
@@ -1309,9 +1316,8 @@ mod tests {
                     Box::new(CExpr::IntConstant(2)),
                 )),
                 Box::new(CExpr::IntConstant(3)),
-            )
+            ),
         );
-
 
         // Ambiguous cases
         test(
