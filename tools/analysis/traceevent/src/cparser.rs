@@ -14,7 +14,7 @@ use nom::{
     error::{ErrorKind, FromExternalError},
     multi::{many0, many0_count, many1},
     number::complete::u8,
-    sequence::{delimited, pair, preceded, separated_pair, tuple},
+    sequence::{delimited, pair, preceded, separated_pair, tuple, terminated},
     Parser,
 };
 
@@ -91,8 +91,10 @@ pub enum CExpr {
     Cast(CType, Box<CExpr>),
     SizeofType(CType),
     SizeofExpr(Box<CExpr>),
-    Preinc(Box<CExpr>),
-    Predec(Box<CExpr>),
+    PreInc(Box<CExpr>),
+    PreDec(Box<CExpr>),
+    PostInc(Box<CExpr>),
+    PostDec(Box<CExpr>),
 
     Assign(Box<CExpr>, Box<CExpr>),
     Mul(Box<CExpr>, Box<CExpr>),
@@ -643,6 +645,14 @@ grammar! {
         rule postfix_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
+                    terminated(
+                        Self::postfix_expr(abi),
+                        lexeme(tag("++")),
+                    ).map(|expr| CExpr::PostInc(Box::new(expr))),
+                    terminated(
+                        Self::postfix_expr(abi),
+                        lexeme(tag("--")),
+                    ).map(|expr| CExpr::PostDec(Box::new(expr))),
                     Self::primary_expr(abi),
                 ))
             )
@@ -943,13 +953,13 @@ grammar! {
                             preceded(
                                 lexeme(tag("++")),
                                 Self::unary_expr(abi),
-                            ).map(|e| CExpr::Preinc(Box::new(e)))
+                            ).map(|e| CExpr::PreInc(Box::new(e)))
                     ),
                     context("predec expr",
                             preceded(
                                 lexeme(tag("--")),
                                 Self::unary_expr(abi),
-                            ).map(|e| CExpr::Predec(Box::new(e)))
+                            ).map(|e| CExpr::PreDec(Box::new(e)))
                     ),
                     context("sizeof type",
                             preceded(
@@ -1245,10 +1255,10 @@ mod tests {
         );
 
         // Pre-increment
-        test(b"++ 42 ", CExpr::Preinc(Box::new(CExpr::IntConstant(42))));
+        test(b"++ 42 ", CExpr::PreInc(Box::new(CExpr::IntConstant(42))));
         test(
             b"++ sizeof - (int ) 1 ",
-            CExpr::Preinc(Box::new(CExpr::SizeofExpr(Box::new(CExpr::Minus(
+            CExpr::PreInc(Box::new(CExpr::SizeofExpr(Box::new(CExpr::Minus(
                 Box::new(CExpr::Cast(
                     CType::Basic(CBasicType::I32),
                     Box::new(CExpr::IntConstant(1)),
@@ -1259,7 +1269,7 @@ mod tests {
         // Pre-decrement
         test(
             b"-- -42 ",
-            CExpr::Predec(Box::new(CExpr::Minus(Box::new(CExpr::IntConstant(42))))),
+            CExpr::PreDec(Box::new(CExpr::Minus(Box::new(CExpr::IntConstant(42))))),
         );
 
         // Addition
@@ -1267,6 +1277,23 @@ mod tests {
             b"1+2",
             CExpr::Add(
                 Box::new(CExpr::IntConstant(1)),
+                Box::new(CExpr::IntConstant(2)),
+            ),
+        );
+        test(
+            b" 1 + 2 ",
+            CExpr::Add(
+                Box::new(CExpr::IntConstant(1)),
+                Box::new(CExpr::IntConstant(2)),
+            ),
+        );
+        test(
+            // Amibiguity of is lifted by 6.4p4 stating that the tokenizer is
+            // greedy, i.e. the following is tokenized as "1 ++ + 2":
+            // https://port70.net/~nsz/c/c11/n1570.html#6.4p4
+            b" 1 +++ 2 ",
+            CExpr::Add(
+                Box::new(CExpr::PostInc(Box::new(CExpr::IntConstant(1)))),
                 Box::new(CExpr::IntConstant(2)),
             ),
         );
