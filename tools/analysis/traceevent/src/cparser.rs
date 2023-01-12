@@ -941,7 +941,6 @@ grammar! {
         rule unary_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::postfix_expr(abi),
                     context("preinc expr",
                             preceded(
                                 lexeme(tag("++")),
@@ -953,6 +952,20 @@ grammar! {
                                 lexeme(tag("--")),
                                 Self::unary_expr(abi),
                             ).map(|e| CExpr::Predec(Box::new(e)))
+                    ),
+                    context("sizeof type",
+                            preceded(
+                                lexeme(tag("sizeof")),
+                                parenthesized(
+                                    Self::type_name(abi),
+                                )
+                            ).map(|typ| CExpr::SizeofType(typ))
+                    ),
+                    context("sizeof expr",
+                            preceded(
+                                lexeme(tag("sizeof")),
+                                Self::unary_expr(abi),
+                            ).map(|e| CExpr::SizeofExpr(Box::new(e)))
                     ),
                     context("unary op expr",
                         tuple((
@@ -970,20 +983,7 @@ grammar! {
                             Self::cast_expr(abi),
                         )).map(|(modify, e)| modify(e))
                     ),
-                    context("sizeof type",
-                        preceded(
-                            lexeme(tag("sizeof")),
-                            parenthesized(
-                                Self::type_name(abi),
-                            )
-                        ).map(|typ| CExpr::SizeofType(typ))
-                    ),
-                    context("sizeof expr",
-                        preceded(
-                            lexeme(tag("sizeof")),
-                            Self::unary_expr(abi),
-                        ).map(|e| CExpr::SizeofExpr(Box::new(e)))
-                    ),
+                    Self::postfix_expr(abi),
                 ))
             )
         }
@@ -1004,7 +1004,6 @@ grammar! {
         rule cast_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::unary_expr(abi),
                     context("cast expr",
                         tuple((
                             parenthesized(
@@ -1012,7 +1011,8 @@ grammar! {
                             ),
                             Self::cast_expr(abi),
                         )).map(|(typ, e)| CExpr::Cast(typ, Box::new(e)))
-                    )
+                    ),
+                    Self::unary_expr(abi),
                 ))
             )
         }
