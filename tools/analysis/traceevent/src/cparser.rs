@@ -1257,6 +1257,9 @@ mod tests {
             b"-- -42 ",
             CExpr::Predec(Box::new(CExpr::Minus(Box::new(CExpr::IntConstant(42))))),
         );
+
+        // Addition
+        test(b"1+2", CExpr::Add(Box::new(CExpr::IntConstant(1)), Box::new(CExpr::IntConstant(2))));
     }
 
     #[test]
