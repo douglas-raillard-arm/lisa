@@ -1113,6 +1113,7 @@ grammar! {
                     parenthesized(
                         Self::expr(abi)
                     ),
+                    // TODO: we should only accept "REC" as a variable
                     Self::identifier().map(|id| CExpr::Variable(id)),
                     Self::constant(),
                     Self::string_literal(),
