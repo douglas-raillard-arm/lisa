@@ -666,6 +666,7 @@ where
     type Bytes<'a> = AttemptMmapFileBytes<'a, R1, R2> where R1: 'a, R2: 'a;
     type OffsetReader = AttemptMmapFileOffsetReader<R1, CursorReader<R2>>;
 
+    #[inline]
     fn read(&mut self, count: MemSize) -> io::Result<Self::Bytes<'_>> {
         Ok(match self {
             AttemptMmapFileOffsetReader::Mmap(mmap) => {
@@ -676,6 +677,8 @@ where
             }
         })
     }
+
+    #[inline]
     fn read_null_terminated(&mut self) -> io::Result<Self::Bytes<'_>> {
         Ok(match self {
             AttemptMmapFileOffsetReader::Mmap(mmap) => {
@@ -686,6 +689,8 @@ where
             }
         })
     }
+
+    #[inline]
     fn split_at_offsets(
         self,
         offsets: &[(FileOffset, FileSize)],
@@ -717,12 +722,15 @@ where
     type Bytes<'a> = AttemptMmapFileBytes<'a, R1, R2> where R1: 'a, R2: 'a;
     type OffsetReader = AttemptMmapFileOffsetReader<R1, R2>;
 
+    #[inline]
     fn read(&mut self, count: MemSize) -> io::Result<Self::Bytes<'_>> {
         Ok(match self {
             AttemptMmapFile::Mmap(mmap) => AttemptMmapFileBytes::Mmap(mmap.read(count)?),
             AttemptMmapFile::Reader(reader) => AttemptMmapFileBytes::Reader(reader.read(count)?),
         })
     }
+
+    #[inline]
     fn read_null_terminated(&mut self) -> io::Result<Self::Bytes<'_>> {
         Ok(match self {
             AttemptMmapFile::Mmap(mmap) => AttemptMmapFileBytes::Mmap(mmap.read_null_terminated()?),
@@ -731,6 +739,8 @@ where
             }
         })
     }
+
+    #[inline]
     fn split_at_offsets(
         self,
         offsets: &[(FileOffset, FileSize)],
