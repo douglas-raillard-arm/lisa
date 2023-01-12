@@ -1189,7 +1189,7 @@ mod tests {
             CExpr::Deref(Box::new(CExpr::Addr(Box::new(CExpr::IntConstant(1))))),
         );
 
-        // Arithmetic
+        // Unary
         test(b"+1", CExpr::Plus(Box::new(CExpr::IntConstant(1))));
         test(b" +1", CExpr::Plus(Box::new(CExpr::IntConstant(1))));
         test(b"-1", CExpr::Minus(Box::new(CExpr::IntConstant(1))));
@@ -1287,6 +1287,8 @@ mod tests {
                 Box::new(CExpr::IntConstant(2)),
             ),
         );
+
+        // Ambiguous cases
         test(
             // Amibiguity of is lifted by 6.4p4 stating that the tokenizer is
             // greedy, i.e. the following is tokenized as "1 ++ + 2":
