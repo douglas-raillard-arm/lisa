@@ -79,6 +79,7 @@ pub enum CExpr {
     EventField(Identifier),
     Variable(Identifier),
 
+
     IntConstant(u64),
     StringLiteral(String),
 
@@ -86,6 +87,15 @@ pub enum CExpr {
     Deref(Box<CExpr>),
     Plus(Box<CExpr>),
     Minus(Box<CExpr>),
+    Tilde(Box<CExpr>),
+    Bang(Box<CExpr>),
+    Cast(CType, Box<CExpr>),
+    SizeofType(CType),
+    SizeofExpr(Box<CExpr>),
+    Preinc(Box<CExpr>),
+    Predec(Box<CExpr>),
+
+    Assign(Box<CExpr>, Box<CExpr>),
     Mul(Box<CExpr>, Box<CExpr>),
     Div(Box<CExpr>, Box<CExpr>),
     Mod(Box<CExpr>, Box<CExpr>),
@@ -100,18 +110,13 @@ pub enum CExpr {
     Eq(Box<CExpr>, Box<CExpr>),
     NEq(Box<CExpr>, Box<CExpr>),
     And(Box<CExpr>, Box<CExpr>),
-    Ternary(Box<CExpr>, Box<CExpr>, Box<CExpr>),
     Or(Box<CExpr>, Box<CExpr>),
     BitAnd(Box<CExpr>, Box<CExpr>),
     BitOr(Box<CExpr>, Box<CExpr>),
-    Xor(Box<CExpr>, Box<CExpr>),
-    Tilde(Box<CExpr>),
-    Bang(Box<CExpr>),
-    Cast(CType, Box<CExpr>),
-    SizeofType(CType),
-    SizeofExpr(Box<CExpr>),
-    Preinc(Box<CExpr>),
-    Predec(Box<CExpr>),
+    BitXor(Box<CExpr>, Box<CExpr>),
+
+    Ternary(Box<CExpr>, Box<CExpr>, Box<CExpr>),
+
 }
 
 #[derive(Error, Debug, Default)]
@@ -809,7 +814,7 @@ grammar! {
                             Self::exclusive_or_expr(abi),
                             lexeme(char('^')),
                             Self::and_expr(abi),
-                        ).map(|(lop, rop)| CExpr::Xor(Box::new(lop), Box::new(rop)))
+                        ).map(|(lop, rop)| CExpr::BitXor(Box::new(lop), Box::new(rop)))
                     ),
                 ))
             )
@@ -890,25 +895,6 @@ grammar! {
             )
         }
 
-        // https://port70.net/~nsz/c/c11/n1570.html#6.5.16
-        rule assignment_op() -> CExpr {
-            lexeme(
-                alt((
-                    char('=').map(|_| todo!()),
-                    tag("*=").map(|_| todo!()),
-                    tag("/=").map(|_| todo!()),
-                    tag("%=").map(|_| todo!()),
-                    tag("+=").map(|_| todo!()),
-                    tag("-=").map(|_| todo!()),
-                    tag("<<=").map(|_| todo!()),
-                    tag(">>=").map(|_| todo!()),
-                    tag("&=").map(|_| todo!()),
-                    tag("^=").map(|_| todo!()),
-                    tag("|=").map(|_| todo!()),
-                ))
-            )
-        }
-
         // https://port70.net/~nsz/c/c11/n1570.html#6.5.3p1
         rule assignment_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
@@ -917,9 +903,37 @@ grammar! {
                     context("assignment",
                         tuple((
                             Self::unary_expr(abi),
-                            Self::assignment_op(),
+                            alt((
+                                tag("="),
+                                tag("*="),
+                                tag("/="),
+                                tag("%="),
+                                tag("+="),
+                                tag("-="),
+                                tag("<<="),
+                                tag(">>="),
+                                tag("&="),
+                                tag("^="),
+                                tag("|="),
+                            )),
                             Self::assignment_expr(abi),
-                        )).map(|(lexpr, op, rexpr)| todo!())
+                        )).map(|(lexpr, op, rexpr)| {
+                            use CExpr::*;
+                            match &op.fragment()[..] {
+                                b"=" => Assign(Box::new(lexpr), Box::new(rexpr)),
+                                b"*=" => Assign(Box::new(lexpr.clone()), Box::new(Mul(Box::new(lexpr), Box::new(rexpr)))),
+                                b"/=" => Assign(Box::new(lexpr.clone()), Box::new(Div(Box::new(lexpr), Box::new(rexpr)))),
+                                b"%=" => Assign(Box::new(lexpr.clone()), Box::new(Mod(Box::new(lexpr), Box::new(rexpr)))),
+                                b"+=" => Assign(Box::new(lexpr.clone()), Box::new(Add(Box::new(lexpr), Box::new(rexpr)))),
+                                b"-=" => Assign(Box::new(lexpr.clone()), Box::new(Sub(Box::new(lexpr), Box::new(rexpr)))),
+                                b"<<=" => Assign(Box::new(lexpr.clone()), Box::new(LShift(Box::new(lexpr), Box::new(rexpr)))),
+                                b">>=" => Assign(Box::new(lexpr.clone()), Box::new(RShift(Box::new(lexpr), Box::new(rexpr)))),
+                                b"&=" => Assign(Box::new(lexpr.clone()), Box::new(BitAnd(Box::new(lexpr), Box::new(rexpr)))),
+                                b"^=" => Assign(Box::new(lexpr.clone()), Box::new(BitXor(Box::new(lexpr), Box::new(rexpr)))),
+                                b"|=" => Assign(Box::new(lexpr.clone()), Box::new(BitOr(Box::new(lexpr), Box::new(rexpr)))),
+                                _ => panic!("unhandled assignment operator")
+                            }
+                        })
                     ),
                 ))
             )
