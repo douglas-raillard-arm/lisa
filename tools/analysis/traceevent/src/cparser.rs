@@ -1236,13 +1236,6 @@ mod tests {
                 )),
             ))),
         );
-        test(
-            b" (type) + (2) ",
-            CExpr::Cast(
-                CType::Typedef("type".into()),
-                Box::new(CExpr::Plus(Box::new(CExpr::IntConstant(2)))),
-            ),
-        );
 
         // Sizeof type
         test(
@@ -1359,6 +1352,35 @@ mod tests {
                     CExpr::IntConstant(1),
                 ))))),
                 Box::new(CExpr::IntConstant(2)),
+            ),
+        );
+
+        test(
+            b" 1 --- 2 ",
+            CExpr::Sub(
+                Box::new(CExpr::PostDec(Box::new(CExpr::IntConstant(1)))),
+                Box::new(CExpr::IntConstant(2)),
+            ),
+        );
+        test(
+            b" 1 ----- 2 ",
+            CExpr::Sub(
+                Box::new(CExpr::PostDec(Box::new(CExpr::PostDec(Box::new(
+                    CExpr::IntConstant(1),
+                ))))),
+                Box::new(CExpr::IntConstant(2)),
+            ),
+        );
+
+        // This is genuinely ambiguous: it can be either a cast to type "type"
+        // of "+2" or the addition of a "type" variable and 2.
+        // We parse it as a cast as the expressions we are interested in only
+        // contain one variable (REC).
+        test(
+            b" (type) + (2) ",
+            CExpr::Cast(
+                CType::Typedef("type".into()),
+                Box::new(CExpr::Plus(Box::new(CExpr::IntConstant(2)))),
             ),
         );
     }
