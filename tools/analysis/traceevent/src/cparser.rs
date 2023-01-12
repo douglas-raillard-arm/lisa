@@ -145,6 +145,7 @@ grammar! {
     error: CParseError,
     rules: {
 
+        // https://port70.net/~nsz/c/c11/n1570.html#6.4.2.1
         rule identifier() -> Identifier {
             map_res(
                 lexeme(recognize(pair(
@@ -162,6 +163,7 @@ grammar! {
             )
         }
 
+        // https://port70.net/~nsz/c/c11/n1570.html#6.7.3p1
         rule type_qualifier() -> () {
             lexeme(alt((
                 tag("const"),
@@ -171,6 +173,8 @@ grammar! {
             ))).map(|_| ())
         }
 
+        // TODO: deal with array types etc
+        // https://port70.net/~nsz/c/c11/n1570.html#6.7.6
         rule declarator(abstract_declarator: bool) -> CDeclarator {
             lexeme(pair(
                 context(
@@ -279,6 +283,7 @@ grammar! {
             })
         }
 
+        // https://port70.net/~nsz/c/c11/n1570.html#6.7
         rule declaration_specifier<'abi>(abi: &'abi Abi) -> CType {
             lexeme(move |mut input| {
                 #[derive(Debug, Clone, Copy)]
@@ -482,6 +487,7 @@ grammar! {
             })
         }
 
+        // https://port70.net/~nsz/c/c11/n1570.html#6.7
         rule declaration<'abi>(abi: &'abi Abi) -> CDeclaration {
             // Parser for ISO C
             let iso = context(
@@ -698,6 +704,7 @@ grammar! {
             )
         }
 
+        // https://port70.net/~nsz/c/c11/n1570.html#6.4.5
         rule string_literal() -> CExpr {
             tuple((
                 // TODO: do we want to handle the encoding prefix ?
