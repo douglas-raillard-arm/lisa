@@ -38,7 +38,10 @@ pub trait BorrowingRead {
 
     fn read<'a>(&mut self, count: MemSize) -> io::Result<Self::Bytes<'_>>;
     fn read_null_terminated(&mut self) -> io::Result<Self::Bytes<'_>>;
-    fn split_at_offsets(self, offsets: &[(FileOffset, FileSize)]) -> io::Result<Vec<Self::OffsetReader>>;
+    fn split_at_offsets(
+        self,
+        offsets: &[(FileOffset, FileSize)],
+    ) -> io::Result<Vec<Self::OffsetReader>>;
 
     #[inline]
     fn parse<P, O, E>(&mut self, count: MemSize, mut p: P) -> io::Result<Result<O, E>>
@@ -130,13 +133,19 @@ impl<'a> BorrowingRead for BorrowingCursor<'a> {
         }
     }
 
-    fn split_at_offsets(self, offsets: &[(FileOffset, FileSize)]) -> io::Result<Vec<Self::OffsetReader>> {
+    fn split_at_offsets(
+        self,
+        offsets: &[(FileOffset, FileSize)],
+    ) -> io::Result<Vec<Self::OffsetReader>> {
         offsets
             .iter()
             .map(|(offset, len)| {
                 #[inline]
                 fn convert(x: FileOffset) -> io::Result<MemOffset> {
-                    x.try_into().map_err(#[cold] |_| ErrorKind::UnexpectedEof.into())
+                    x.try_into().map_err(
+                        #[cold]
+                        |_| ErrorKind::UnexpectedEof.into(),
+                    )
                 }
 
                 let offset = convert(*offset)?;
@@ -279,36 +288,36 @@ impl Deref for Mmap {
     }
 }
 
-pub struct MmapFile<'a, T> {
+pub struct MmapFile<T> {
     // Use a Rc<RefCell<_>> so that we can clone the reference when creating
     // MmapFile::OffsetReader
-    file: Rc<RefCell<&'a mut T>>,
+    file: Rc<RefCell<T>>,
     len: FileSize,
 
     mmap: Mmap,
 }
 
-impl<'a, T> MmapFile<'a, T> {
-    pub unsafe fn new(file: &'a mut T) -> io::Result<MmapFile<'a, T>>
+impl<T> MmapFile<T> {
+    pub unsafe fn new(mut file: T) -> io::Result<MmapFile<T>>
     where
         T: AsRawFd + Seek,
     {
         let offset = 0;
-        let len = file_len(file)?;
+        let len = file_len(&mut file)?;
         let file = Rc::new(RefCell::new(file));
         Self::from_cell(file, offset, len)
     }
 
     unsafe fn from_cell(
-        file: Rc<RefCell<&'a mut T>>,
+        file: Rc<RefCell<T>>,
         offset: FileOffset,
         len: FileSize,
-    ) -> io::Result<MmapFile<'a, T>>
+    ) -> io::Result<MmapFile<T>>
     where
         T: AsRawFd,
     {
         let mmap_len = len.try_into().unwrap_or(MemSize::MAX);
-        let mmap = Mmap::new(*RefCell::borrow(&file), offset, mmap_len)?;
+        let mmap = Mmap::new(&*RefCell::borrow(&file), offset, mmap_len)?;
 
         Ok(MmapFile { file, len, mmap })
     }
@@ -322,15 +331,15 @@ impl<'a, T> MmapFile<'a, T> {
         let len = self.len - offset;
         // Saturate at the max size possible for a mmap
         let len: MemSize = len.try_into().unwrap_or(MemSize::MAX);
-        Ok(Mmap::new(*RefCell::borrow(&self.file), offset, len)?)
+        Ok(Mmap::new(&*RefCell::borrow(&self.file), offset, len)?)
     }
 }
 
-impl<'a, T> BorrowingRead for MmapFile<'a, T>
+impl<T> BorrowingRead for MmapFile<T>
 where
     T: AsRawFd + Read + Seek,
 {
-    type Bytes<'b> = MmapView where Self: 'b;
+    type Bytes<'a> = MmapView where Self: 'a;
     type OffsetReader = Self;
 
     #[inline]
@@ -360,7 +369,7 @@ where
 
                         let mut file = RefCell::borrow_mut(&self.file);
                         file.seek(SeekFrom::Start(file_offset))?;
-                        let vec = read(*file, count)?;
+                        let vec = read(&mut *file, count)?;
                         Ok(MmapView::Buffer(vec))
                     }
                 }
@@ -404,7 +413,7 @@ where
 
         let vec: Vec<u8>;
         {
-            let mut file = RefCell::borrow_mut(&self.file);
+            let mut file = &mut *RefCell::borrow_mut(&self.file);
             let file_offset = self.mmap.file_read_offset();
             file.seek(SeekFrom::Start(file_offset))?;
 
@@ -413,7 +422,7 @@ where
 
             loop {
                 let mut read_vec = Vec::with_capacity(buf_size);
-                let _nr_read = file.take(mem2file(buf_size)).read_to_end(&mut read_vec)?;
+                file.take(mem2file(buf_size)).read_to_end(&mut read_vec)?;
 
                 match find(&read_vec) {
                     Some(end) => {
@@ -435,7 +444,10 @@ where
         Ok(MmapView::Buffer(vec))
     }
 
-    fn split_at_offsets(self, offsets: &[(FileOffset, FileSize)]) -> io::Result<Vec<Self::OffsetReader>> {
+    fn split_at_offsets(
+        self,
+        offsets: &[(FileOffset, FileSize)],
+    ) -> io::Result<Vec<Self::OffsetReader>> {
         let file = self.file;
         offsets
             .iter()
@@ -599,14 +611,32 @@ where
     }
 }
 
+// pub enum AttemptMmapFile<'a, R> {
+//     Mmap(MmapFile<'a, R>),
+
+// }
+
+// pub trait BorrowingRead {
+//     // The 'a lifetime is the lifetime of Self, so that the returned Bytes can
+//     // simply be a &[u8] pointing to an internal buffer of Self.
+//     type Bytes<'a>: Deref<Target = [u8]>
+//     where
+//         Self: 'a;
+//     type OffsetReader: BorrowingRead;
+
+//     fn read<'a>(&mut self, count: MemSize) -> io::Result<Self::Bytes<'_>>;
+//     fn read_null_terminated(&mut self) -> io::Result<Self::Bytes<'_>>;
+//     fn split_at_offsets(self, offsets: &[(FileOffset, FileSize)]) -> io::Result<Vec<Self::OffsetReader>>;
+
 fn read<T>(reader: &mut T, count: MemSize) -> io::Result<Vec<u8>>
 where
     T: Read,
 {
     let mut vec = Vec::with_capacity(count);
-    let take_nr = count
-        .try_into()
-        .map_err(#[cold] |_| Error::from(ErrorKind::UnexpectedEof))?;
+    let take_nr = count.try_into().map_err(
+        #[cold]
+        |_| Error::from(ErrorKind::UnexpectedEof),
+    )?;
 
     let nr_read = reader.take(take_nr).read_to_end(&mut vec)?;
 

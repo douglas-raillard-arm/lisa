@@ -27,7 +27,7 @@ mod tests {
 
         let mut file =
             std::fs::File::open("/home/dourai01/Work/lisa/lisa/doc/traces/trace.dat").unwrap();
-        let reader = unsafe { crate::io::MmapFile::new(&mut file) }.unwrap();
+        let reader = unsafe { crate::io::MmapFile::new(file) }.unwrap();
 
         let res = header::header(reader);
         match res {
