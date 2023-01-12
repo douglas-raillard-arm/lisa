@@ -1288,6 +1288,31 @@ mod tests {
             ),
         );
 
+
+        // Operator precedence
+        test(
+            b" 1 + 2 * 3",
+            CExpr::Add(
+                Box::new(CExpr::IntConstant(1)),
+                Box::new(CExpr::Mul(
+                    Box::new(CExpr::IntConstant(2)),
+                    Box::new(CExpr::IntConstant(3)),
+                )),
+            )
+        );
+
+        test(
+            b" 1 * 2 + 3",
+            CExpr::Add(
+                Box::new(CExpr::Mul(
+                    Box::new(CExpr::IntConstant(1)),
+                    Box::new(CExpr::IntConstant(2)),
+                )),
+                Box::new(CExpr::IntConstant(3)),
+            )
+        );
+
+
         // Ambiguous cases
         test(
             // Amibiguity of is lifted by 6.4p4 stating that the tokenizer is
