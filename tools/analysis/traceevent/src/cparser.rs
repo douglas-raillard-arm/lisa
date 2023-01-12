@@ -210,17 +210,17 @@ grammar! {
                 "direct declarator"
             };
             context(name, move |input| {
-                let _id_parser = || {
+                let _id = || {
                     lexeme(Self::identifier().map(|id| CDeclarator {
                         identifier: Some(id),
                         modify_typ: Rc::new(|typ| typ),
                     }))
                 };
-                let id_parser = || {
+                let id = || {
                     move |input| {
                         if abstract_declarator {
                             alt((
-                                _id_parser(),
+                                _id(),
                                 success_with(|| CDeclarator {
                                     identifier: None,
                                     modify_typ: Rc::new(|typ| typ),
@@ -228,12 +228,12 @@ grammar! {
                             ))
                             .parse(input)
                         } else {
-                            _id_parser().parse(input)
+                            _id().parse(input)
                         }
                     }
                 };
 
-                let parenthesized_parser = || {
+                let parenthesized = || {
                     context(
                         "parenthesized",
                         lexeme(parenthesized(Self::declarator(abstract_declarator))),
@@ -278,7 +278,7 @@ grammar! {
                     }
                 });
 
-                let parser = alt((array, parenthesized_parser(), id_parser()));
+                let parser = alt((array, parenthesized(), id()));
                 lexeme(parser).parse(input)
             })
         }
