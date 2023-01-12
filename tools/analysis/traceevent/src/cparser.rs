@@ -1302,6 +1302,13 @@ mod tests {
                 Box::new(CExpr::IntConstant(2)),
             ),
         );
+        test(
+            b" (1) + (2) ",
+            CExpr::Add(
+                Box::new(CExpr::IntConstant(1)),
+                Box::new(CExpr::IntConstant(2)),
+            ),
+        );
 
         // Operator precedence
         test(
@@ -1341,7 +1348,9 @@ mod tests {
         test(
             b" 1 +++++ 2 ",
             CExpr::Add(
-                Box::new(CExpr::PostInc(Box::new(CExpr::PostInc(Box::new(CExpr::IntConstant(1)))))),
+                Box::new(CExpr::PostInc(Box::new(CExpr::PostInc(Box::new(
+                    CExpr::IntConstant(1),
+                ))))),
                 Box::new(CExpr::IntConstant(2)),
             ),
         );
