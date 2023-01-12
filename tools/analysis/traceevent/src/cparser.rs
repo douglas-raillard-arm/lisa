@@ -652,7 +652,6 @@ grammar! {
         rule multiplicative_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::cast_expr(abi),
                     context("* expr",
                         separated_pair(
                             Self::multiplicative_expr(abi),
@@ -674,6 +673,7 @@ grammar! {
                             Self::cast_expr(abi),
                         ).map(|(lop, rop)| CExpr::Mod(Box::new(lop), Box::new(rop)))
                     ),
+                    Self::cast_expr(abi),
                 ))
             )
         }
@@ -682,7 +682,6 @@ grammar! {
         rule additive_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::multiplicative_expr(abi),
                     context("+ expr",
                         separated_pair(
                             Self::additive_expr(abi),
@@ -697,6 +696,7 @@ grammar! {
                             Self::multiplicative_expr(abi),
                         ).map(|(lop, rop)| CExpr::Sub(Box::new(lop), Box::new(rop)))
                     ),
+                    Self::multiplicative_expr(abi),
                 ))
             )
         }
@@ -705,7 +705,6 @@ grammar! {
         rule shift_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::additive_expr(abi),
                     context("<< expr",
                         separated_pair(
                             Self::shift_expr(abi),
@@ -720,6 +719,7 @@ grammar! {
                             Self::additive_expr(abi),
                         ).map(|(lop, rop)| CExpr::RShift(Box::new(lop), Box::new(rop)))
                     ),
+                    Self::additive_expr(abi),
                 ))
             )
         }
@@ -728,7 +728,6 @@ grammar! {
         rule relational_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::shift_expr(abi),
                     context("<= expr",
                         separated_pair(
                             Self::relational_expr(abi),
@@ -757,6 +756,7 @@ grammar! {
                             Self::shift_expr(abi),
                         ).map(|(lop, rop)| CExpr::Hi(Box::new(lop), Box::new(rop)))
                     ),
+                    Self::shift_expr(abi),
                 ))
             )
         }
@@ -766,7 +766,6 @@ grammar! {
         rule equality_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::relational_expr(abi),
                     context("== expr",
                         separated_pair(
                             Self::equality_expr(abi),
@@ -781,6 +780,7 @@ grammar! {
                             Self::relational_expr(abi),
                         ).map(|(lop, rop)| CExpr::NEq(Box::new(lop), Box::new(rop)))
                     ),
+                    Self::relational_expr(abi),
                 ))
             )
         }
@@ -789,7 +789,6 @@ grammar! {
         rule and_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::equality_expr(abi),
                     context("& expr",
                         separated_pair(
                             Self::and_expr(abi),
@@ -797,6 +796,7 @@ grammar! {
                             Self::equality_expr(abi),
                         ).map(|(lop, rop)| CExpr::BitAnd(Box::new(lop), Box::new(rop)))
                     ),
+                    Self::equality_expr(abi),
                 ))
             )
         }
@@ -805,7 +805,6 @@ grammar! {
         rule exclusive_or_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::and_expr(abi),
                     context("^ expr",
                         separated_pair(
                             Self::exclusive_or_expr(abi),
@@ -813,6 +812,7 @@ grammar! {
                             Self::and_expr(abi),
                         ).map(|(lop, rop)| CExpr::BitXor(Box::new(lop), Box::new(rop)))
                     ),
+                    Self::and_expr(abi),
                 ))
             )
         }
@@ -821,8 +821,6 @@ grammar! {
         rule inclusive_or_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::exclusive_or_expr(abi),
-
                     context("| expr",
                         separated_pair(
                             Self::inclusive_or_expr(abi),
@@ -830,6 +828,7 @@ grammar! {
                             Self::exclusive_or_expr(abi),
                         ).map(|(lop, rop)| CExpr::BitOr(Box::new(lop), Box::new(rop)))
                     ),
+                    Self::exclusive_or_expr(abi),
                 ))
             )
         }
@@ -838,7 +837,6 @@ grammar! {
         rule logical_and_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::inclusive_or_expr(abi),
                     context("&& expr",
                         separated_pair(
                             Self::logical_and_expr(abi),
@@ -846,6 +844,7 @@ grammar! {
                             Self::inclusive_or_expr(abi),
                         ).map(|(lop, rop)| CExpr::And(Box::new(lop), Box::new(rop)))
                     ),
+                    Self::inclusive_or_expr(abi),
                 ))
             )
         }
@@ -854,7 +853,6 @@ grammar! {
         rule logical_or_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::logical_and_expr(abi),
                     context("|| expr",
                         separated_pair(
                             Self::logical_or_expr(abi),
@@ -862,6 +860,7 @@ grammar! {
                             Self::logical_and_expr(abi),
                         ).map(|(lop, rop)| CExpr::Or(Box::new(lop), Box::new(rop)))
                     ),
+                    Self::logical_and_expr(abi),
                 ))
             )
         }
@@ -870,7 +869,6 @@ grammar! {
         rule conditional_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::logical_or_expr(abi),
                     context("ternary expr",
                         separated_pair(
                             context("ternary cond expr",
@@ -888,6 +886,7 @@ grammar! {
                             ),
                         ).map(|(cond, (true_, false_))| CExpr::Ternary(Box::new(cond), Box::new(true_), Box::new(false_)))
                     ),
+                    Self::logical_or_expr(abi),
                 ))
             )
         }
@@ -896,7 +895,6 @@ grammar! {
         rule assignment_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    Self::conditional_expr(abi),
                     context("assignment",
                         tuple((
                             Self::unary_expr(abi),
@@ -932,6 +930,7 @@ grammar! {
                             }
                         })
                     ),
+                    Self::conditional_expr(abi),
                 ))
             )
         }
