@@ -34,7 +34,8 @@ mod tests {
         let reader = crate::io::FallbackBorrowingReader::new(
             || unsafe { crate::io::MmapFile::new(file) },
             || Ok(crate::io::BorrowingCursor::new(&data[..])),
-        ).unwrap();
+        )
+        .unwrap();
 
         let res = header::header(reader);
         match res {

@@ -14,7 +14,7 @@ use nom::{
     error::{ErrorKind, FromExternalError},
     multi::{many0, many0_count, many1},
     number::complete::u8,
-    sequence::{delimited, pair, preceded, tuple, separated_pair},
+    sequence::{delimited, pair, preceded, separated_pair, tuple},
     Parser,
 };
 
@@ -79,7 +79,6 @@ pub enum CExpr {
     EventField(Identifier),
     Variable(Identifier),
 
-
     IntConstant(u64),
     StringLiteral(String),
 
@@ -116,7 +115,6 @@ pub enum CExpr {
     BitXor(Box<CExpr>, Box<CExpr>),
 
     Ternary(Box<CExpr>, Box<CExpr>, Box<CExpr>),
-
 }
 
 #[derive(Error, Debug, Default)]
@@ -157,7 +155,7 @@ fn interpret_c_numeric_expr<'a>(expr: CExpr) -> Option<u64> {
         // It used to be a macro, but is an enum in recent kernels for compat
         // with eBPF ...
         Variable(id) if &id == "TASK_COMM_LEN" => Some(16),
-        _ => None
+        _ => None,
     }
 }
 
@@ -1191,6 +1189,13 @@ mod tests {
 
         // Cast
         test(
+            b"(int)1 ",
+            CExpr::Cast(
+                CType::Basic(CBasicType::I32),
+                Box::new(CExpr::IntConstant(1)),
+            ),
+        );
+        test(
             b"-(int)1 ",
             CExpr::Minus(Box::new(CExpr::Cast(
                 CType::Basic(CBasicType::I32),
@@ -1259,7 +1264,13 @@ mod tests {
         );
 
         // Addition
-        test(b"1+2", CExpr::Add(Box::new(CExpr::IntConstant(1)), Box::new(CExpr::IntConstant(2))));
+        test(
+            b"1+2",
+            CExpr::Add(
+                Box::new(CExpr::IntConstant(1)),
+                Box::new(CExpr::IntConstant(2)),
+            ),
+        );
     }
 
     #[test]
