@@ -25,9 +25,16 @@ mod tests {
         // let reader = crate::io::CursorReader{inner: Rc::new(RefCell::new(file)), offset: 0};
         // let reader = crate::io::BorrowingBufReader::new(reader, Some(4096));
 
+        // let mut file =
+        //     std::fs::File::open("/home/dourai01/Work/lisa/lisa/doc/traces/trace.dat").unwrap();
+        // let reader = unsafe { crate::io::MmapFile::new(file) }.unwrap();
+
         let mut file =
             std::fs::File::open("/home/dourai01/Work/lisa/lisa/doc/traces/trace.dat").unwrap();
-        let reader = unsafe { crate::io::MmapFile::new(file) }.unwrap();
+        let reader = crate::io::FallbackBorrowingReader::new(
+            || unsafe { crate::io::MmapFile::new(file) },
+            || Ok(crate::io::BorrowingCursor::new(&data[..])),
+        ).unwrap();
 
         let res = header::header(reader);
         match res {

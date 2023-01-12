@@ -611,69 +611,71 @@ where
     }
 }
 
-
-
 //////////////////////////////////////
-// Combined Mmap with a fallback on
-// BorrowingBufReader
+// FallbackBorrowingReader
 //////////////////////////////////////
 
-pub enum AttemptMmapFile<R1, R2> {
-    Mmap(MmapFile<R1>),
-    Reader(BorrowingBufReader<R2>),
+pub enum FallbackBorrowingReader<R1, R2> {
+    Main(R1),
+    Fallback(R2),
 }
 
-pub enum AttemptMmapFileBytes<'a, R1, R2>
+impl<R1, R2> FallbackBorrowingReader<R1, R2> {
+    pub fn new<E, F1, F2>(make1: F1, make2: F2) -> Result<Self, E>
+    where
+        F1: FnOnce() -> Result<R1, E>,
+        F2: FnOnce() -> Result<R2, E>,
+    {
+        return Ok(FallbackBorrowingReader::Main(make1()?));
+        return Ok(FallbackBorrowingReader::Fallback(make2()?));
+    }
+}
+
+pub enum FallbackBorrowingReaderBytes<'a, R1, R2>
 where
-    R1: AsRawFd + Read + Seek + 'a,
-    R2: Read + Seek + 'a,
+    R1: BorrowingRead + 'a,
+    R2: BorrowingRead + 'a,
 {
-    Mmap(<MmapFile<R1> as BorrowingRead>::Bytes<'a>),
-    Reader(<BorrowingBufReader<R2> as BorrowingRead>::Bytes<'a>),
+    Main(<R1 as BorrowingRead>::Bytes<'a>),
+    Fallback(<R2 as BorrowingRead>::Bytes<'a>),
 }
 
-impl<'a, R1, R2> Deref for AttemptMmapFileBytes<'a, R1, R2>
+impl<'a, R1, R2> Deref for FallbackBorrowingReaderBytes<'a, R1, R2>
 where
-    R1: AsRawFd + Read + Seek + 'a,
-    R2: Read + Seek + 'a,
+    R1: BorrowingRead,
+    R2: BorrowingRead,
 {
     type Target = [u8];
     #[inline]
     fn deref(&self) -> &Self::Target {
         match self {
-            AttemptMmapFileBytes::Mmap(mmap) => mmap.deref(),
-            AttemptMmapFileBytes::Reader(reader) => reader.deref(),
+            FallbackBorrowingReaderBytes::Main(main) => main.deref(),
+            FallbackBorrowingReaderBytes::Fallback(fallback) => fallback.deref(),
         }
     }
 }
 
-pub enum AttemptMmapFileOffsetReader<R1, R2>
+impl<R1, R2> BorrowingRead for FallbackBorrowingReader<R1, R2>
 where
-    R1: AsRawFd + Read + Seek,
-    R2: Read + Seek,
-{
-    Mmap(<MmapFile<R1> as BorrowingRead>::OffsetReader),
-    Reader(<BorrowingBufReader<R2> as BorrowingRead>::OffsetReader),
-}
-
-impl<R1, R2> BorrowingRead for AttemptMmapFileOffsetReader<R1, R2>
-where
-    R1: AsRawFd + Read + Seek,
-    R2: Read + Seek,
+    R1: BorrowingRead,
+    R2: BorrowingRead,
 {
     // The 'a lifetime is the lifetime of Self, so that the returned Bytes can
     // simply be a &[u8] pointing to an internal buffer of Self.
-    type Bytes<'a> = AttemptMmapFileBytes<'a, R1, R2> where R1: 'a, R2: 'a;
-    type OffsetReader = AttemptMmapFileOffsetReader<R1, CursorReader<R2>>;
+    type Bytes<'a> = FallbackBorrowingReaderBytes<'a, R1, R2> where R1: 'a, R2: 'a;
+    type OffsetReader = FallbackBorrowingReader<
+        <R1 as BorrowingRead>::OffsetReader,
+        <R2 as BorrowingRead>::OffsetReader,
+    >;
 
     #[inline]
     fn read(&mut self, count: MemSize) -> io::Result<Self::Bytes<'_>> {
         Ok(match self {
-            AttemptMmapFileOffsetReader::Mmap(mmap) => {
-                AttemptMmapFileBytes::Mmap(mmap.read(count)?)
+            FallbackBorrowingReader::Main(main) => {
+                FallbackBorrowingReaderBytes::Main(main.read(count)?)
             }
-            AttemptMmapFileOffsetReader::Reader(reader) => {
-                AttemptMmapFileBytes::Reader(reader.read(count)?)
+            FallbackBorrowingReader::Fallback(fallback) => {
+                FallbackBorrowingReaderBytes::Fallback(fallback.read(count)?)
             }
         })
     }
@@ -681,11 +683,11 @@ where
     #[inline]
     fn read_null_terminated(&mut self) -> io::Result<Self::Bytes<'_>> {
         Ok(match self {
-            AttemptMmapFileOffsetReader::Mmap(mmap) => {
-                AttemptMmapFileBytes::Mmap(mmap.read_null_terminated()?)
+            FallbackBorrowingReader::Main(main) => {
+                FallbackBorrowingReaderBytes::Main(main.read_null_terminated()?)
             }
-            AttemptMmapFileOffsetReader::Reader(reader) => {
-                AttemptMmapFileBytes::Reader(reader.read_null_terminated()?)
+            FallbackBorrowingReader::Fallback(fallback) => {
+                FallbackBorrowingReaderBytes::Fallback(fallback.read_null_terminated()?)
             }
         })
     }
@@ -696,66 +698,14 @@ where
         offsets: &[(FileOffset, FileSize)],
     ) -> io::Result<Vec<Self::OffsetReader>> {
         Ok(match self {
-            AttemptMmapFileOffsetReader::Mmap(mmap) => {
-                let vec = mmap.split_at_offsets(offsets)?;
-                vec.into_iter()
-                    .map(AttemptMmapFileOffsetReader::Mmap)
-                    .collect()
+            FallbackBorrowingReader::Main(main) => {
+                let vec = main.split_at_offsets(offsets)?;
+                vec.into_iter().map(FallbackBorrowingReader::Main).collect()
             }
-            AttemptMmapFileOffsetReader::Reader(reader) => {
-                let vec = reader.split_at_offsets(offsets)?;
+            FallbackBorrowingReader::Fallback(fallback) => {
+                let vec = fallback.split_at_offsets(offsets)?;
                 vec.into_iter()
-                    .map(AttemptMmapFileOffsetReader::Reader)
-                    .collect()
-            }
-        })
-    }
-}
-
-impl<R1, R2> BorrowingRead for AttemptMmapFile<R1, R2>
-where
-    R1: AsRawFd + Read + Seek,
-    R2: Read + Seek,
-{
-    // The 'a lifetime is the lifetime of Self, so that the returned Bytes can
-    // simply be a &[u8] pointing to an internal buffer of Self.
-    type Bytes<'a> = AttemptMmapFileBytes<'a, R1, R2> where R1: 'a, R2: 'a;
-    type OffsetReader = AttemptMmapFileOffsetReader<R1, R2>;
-
-    #[inline]
-    fn read(&mut self, count: MemSize) -> io::Result<Self::Bytes<'_>> {
-        Ok(match self {
-            AttemptMmapFile::Mmap(mmap) => AttemptMmapFileBytes::Mmap(mmap.read(count)?),
-            AttemptMmapFile::Reader(reader) => AttemptMmapFileBytes::Reader(reader.read(count)?),
-        })
-    }
-
-    #[inline]
-    fn read_null_terminated(&mut self) -> io::Result<Self::Bytes<'_>> {
-        Ok(match self {
-            AttemptMmapFile::Mmap(mmap) => AttemptMmapFileBytes::Mmap(mmap.read_null_terminated()?),
-            AttemptMmapFile::Reader(reader) => {
-                AttemptMmapFileBytes::Reader(reader.read_null_terminated()?)
-            }
-        })
-    }
-
-    #[inline]
-    fn split_at_offsets(
-        self,
-        offsets: &[(FileOffset, FileSize)],
-    ) -> io::Result<Vec<Self::OffsetReader>> {
-        Ok(match self {
-            AttemptMmapFile::Mmap(mmap) => {
-                let vec = mmap.split_at_offsets(offsets)?;
-                vec.into_iter()
-                    .map(AttemptMmapFileOffsetReader::Mmap)
-                    .collect()
-            }
-            AttemptMmapFile::Reader(reader) => {
-                let vec = reader.split_at_offsets(offsets)?;
-                vec.into_iter()
-                    .map(AttemptMmapFileOffsetReader::Reader)
+                    .map(FallbackBorrowingReader::Fallback)
                     .collect()
             }
         })
