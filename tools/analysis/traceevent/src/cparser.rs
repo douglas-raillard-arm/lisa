@@ -1213,6 +1213,13 @@ mod tests {
             ),
         );
         test(
+            b"(type)(1) ",
+            CExpr::Cast(
+                CType::Typedef("type".into()),
+                Box::new(CExpr::IntConstant(1)),
+            ),
+        );
+        test(
             b"-(int)1 ",
             CExpr::Minus(Box::new(CExpr::Cast(
                 CType::Basic(CBasicType::I32),
@@ -1324,8 +1331,8 @@ mod tests {
         // Amibiguity of is lifted by 6.4p4 stating that the tokenizer is
         // greedy, i.e. the following is tokenized as "1 ++ + 2":
         // https://port70.net/~nsz/c/c11/n1570.html#6.4p4
-        b" 1 +++ 2 ",
         test(
+            b" 1 +++ 2 ",
             CExpr::Add(
                 Box::new(CExpr::PostInc(Box::new(CExpr::IntConstant(1)))),
                 Box::new(CExpr::IntConstant(2)),
