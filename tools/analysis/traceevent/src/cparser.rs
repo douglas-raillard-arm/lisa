@@ -1236,6 +1236,13 @@ mod tests {
                 )),
             ))),
         );
+        test(
+            b" (type) + (2) ",
+            CExpr::Cast(
+                CType::Typedef("type".into()),
+                Box::new(CExpr::Plus(Box::new(CExpr::IntConstant(2)))),
+            ),
+        );
 
         // Sizeof type
         test(
