@@ -644,7 +644,6 @@ grammar! {
             lexeme(
                 alt((
                     Self::primary_expr(abi),
-
                 ))
             )
         }
@@ -901,7 +900,7 @@ grammar! {
                     context("assignment",
                         tuple((
                             Self::unary_expr(abi),
-                            alt((
+                            lexeme(alt((
                                 tag("="),
                                 tag("*="),
                                 tag("/="),
@@ -913,7 +912,7 @@ grammar! {
                                 tag("&="),
                                 tag("^="),
                                 tag("|="),
-                            )),
+                            ))),
                             Self::assignment_expr(abi),
                         )).map(|(lexpr, op, rexpr)| {
                             use CExpr::*;
@@ -1111,12 +1110,12 @@ grammar! {
         {
             lexeme(
                 alt((
-                    Self::identifier().map(|id| CExpr::Variable(id)),
-                    Self::constant(),
-                    Self::string_literal(),
                     parenthesized(
                         Self::expr(abi)
                     ),
+                    Self::identifier().map(|id| CExpr::Variable(id)),
+                    Self::constant(),
+                    Self::string_literal(),
                 ))
             )
         }
