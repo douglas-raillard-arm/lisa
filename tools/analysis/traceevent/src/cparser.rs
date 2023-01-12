@@ -77,12 +77,34 @@ pub struct CDeclaration {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CExpr {
     EventField(Identifier),
-    IntLiteral(u64),
+    Variable(Identifier),
+
+    IntConstant(u64),
     StringLiteral(String),
+
     Addr(Box<CExpr>),
     Deref(Box<CExpr>),
     Plus(Box<CExpr>),
     Minus(Box<CExpr>),
+    Mul(Box<CExpr>, Box<CExpr>),
+    Div(Box<CExpr>, Box<CExpr>),
+    Mod(Box<CExpr>, Box<CExpr>),
+    Add(Box<CExpr>, Box<CExpr>),
+    Sub(Box<CExpr>, Box<CExpr>),
+    LShift(Box<CExpr>, Box<CExpr>),
+    RShift(Box<CExpr>, Box<CExpr>),
+    LoEq(Box<CExpr>, Box<CExpr>),
+    HiEq(Box<CExpr>, Box<CExpr>),
+    Hi(Box<CExpr>, Box<CExpr>),
+    Lo(Box<CExpr>, Box<CExpr>),
+    Eq(Box<CExpr>, Box<CExpr>),
+    NEq(Box<CExpr>, Box<CExpr>),
+    And(Box<CExpr>, Box<CExpr>),
+    Ternary(Box<CExpr>, Box<CExpr>, Box<CExpr>),
+    Or(Box<CExpr>, Box<CExpr>),
+    BitAnd(Box<CExpr>, Box<CExpr>),
+    BitOr(Box<CExpr>, Box<CExpr>),
+    Xor(Box<CExpr>, Box<CExpr>),
     Tilde(Box<CExpr>),
     Bang(Box<CExpr>),
     Cast(CType, Box<CExpr>),
@@ -123,16 +145,14 @@ pub enum CParseError {
 }
 
 // TODO: replace by the proper expr evaluator
-fn interpret_c_numeric_expr<'a>(expr: &'a [u8]) -> Option<u64> {
+fn interpret_c_numeric_expr<'a>(expr: CExpr) -> Option<u64> {
+    use CExpr::*;
     match expr {
+        IntConstant(x) => Some(x),
         // It used to be a macro, but is an enum in recent kernels for compat
         // with eBPF ...
-        b"TASK_COMM_LEN" => Some(16),
-        // Number literal
-        expr => {
-            let expr = from_utf8(expr).ok()?;
-            str::parse(expr).ok()
-        }
+        Variable(id) if &id == "TASK_COMM_LEN" => Some(16),
+        _ => None
     }
 }
 
@@ -249,30 +269,30 @@ grammar! {
                             "array size",
                             lexeme(delimited(
                                 char('['),
-                                lexeme(opt(Self::assignment_expr(abi))),
+                                preceded(
+                                    delimited(
+                                        lexeme(opt(tag("static"))),
+                                        many0(
+                                            Self::type_qualifier()
+                                        ),
+                                        lexeme(opt(tag("static"))),
+                                    ),
+                                    lexeme(opt(Self::assignment_expr(abi))),
+                                ),
                                 char(']'),
                             )),
                         ),
                     ),
                 )
-                .map(|(declarator, array_sizes)| {
-                    let array_sizes = array_sizes.iter().map(|array_size| match array_size {
+                .map(|(declarator, array_size)| {
+                    let array_size = match array_size {
                         Some(array_size) => {
-                            if array_size.len() > 0 {
-                                interpret_c_numeric_expr(array_size).map(|x| x.into())
-                            } else {
-                                None
-                            }
+                            interpret_c_numeric_expr(array_size).map(|x| x.into())
                         }
                         _ => None,
-                    });
+                    };
 
-                    let mut modify_typ: Box<dyn Fn(CType) -> CType> = Box::new(move |typ| typ);
-                    for array_size in array_sizes.rev() {
-                        modify_typ =
-                            Box::new(move |typ| CType::Array(Box::new((modify_typ)(typ)), array_size));
-                    }
-                    let modify_typ = Rc::new(move |typ| (declarator.modify_typ)(modify_typ(typ)));
+                    let modify_typ = Rc::new(move |typ| (declarator.modify_typ)(CType::Array(Box::new(typ), array_size)));
                     CDeclarator {
                         modify_typ,
                         identifier: declarator.identifier,
@@ -636,21 +656,21 @@ grammar! {
                             Self::multiplicative_expr(abi),
                             lexeme(char('*')),
                             Self::cast_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::Mul(Box::new(lop), Box::new(rop)))
                     ),
                     context("/ expr",
                         separated_pair(
                             Self::multiplicative_expr(abi),
                             lexeme(char('/')),
                             Self::cast_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::Div(Box::new(lop), Box::new(rop)))
                     ),
                     context("% expr",
                         separated_pair(
                             Self::multiplicative_expr(abi),
                             lexeme(char('%')),
                             Self::cast_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::Mod(Box::new(lop), Box::new(rop)))
                     ),
                 ))
             )
@@ -666,14 +686,14 @@ grammar! {
                             Self::additive_expr(abi),
                             lexeme(char('+')),
                             Self::multiplicative_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::Add(Box::new(lop), Box::new(rop)))
                     ),
                     context("- expr",
                         separated_pair(
                             Self::additive_expr(abi),
                             lexeme(char('-')),
                             Self::multiplicative_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::Sub(Box::new(lop), Box::new(rop)))
                     ),
                 ))
             )
@@ -689,14 +709,14 @@ grammar! {
                             Self::shift_expr(abi),
                             lexeme(tag("<<")),
                             Self::additive_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::LShift(Box::new(lop), Box::new(rop)))
                     ),
                     context(">> expr",
                         separated_pair(
                             Self::shift_expr(abi),
                             lexeme(tag(">>")),
                             Self::additive_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::RShift(Box::new(lop), Box::new(rop)))
                     ),
                 ))
             )
@@ -712,28 +732,28 @@ grammar! {
                             Self::relational_expr(abi),
                             lexeme(tag("<=")),
                             Self::shift_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::LoEq(Box::new(lop), Box::new(rop)))
                     ),
                     context(">= expr",
                         separated_pair(
                             Self::relational_expr(abi),
                             lexeme(tag(">=")),
                             Self::shift_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::HiEq(Box::new(lop), Box::new(rop)))
                     ),
                     context("< expr",
                         separated_pair(
                             Self::relational_expr(abi),
                             lexeme(char('<')),
                             Self::shift_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::Lo(Box::new(lop), Box::new(rop)))
                     ),
                     context("> expr",
                         separated_pair(
                             Self::relational_expr(abi),
                             lexeme(char('>')),
                             Self::shift_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::Hi(Box::new(lop), Box::new(rop)))
                     ),
                 ))
             )
@@ -750,14 +770,14 @@ grammar! {
                             Self::equality_expr(abi),
                             lexeme(tag("==")),
                             Self::relational_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::Eq(Box::new(lop), Box::new(rop)))
                     ),
                     context("!=",
                         separated_pair(
                             Self::equality_expr(abi),
                             lexeme(tag("!=")),
                             Self::relational_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::NEq(Box::new(lop), Box::new(rop)))
                     ),
                 ))
             )
@@ -773,7 +793,7 @@ grammar! {
                             Self::and_expr(abi),
                             lexeme(char('&')),
                             Self::equality_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::BitAnd(Box::new(lop), Box::new(rop)))
                     ),
                 ))
             )
@@ -789,7 +809,7 @@ grammar! {
                             Self::exclusive_or_expr(abi),
                             lexeme(char('^')),
                             Self::and_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::Xor(Box::new(lop), Box::new(rop)))
                     ),
                 ))
             )
@@ -806,7 +826,7 @@ grammar! {
                             Self::inclusive_or_expr(abi),
                             lexeme(char('|')),
                             Self::exclusive_or_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::BitOr(Box::new(lop), Box::new(rop)))
                     ),
                 ))
             )
@@ -822,7 +842,7 @@ grammar! {
                             Self::logical_and_expr(abi),
                             lexeme(tag("&&")),
                             Self::inclusive_or_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::And(Box::new(lop), Box::new(rop)))
                     ),
                 ))
             )
@@ -838,7 +858,7 @@ grammar! {
                             Self::logical_or_expr(abi),
                             lexeme(tag("||")),
                             Self::logical_and_expr(abi),
-                        ).map(|(lop, rop)| todo!())
+                        ).map(|(lop, rop)| CExpr::Or(Box::new(lop), Box::new(rop)))
                     ),
                 ))
             )
@@ -864,7 +884,7 @@ grammar! {
                                     Self::conditional_expr(abi)
                                 ),
                             ),
-                        ).map(|(cond, (true_, false_))| todo!()),
+                        ).map(|(cond, (true_, false_))| CExpr::Ternary(Box::new(cond), Box::new(true_), Box::new(false_)))
                     ),
                 ))
             )
@@ -1063,12 +1083,13 @@ grammar! {
             )).map(|(_prefix, seq)| CExpr::StringLiteral(seq))
         }
 
-        // TODO: parse literals properly, including hex
-        rule literal() -> CExpr {
+        // TODO: parse integer constant literals properly, including hex
+        rule constant() -> CExpr {
             lexeme(
                 alt((
-                    Self::string_literal(),
-                    context("integer literal", txt_u64.map(CExpr::IntLiteral)),
+                    context("integer constant", txt_u64.map(CExpr::IntConstant)),
+                    // TODO: this will require desambiguation with the idenfitier in primary_expr()
+                    // context("enum constant", Self::identifier()),
                 ))
             )
         }
@@ -1078,11 +1099,12 @@ grammar! {
         {
             lexeme(
                 alt((
-                    // TODO: this is a postfix expression
-                    lexeme(Self::literal()),
-                    // TODO: this is a postfix expression
-                    parenthesized(Self::expr(abi)),
-                    Self::unary_expr(abi),
+                    Self::identifier().map(|id| CExpr::Variable(id)),
+                    Self::constant(),
+                    Self::string_literal(),
+                    parenthesized(
+                        Self::expr(abi)
+                    ),
                 ))
             )
         }
@@ -1118,10 +1140,10 @@ mod tests {
         }
 
         // Literal
-        test(b"1", CExpr::IntLiteral(1));
-        test(b"42", CExpr::IntLiteral(42));
-        test(b" 1 ", CExpr::IntLiteral(1));
-        test(b" 42 ", CExpr::IntLiteral(42));
+        test(b"1", CExpr::IntConstant(1));
+        test(b"42", CExpr::IntConstant(42));
+        test(b" 1 ", CExpr::IntConstant(1));
+        test(b" 42 ", CExpr::IntConstant(42));
         test(br#""a""#, CExpr::StringLiteral("a".into()));
         test(
             br#"" hello world ""#,
@@ -1138,27 +1160,27 @@ mod tests {
         test(br#""\n\t\\""#, CExpr::StringLiteral("\n\t\\".into()));
 
         // Address of
-        test(b" &1 ", CExpr::Addr(Box::new(CExpr::IntLiteral(1))));
+        test(b" &1 ", CExpr::Addr(Box::new(CExpr::IntConstant(1))));
 
         // Deref
         test(
             b" *&1 ",
-            CExpr::Deref(Box::new(CExpr::Addr(Box::new(CExpr::IntLiteral(1))))),
+            CExpr::Deref(Box::new(CExpr::Addr(Box::new(CExpr::IntConstant(1))))),
         );
 
         // Arithmetic
-        test(b"+1", CExpr::Plus(Box::new(CExpr::IntLiteral(1))));
-        test(b" +1", CExpr::Plus(Box::new(CExpr::IntLiteral(1))));
-        test(b"-1", CExpr::Minus(Box::new(CExpr::IntLiteral(1))));
-        test(b" - 1 ", CExpr::Minus(Box::new(CExpr::IntLiteral(1))));
-        test(b" ~ 1 ", CExpr::Tilde(Box::new(CExpr::IntLiteral(1))));
+        test(b"+1", CExpr::Plus(Box::new(CExpr::IntConstant(1))));
+        test(b" +1", CExpr::Plus(Box::new(CExpr::IntConstant(1))));
+        test(b"-1", CExpr::Minus(Box::new(CExpr::IntConstant(1))));
+        test(b" - 1 ", CExpr::Minus(Box::new(CExpr::IntConstant(1))));
+        test(b" ~ 1 ", CExpr::Tilde(Box::new(CExpr::IntConstant(1))));
 
         // Cast
         test(
             b"-(int)1 ",
             CExpr::Minus(Box::new(CExpr::Cast(
                 CType::Basic(CBasicType::I32),
-                Box::new(CExpr::IntLiteral(1)),
+                Box::new(CExpr::IntConstant(1)),
             ))),
         );
         test(
@@ -1167,7 +1189,7 @@ mod tests {
                 CType::Basic(CBasicType::I32),
                 Box::new(CExpr::Cast(
                     CType::Basic(CBasicType::U64),
-                    Box::new(CExpr::IntLiteral(1)),
+                    Box::new(CExpr::IntConstant(1)),
                 )),
             ))),
         );
@@ -1186,32 +1208,32 @@ mod tests {
         // Sizeof expr
         test(
             b"sizeof(1)",
-            CExpr::SizeofExpr(Box::new(CExpr::IntLiteral(1))),
+            CExpr::SizeofExpr(Box::new(CExpr::IntConstant(1))),
         );
 
         test(
             b"sizeof(-(int)1)",
             CExpr::SizeofExpr(Box::new(CExpr::Minus(Box::new(CExpr::Cast(
                 CType::Basic(CBasicType::I32),
-                Box::new(CExpr::IntLiteral(1)),
+                Box::new(CExpr::IntConstant(1)),
             ))))),
         );
         test(
             b"sizeof - (int ) 1 ",
             CExpr::SizeofExpr(Box::new(CExpr::Minus(Box::new(CExpr::Cast(
                 CType::Basic(CBasicType::I32),
-                Box::new(CExpr::IntLiteral(1)),
+                Box::new(CExpr::IntConstant(1)),
             ))))),
         );
 
         // Pre-increment
-        test(b"++ 42 ", CExpr::Preinc(Box::new(CExpr::IntLiteral(42))));
+        test(b"++ 42 ", CExpr::Preinc(Box::new(CExpr::IntConstant(42))));
         test(
             b"++ sizeof - (int ) 1 ",
             CExpr::Preinc(Box::new(CExpr::SizeofExpr(Box::new(CExpr::Minus(
                 Box::new(CExpr::Cast(
                     CType::Basic(CBasicType::I32),
-                    Box::new(CExpr::IntLiteral(1)),
+                    Box::new(CExpr::IntConstant(1)),
                 )),
             ))))),
         );
@@ -1219,7 +1241,7 @@ mod tests {
         // Pre-decrement
         test(
             b"-- -42 ",
-            CExpr::Predec(Box::new(CExpr::Minus(Box::new(CExpr::IntLiteral(42))))),
+            CExpr::Predec(Box::new(CExpr::Minus(Box::new(CExpr::IntConstant(42))))),
         );
     }
 
