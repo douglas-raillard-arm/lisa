@@ -1125,7 +1125,7 @@ grammar! {
 
         rule expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(alt((
-                Self::primary_expr(abi),
+                Self::assignment_expr(abi),
                 // preceded(tag("REC->"), c_identifier_parser()).map(|id| CExpr::EventField(id)),
             )))
         }
