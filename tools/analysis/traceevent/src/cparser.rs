@@ -14,7 +14,7 @@ use nom::{
     error::{ErrorKind, FromExternalError},
     multi::{many0, many0_count, many1},
     number::complete::u8,
-    sequence::{delimited, pair, preceded, tuple},
+    sequence::{delimited, pair, preceded, tuple, separated_pair},
     Parser,
 };
 
@@ -175,7 +175,7 @@ grammar! {
 
         // TODO: deal with array types etc
         // https://port70.net/~nsz/c/c11/n1570.html#6.7.6
-        rule declarator(abstract_declarator: bool) -> CDeclarator {
+        rule declarator<'abi>(abi: &'abi Abi, abstract_declarator: bool) -> CDeclarator {
             lexeme(pair(
                 context(
                     "pointer",
@@ -184,7 +184,7 @@ grammar! {
                         many0_count(Self::type_qualifier()),
                     )),
                 ),
-                Self::direct_declarator(abstract_declarator),
+                Self::direct_declarator(abi, abstract_declarator),
             ))
             .map(|(indirection_level, declarator)| {
                 let mut modify_typ: Box<dyn Fn(CType) -> CType> = Box::new(move |typ| typ);
@@ -203,7 +203,8 @@ grammar! {
             })
         }
 
-        rule direct_declarator(abstract_declarator: bool) -> CDeclarator {
+        // https://port70.net/~nsz/c/c11/n1570.html#6.7.6
+        rule direct_declarator<'abi>(abi: &'abi Abi, abstract_declarator: bool) -> CDeclarator {
             let name = if abstract_declarator {
                 "abstract direct declarator"
             } else {
@@ -233,24 +234,24 @@ grammar! {
                     }
                 };
 
-                let parenthesized = || {
+                let paren = || {
                     context(
                         "parenthesized",
-                        lexeme(parenthesized(Self::declarator(abstract_declarator))),
+                        lexeme(parenthesized(Self::declarator(abi, abstract_declarator))),
                     )
                 };
 
                 let array = context(
                     "array",
                     pair(
-                        Self::direct_declarator(abstract_declarator),
+                        Self::direct_declarator(abi, abstract_declarator),
                         context(
                             "array size",
-                            many1(lexeme(delimited(
+                            lexeme(delimited(
                                 char('['),
-                                lexeme(opt(is_not("]"))),
+                                lexeme(opt(Self::assignment_expr(abi))),
                                 char(']'),
-                            ))),
+                            )),
                         ),
                     ),
                 )
@@ -278,7 +279,7 @@ grammar! {
                     }
                 });
 
-                let parser = alt((array, parenthesized(), id()));
+                let parser = alt((array, paren(), id()));
                 lexeme(parser).parse(input)
             })
         }
@@ -497,7 +498,7 @@ grammar! {
                         Self::declaration_specifier(abi),
                         // We only have to deal with declarations containing only one
                         // declarator, i.e. we only handle "int foo" and not "int foo, bar;"
-                        Self::declarator(false),
+                        Self::declarator(abi, false),
                     )),
                     |(typ, declarator)| {
                         let typ = (declarator.modify_typ)(typ);
@@ -529,7 +530,7 @@ grammar! {
                             // This will be an abstract declarator, i.e. a declarator with
                             // no identifier (like parameters in a function prototype), as
                             // the name comes after the last "[]"
-                            Self::declarator(true),
+                            Self::declarator(abi, true),
                             opt(context(
                                 "__data_loc identifier",
                                 lexeme(Self::identifier()),
@@ -614,12 +615,292 @@ grammar! {
             context("declaration", lexeme(parser))
         }
 
+        // TODO: finish this rule
         // https://port70.net/~nsz/c/c11/n1570.html#6.5.2p1
         rule postfix_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
                     Self::primary_expr(abi),
 
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.5
+        rule multiplicative_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::cast_expr(abi),
+                    context("* expr",
+                        separated_pair(
+                            Self::multiplicative_expr(abi),
+                            lexeme(char('*')),
+                            Self::cast_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                    context("/ expr",
+                        separated_pair(
+                            Self::multiplicative_expr(abi),
+                            lexeme(char('/')),
+                            Self::cast_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                    context("% expr",
+                        separated_pair(
+                            Self::multiplicative_expr(abi),
+                            lexeme(char('%')),
+                            Self::cast_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.6
+        rule additive_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::multiplicative_expr(abi),
+                    context("+ expr",
+                        separated_pair(
+                            Self::additive_expr(abi),
+                            lexeme(char('+')),
+                            Self::multiplicative_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                    context("- expr",
+                        separated_pair(
+                            Self::additive_expr(abi),
+                            lexeme(char('-')),
+                            Self::multiplicative_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.7
+        rule shift_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::additive_expr(abi),
+                    context("<< expr",
+                        separated_pair(
+                            Self::shift_expr(abi),
+                            lexeme(tag("<<")),
+                            Self::additive_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                    context(">> expr",
+                        separated_pair(
+                            Self::shift_expr(abi),
+                            lexeme(tag(">>")),
+                            Self::additive_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.8
+        rule relational_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::shift_expr(abi),
+                    context("<= expr",
+                        separated_pair(
+                            Self::relational_expr(abi),
+                            lexeme(tag("<=")),
+                            Self::shift_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                    context(">= expr",
+                        separated_pair(
+                            Self::relational_expr(abi),
+                            lexeme(tag(">=")),
+                            Self::shift_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                    context("< expr",
+                        separated_pair(
+                            Self::relational_expr(abi),
+                            lexeme(char('<')),
+                            Self::shift_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                    context("> expr",
+                        separated_pair(
+                            Self::relational_expr(abi),
+                            lexeme(char('>')),
+                            Self::shift_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                ))
+            )
+        }
+
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.9
+        rule equality_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::relational_expr(abi),
+                    context("== expr",
+                        separated_pair(
+                            Self::equality_expr(abi),
+                            lexeme(tag("==")),
+                            Self::relational_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                    context("!=",
+                        separated_pair(
+                            Self::equality_expr(abi),
+                            lexeme(tag("!=")),
+                            Self::relational_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.10
+        rule and_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::equality_expr(abi),
+                    context("& expr",
+                        separated_pair(
+                            Self::and_expr(abi),
+                            lexeme(char('&')),
+                            Self::equality_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.11
+        rule exclusive_or_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::and_expr(abi),
+                    context("^ expr",
+                        separated_pair(
+                            Self::exclusive_or_expr(abi),
+                            lexeme(char('^')),
+                            Self::and_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.12
+        rule inclusive_or_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::exclusive_or_expr(abi),
+
+                    context("| expr",
+                        separated_pair(
+                            Self::inclusive_or_expr(abi),
+                            lexeme(char('|')),
+                            Self::exclusive_or_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.13
+        rule logical_and_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::inclusive_or_expr(abi),
+                    context("&& expr",
+                        separated_pair(
+                            Self::logical_and_expr(abi),
+                            lexeme(tag("&&")),
+                            Self::inclusive_or_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.14
+        rule logical_or_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::logical_and_expr(abi),
+                    context("|| expr",
+                        separated_pair(
+                            Self::logical_or_expr(abi),
+                            lexeme(tag("||")),
+                            Self::logical_and_expr(abi),
+                        ).map(|(lop, rop)| todo!())
+                    ),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.3p1
+        rule conditional_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::logical_or_expr(abi),
+                    context("ternary expr",
+                        separated_pair(
+                            context("ternary cond expr",
+                                Self::logical_or_expr(abi)
+                            ),
+                            lexeme(char('?')),
+                            separated_pair(
+                                context("ternary true expr",
+                                    Self::expr(abi)
+                                ),
+                                lexeme(char(':')),
+                                context("ternary false expr",
+                                    Self::conditional_expr(abi)
+                                ),
+                            ),
+                        ).map(|(cond, (true_, false_))| todo!()),
+                    ),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.16
+        rule assignment_op() -> CExpr {
+            lexeme(
+                alt((
+                    char('=').map(|_| todo!()),
+                    tag("*=").map(|_| todo!()),
+                    tag("/=").map(|_| todo!()),
+                    tag("%=").map(|_| todo!()),
+                    tag("+=").map(|_| todo!()),
+                    tag("-=").map(|_| todo!()),
+                    tag("<<=").map(|_| todo!()),
+                    tag(">>=").map(|_| todo!()),
+                    tag("&=").map(|_| todo!()),
+                    tag("^=").map(|_| todo!()),
+                    tag("|=").map(|_| todo!()),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.5.3p1
+        rule assignment_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    Self::conditional_expr(abi),
+                    context("assignment",
+                        tuple((
+                            Self::unary_expr(abi),
+                            Self::assignment_op(),
+                            Self::assignment_expr(abi),
+                        )).map(|(lexpr, op, rexpr)| todo!())
+                    ),
                 ))
             )
         }
@@ -680,7 +961,7 @@ grammar! {
             lexeme(
                 tuple((
                     Self::declaration_specifier(abi),
-                    Self::declarator(true),
+                    Self::declarator(abi, true),
                 )).map(|(typ, abstract_declarator)|
                     (abstract_declarator.modify_typ)(typ)
                 )
@@ -692,7 +973,7 @@ grammar! {
             lexeme(
                 alt((
                     Self::unary_expr(abi),
-                    context("cast",
+                    context("cast expr",
                         tuple((
                             parenthesized(
                                 Self::type_name(abi),
