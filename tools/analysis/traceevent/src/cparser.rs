@@ -12,7 +12,7 @@ use nom::{
     character::complete::{alpha1, alphanumeric1, char, u64 as txt_u64},
     combinator::{fail, map_res, opt, recognize, success},
     error::{ErrorKind, FromExternalError},
-    multi::{many0, many0_count, many1},
+    multi::{many0, many0_count, many1, separated_list0},
     number::complete::u8,
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
     Parser,
@@ -681,7 +681,8 @@ grammar! {
                             Self::postfix_expr(abi),
                             delimited(
                                 lexeme(char('(')),
-                                many0(
+                                separated_list0(
+                                    lexeme(char(',')),
                                     Self::assignment_expr(abi)
                                 ),
                                 lexeme(char(')')),
@@ -1379,6 +1380,40 @@ mod tests {
                     Box::new(CExpr::IntConstant(2)),
                 )),
                 Box::new(CExpr::IntConstant(3)),
+            ),
+        );
+
+
+        // Function call
+        test(
+            b"f(1)",
+            CExpr::FuncCall(
+                Box::new(CExpr::Variable("f".into())),
+                vec![CExpr::IntConstant(1)],
+            ),
+        );
+        test(
+            b" f(1, 2, 3)",
+            CExpr::FuncCall(
+                Box::new(CExpr::Variable("f".into())),
+                vec![
+                    CExpr::IntConstant(1),
+                    CExpr::IntConstant(2),
+                    CExpr::IntConstant(3),
+                ],
+            ),
+        );
+        test(
+            // This is actually not ambiguous with a cast, since the argument
+            // list is not valid expression on its own.
+            b" (f)(1, 2, 3)",
+            CExpr::FuncCall(
+                Box::new(CExpr::Variable("f".into())),
+                vec![
+                    CExpr::IntConstant(1),
+                    CExpr::IntConstant(2),
+                    CExpr::IntConstant(3),
+                ],
             ),
         );
 
