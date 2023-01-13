@@ -82,7 +82,7 @@ pub enum CExpr {
 
     Uninit,
 
-    ListInitializer(Vec<CExpr>),
+    InitializerList(Vec<CExpr>),
     DesignatedInitializer(Box<CExpr>, Box<CExpr>),
     CompoundLiteral(CType, Vec<CExpr>),
 
@@ -661,7 +661,7 @@ grammar! {
                 alt((
                     delimited(
                         lexeme(char('{')),
-                        Self::initializer_list(abi).map(CExpr::ListInitializer),
+                        Self::initializer_list(abi).map(CExpr::InitializerList),
                         preceded(
                             lexeme(opt(char(','))),
                             lexeme(char('}')),
@@ -1529,7 +1529,7 @@ mod tests {
                 CType::Typedef("type".into()),
                 vec![DesignatedInitializer(
                     Box::new(MemberAccess(Box::new(Uninit), "x".into())),
-                    Box::new(ListInitializer(vec![IntConstant(0), IntConstant(1)])),
+                    Box::new(InitializerList(vec![IntConstant(0), IntConstant(1)])),
                 )],
             ),
         );
@@ -1553,7 +1553,7 @@ mod tests {
                 vec![
                     DesignatedInitializer(
                         Box::new(MemberAccess(Box::new(Uninit), "x".into())),
-                        Box::new(ListInitializer(vec![
+                        Box::new(InitializerList(vec![
                             CompoundLiteral(CType::Typedef("type2".into()), vec![IntConstant(0)]),
                             CompoundLiteral(
                                 CType::Typedef("type3".into()),
@@ -1563,7 +1563,7 @@ mod tests {
                     ),
                     DesignatedInitializer(
                         Box::new(MemberAccess(Box::new(Uninit), "y".into())),
-                        Box::new(ListInitializer(vec![IntConstant(3)])),
+                        Box::new(InitializerList(vec![IntConstant(3)])),
                     ),
                     DesignatedInitializer(
                         Box::new(MemberAccess(Box::new(Uninit), "z".into())),
