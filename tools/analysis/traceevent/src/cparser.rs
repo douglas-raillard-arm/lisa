@@ -82,7 +82,6 @@ pub enum CExpr {
 
     Uninit,
 
-    ScalarInitializer(Box<CExpr>),
     ListInitializer(Vec<CExpr>),
     DesignatedInitializer(Box<CExpr>, Box<CExpr>),
     CompoundLiteral(CType, Vec<CExpr>),
@@ -668,7 +667,7 @@ grammar! {
                             lexeme(char('}')),
                         )
                     ),
-                    Self::assignment_expr(abi).map(|expr| CExpr::ScalarInitializer(Box::new(expr))),
+                    Self::assignment_expr(abi),
                 ))
             )
         }
@@ -1495,19 +1494,13 @@ mod tests {
         // Compound literal
         test(
             b"(type){0}",
-            CompoundLiteral(
-                CType::Typedef("type".into()),
-                vec![ScalarInitializer(Box::new(IntConstant(0)))],
-            ),
+            CompoundLiteral(CType::Typedef("type".into()), vec![IntConstant(0)]),
         );
         test(
             b"(type){0, 1}",
             CompoundLiteral(
                 CType::Typedef("type".into()),
-                vec![
-                    ScalarInitializer(Box::new(IntConstant(0))),
-                    ScalarInitializer(Box::new(IntConstant(1))),
-                ],
+                vec![IntConstant(0), IntConstant(1)],
             ),
         );
         test(
@@ -1516,7 +1509,7 @@ mod tests {
                 CType::Typedef("type".into()),
                 vec![DesignatedInitializer(
                     Box::new(MemberAccess(Box::new(Uninit), "x".into())),
-                    Box::new(ScalarInitializer(Box::new(IntConstant(0)))),
+                    Box::new(IntConstant(0)),
                 )],
             ),
         );
@@ -1526,7 +1519,7 @@ mod tests {
                 CType::Typedef("type".into()),
                 vec![DesignatedInitializer(
                     Box::new(MemberAccess(Box::new(Uninit), "x".into())),
-                    Box::new(ScalarInitializer(Box::new(IntConstant(0)))),
+                    Box::new(IntConstant(0)),
                 )],
             ),
         );
@@ -1536,10 +1529,7 @@ mod tests {
                 CType::Typedef("type".into()),
                 vec![DesignatedInitializer(
                     Box::new(MemberAccess(Box::new(Uninit), "x".into())),
-                    Box::new(ListInitializer(vec![
-                        ScalarInitializer(Box::new(IntConstant(0))),
-                        ScalarInitializer(Box::new(IntConstant(1))),
-                    ])),
+                    Box::new(ListInitializer(vec![IntConstant(0), IntConstant(1)])),
                 )],
             ),
         );
@@ -1549,34 +1539,33 @@ mod tests {
                 CType::Typedef("type".into()),
                 vec![DesignatedInitializer(
                     Box::new(MemberAccess(Box::new(Uninit), "x".into())),
-                    Box::new(ScalarInitializer(Box::new(CompoundLiteral(
+                    Box::new(CompoundLiteral(
                         CType::Typedef("type2".into()),
-                        vec![ScalarInitializer(Box::new(IntConstant(0)))],
-                    )))),
+                        vec![IntConstant(0)],
+                    )),
                 )],
             ),
         );
         test(
-            b"(type){.x = {(type2){0}, (type3){1}}}",
+            b"(type){.x = {(type2){0}, (type3){1, 2}}, .y={3}}",
             CompoundLiteral(
                 CType::Typedef("type".into()),
-                vec![DesignatedInitializer(
-                    Box::new(MemberAccess(Box::new(Uninit), "x".into())),
-                    Box::new(ListInitializer(vec![
-                        ScalarInitializer(Box::new(
-                            CompoundLiteral(
-                                CType::Typedef("type2".into()),
-                                vec![ScalarInitializer(Box::new(IntConstant(0)))],
-                            )
-                        )),
-                        ScalarInitializer(Box::new(
+                vec![
+                    DesignatedInitializer(
+                        Box::new(MemberAccess(Box::new(Uninit), "x".into())),
+                        Box::new(ListInitializer(vec![
+                            CompoundLiteral(CType::Typedef("type2".into()), vec![IntConstant(0)]),
                             CompoundLiteral(
                                 CType::Typedef("type3".into()),
-                                vec![ScalarInitializer(Box::new(IntConstant(1)))],
+                                vec![IntConstant(1), IntConstant(2)],
                             ),
-                        )),
-                    ])),
-                )],
+                        ])),
+                    ),
+                    DesignatedInitializer(
+                        Box::new(MemberAccess(Box::new(Uninit), "y".into())),
+                        Box::new(ListInitializer(vec![IntConstant(3)])),
+                    ),
+                ],
             ),
         );
 
