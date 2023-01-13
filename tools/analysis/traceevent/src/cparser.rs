@@ -1383,7 +1383,6 @@ mod tests {
             ),
         );
 
-
         // Function call
         test(
             b"f(1)",
@@ -1414,6 +1413,41 @@ mod tests {
                     CExpr::IntConstant(2),
                     CExpr::IntConstant(3),
                 ],
+            ),
+        );
+
+        // Subscript
+        test(
+            b"arr[1]",
+            CExpr::Subscript(
+                Box::new(CExpr::Variable("arr".into())),
+                Box::new(CExpr::IntConstant(1)),
+            ),
+        );
+        test(
+            b"arr[1][2]",
+            CExpr::Subscript(
+                Box::new(CExpr::Subscript(
+                    Box::new(CExpr::Variable("arr".into())),
+                    Box::new(CExpr::IntConstant(1)),
+                )),
+                Box::new(CExpr::IntConstant(2)),
+            ),
+        );
+
+        // Member access
+        test(
+            b"x.y",
+            CExpr::MemberAccess(Box::new(CExpr::Variable("x".into())), "y".into()),
+        );
+        test(
+            b"x.y.z",
+            CExpr::MemberAccess(
+                Box::new(CExpr::MemberAccess(
+                    Box::new(CExpr::Variable("x".into())),
+                    "y".into(),
+                )),
+                "z".into(),
             ),
         );
 
