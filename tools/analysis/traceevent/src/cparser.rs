@@ -1544,6 +1544,35 @@ mod tests {
             ),
         );
 
+        // Compound literal
+        test(
+            b"(type){0}",
+            CExpr::CompoundLiteral(
+                CType::Typedef("type".into()),
+                vec![CExpr::ScalarInitializer(Box::new(CExpr::IntConstant(0)))],
+            ),
+        );
+        test(
+            b"(type){0, 1}",
+            CExpr::CompoundLiteral(
+                CType::Typedef("type".into()),
+                vec![
+                    CExpr::ScalarInitializer(Box::new(CExpr::IntConstant(0))),
+                    CExpr::ScalarInitializer(Box::new(CExpr::IntConstant(1))),
+                ],
+            ),
+        );
+        test(
+            b"(type){.x = 0}",
+            CExpr::CompoundLiteral(
+                CType::Typedef("type".into()),
+                vec![CExpr::DesignatedInitializer(
+                    Box::new(CExpr::MemberAccess(Box::new(CExpr::Uninit), "x".into())),
+                    Box::new(CExpr::ScalarInitializer(Box::new(CExpr::IntConstant(0)))),
+                )],
+            ),
+        );
+
         // Ambiguous cases
 
         // Amibiguity of is lifted by 6.4p4 stating that the tokenizer is
