@@ -1521,6 +1521,16 @@ mod tests {
             ),
         );
         test(
+            b"(type){.x = 0, }",
+            CompoundLiteral(
+                CType::Typedef("type".into()),
+                vec![DesignatedInitializer(
+                    Box::new(MemberAccess(Box::new(Uninit), "x".into())),
+                    Box::new(ScalarInitializer(Box::new(IntConstant(0)))),
+                )],
+            ),
+        );
+        test(
             b"(type){.x = {0, 1}}",
             CompoundLiteral(
                 CType::Typedef("type".into()),
@@ -1547,20 +1557,24 @@ mod tests {
             ),
         );
         test(
-            b"(type){.x = {(type2){0}, (type3){1}}",
+            b"(type){.x = {(type2){0}, (type3){1}}}",
             CompoundLiteral(
                 CType::Typedef("type".into()),
                 vec![DesignatedInitializer(
                     Box::new(MemberAccess(Box::new(Uninit), "x".into())),
                     Box::new(ListInitializer(vec![
-                        CompoundLiteral(
-                            CType::Typedef("type2".into()),
-                            vec![ScalarInitializer(Box::new(IntConstant(0)))],
-                        ),
-                        CompoundLiteral(
-                            CType::Typedef("type3".into()),
-                            vec![ScalarInitializer(Box::new(IntConstant(1)))],
-                        ),
+                        ScalarInitializer(Box::new(
+                            CompoundLiteral(
+                                CType::Typedef("type2".into()),
+                                vec![ScalarInitializer(Box::new(IntConstant(0)))],
+                            )
+                        )),
+                        ScalarInitializer(Box::new(
+                            CompoundLiteral(
+                                CType::Typedef("type3".into()),
+                                vec![ScalarInitializer(Box::new(IntConstant(1)))],
+                            ),
+                        )),
                     ])),
                 )],
             ),
