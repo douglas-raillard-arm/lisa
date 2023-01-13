@@ -1304,78 +1304,65 @@ mod tests {
             test_parser(expected, src, parser);
         }
 
+        use CExpr::*;
+
         // Literal
-        test(b"1", CExpr::IntConstant(1));
-        test(b"42", CExpr::IntConstant(42));
-        test(b" 1 ", CExpr::IntConstant(1));
-        test(b" 42 ", CExpr::IntConstant(42));
-        test(br#""a""#, CExpr::StringLiteral("a".into()));
-        test(
-            br#"" hello world ""#,
-            CExpr::StringLiteral(" hello world ".into()),
-        );
+        test(b"1", IntConstant(1));
+        test(b"42", IntConstant(42));
+        test(b" 1 ", IntConstant(1));
+        test(b" 42 ", IntConstant(42));
+        test(br#""a""#, StringLiteral("a".into()));
+        test(br#"" hello world ""#, StringLiteral(" hello world ".into()));
         test(
             br#""1 hello world ""#,
-            CExpr::StringLiteral("1 hello world ".into()),
+            StringLiteral("1 hello world ".into()),
         );
         test(
             br#""hello \n world""#,
-            CExpr::StringLiteral("hello \n world".into()),
+            StringLiteral("hello \n world".into()),
         );
-        test(br#""\n\t\\""#, CExpr::StringLiteral("\n\t\\".into()));
+        test(br#""\n\t\\""#, StringLiteral("\n\t\\".into()));
 
         // Address of
-        test(b" &1 ", CExpr::Addr(Box::new(CExpr::IntConstant(1))));
+        test(b" &1 ", Addr(Box::new(IntConstant(1))));
 
         // Deref
-        test(
-            b" *&1 ",
-            CExpr::Deref(Box::new(CExpr::Addr(Box::new(CExpr::IntConstant(1))))),
-        );
+        test(b" *&1 ", Deref(Box::new(Addr(Box::new(IntConstant(1))))));
 
         // Unary
-        test(b"+1", CExpr::Plus(Box::new(CExpr::IntConstant(1))));
-        test(b" +1", CExpr::Plus(Box::new(CExpr::IntConstant(1))));
-        test(b"-1", CExpr::Minus(Box::new(CExpr::IntConstant(1))));
-        test(b" - 1 ", CExpr::Minus(Box::new(CExpr::IntConstant(1))));
-        test(b" ~ 1 ", CExpr::Tilde(Box::new(CExpr::IntConstant(1))));
+        test(b"+1", Plus(Box::new(IntConstant(1))));
+        test(b" +1", Plus(Box::new(IntConstant(1))));
+        test(b"-1", Minus(Box::new(IntConstant(1))));
+        test(b" - 1 ", Minus(Box::new(IntConstant(1))));
+        test(b" ~ 1 ", Tilde(Box::new(IntConstant(1))));
 
         // Cast
         test(
             b"(int)1 ",
-            CExpr::Cast(
-                CType::Basic(CBasicType::I32),
-                Box::new(CExpr::IntConstant(1)),
-            ),
+            Cast(CType::Basic(CBasicType::I32), Box::new(IntConstant(1))),
         );
         test(
             b"(type)1 ",
-            CExpr::Cast(
-                CType::Typedef("type".into()),
-                Box::new(CExpr::IntConstant(1)),
-            ),
+            Cast(CType::Typedef("type".into()), Box::new(IntConstant(1))),
         );
         test(
             b"(type)(1) ",
-            CExpr::Cast(
-                CType::Typedef("type".into()),
-                Box::new(CExpr::IntConstant(1)),
-            ),
+            Cast(CType::Typedef("type".into()), Box::new(IntConstant(1))),
         );
         test(
             b"-(int)1 ",
-            CExpr::Minus(Box::new(CExpr::Cast(
+            Minus(Box::new(Cast(
                 CType::Basic(CBasicType::I32),
-                Box::new(CExpr::IntConstant(1)),
+                Box::new(IntConstant(1)),
             ))),
         );
         test(
             b"-(int)(unsigned long)1 ",
-            CExpr::Minus(Box::new(CExpr::Cast(
+            Minus(Box::new(Cast(
                 CType::Basic(CBasicType::I32),
-                Box::new(CExpr::Cast(
+                Box::new(Cast(
                     CType::Basic(CBasicType::U64),
-                    Box::new(CExpr::IntConstant(1)),
+                    Box::new(IntConstant(1)),
                 )),
             ))),
         );
@@ -1383,163 +1370,123 @@ mod tests {
         // Sizeof type
         test(
             b"sizeof(unsigned long)",
-            CExpr::SizeofType(CType::Basic(CBasicType::U64)),
+            SizeofType(CType::Basic(CBasicType::U64)),
         );
 
-        test(
-            b"sizeof (s32)",
-            CExpr::SizeofType(CType::Basic(CBasicType::I32)),
-        );
+        test(b"sizeof (s32)", SizeofType(CType::Basic(CBasicType::I32)));
 
         // Sizeof expr
-        test(
-            b"sizeof(1)",
-            CExpr::SizeofExpr(Box::new(CExpr::IntConstant(1))),
-        );
+        test(b"sizeof(1)", SizeofExpr(Box::new(IntConstant(1))));
 
         test(
             b"sizeof(-(int)1)",
-            CExpr::SizeofExpr(Box::new(CExpr::Minus(Box::new(CExpr::Cast(
+            SizeofExpr(Box::new(Minus(Box::new(Cast(
                 CType::Basic(CBasicType::I32),
-                Box::new(CExpr::IntConstant(1)),
+                Box::new(IntConstant(1)),
             ))))),
         );
         test(
             b"sizeof - (int ) 1 ",
-            CExpr::SizeofExpr(Box::new(CExpr::Minus(Box::new(CExpr::Cast(
+            SizeofExpr(Box::new(Minus(Box::new(Cast(
                 CType::Basic(CBasicType::I32),
-                Box::new(CExpr::IntConstant(1)),
+                Box::new(IntConstant(1)),
             ))))),
         );
 
         // Pre-increment
-        test(b"++ 42 ", CExpr::PreInc(Box::new(CExpr::IntConstant(42))));
+        test(b"++ 42 ", PreInc(Box::new(IntConstant(42))));
         test(
             b"++ sizeof - (int ) 1 ",
-            CExpr::PreInc(Box::new(CExpr::SizeofExpr(Box::new(CExpr::Minus(
-                Box::new(CExpr::Cast(
-                    CType::Basic(CBasicType::I32),
-                    Box::new(CExpr::IntConstant(1)),
-                )),
-            ))))),
+            PreInc(Box::new(SizeofExpr(Box::new(Minus(Box::new(Cast(
+                CType::Basic(CBasicType::I32),
+                Box::new(IntConstant(1)),
+            ))))))),
         );
 
         // Pre-decrement
         test(
             b"-- -42 ",
-            CExpr::PreDec(Box::new(CExpr::Minus(Box::new(CExpr::IntConstant(42))))),
+            PreDec(Box::new(Minus(Box::new(IntConstant(42))))),
         );
 
         // Addition
         test(
             b"1+2",
-            CExpr::Add(
-                Box::new(CExpr::IntConstant(1)),
-                Box::new(CExpr::IntConstant(2)),
-            ),
+            Add(Box::new(IntConstant(1)), Box::new(IntConstant(2))),
         );
         test(
             b" 1 + 2 ",
-            CExpr::Add(
-                Box::new(CExpr::IntConstant(1)),
-                Box::new(CExpr::IntConstant(2)),
-            ),
+            Add(Box::new(IntConstant(1)), Box::new(IntConstant(2))),
         );
         test(
             b" (1) + (2) ",
-            CExpr::Add(
-                Box::new(CExpr::IntConstant(1)),
-                Box::new(CExpr::IntConstant(2)),
-            ),
+            Add(Box::new(IntConstant(1)), Box::new(IntConstant(2))),
         );
 
         // Operator precedence
         test(
             b" 1 + 2 * 3",
-            CExpr::Add(
-                Box::new(CExpr::IntConstant(1)),
-                Box::new(CExpr::Mul(
-                    Box::new(CExpr::IntConstant(2)),
-                    Box::new(CExpr::IntConstant(3)),
-                )),
+            Add(
+                Box::new(IntConstant(1)),
+                Box::new(Mul(Box::new(IntConstant(2)), Box::new(IntConstant(3)))),
             ),
         );
 
         test(
             b" 1 * 2 + 3",
-            CExpr::Add(
-                Box::new(CExpr::Mul(
-                    Box::new(CExpr::IntConstant(1)),
-                    Box::new(CExpr::IntConstant(2)),
-                )),
-                Box::new(CExpr::IntConstant(3)),
+            Add(
+                Box::new(Mul(Box::new(IntConstant(1)), Box::new(IntConstant(2)))),
+                Box::new(IntConstant(3)),
             ),
         );
 
         // Function call
         test(
             b"f(1)",
-            CExpr::FuncCall(
-                Box::new(CExpr::Variable("f".into())),
-                vec![CExpr::IntConstant(1)],
-            ),
+            FuncCall(Box::new(Variable("f".into())), vec![IntConstant(1)]),
         );
         test(
             b" f(1, 2, 3)",
-            CExpr::FuncCall(
-                Box::new(CExpr::Variable("f".into())),
-                vec![
-                    CExpr::IntConstant(1),
-                    CExpr::IntConstant(2),
-                    CExpr::IntConstant(3),
-                ],
+            FuncCall(
+                Box::new(Variable("f".into())),
+                vec![IntConstant(1), IntConstant(2), IntConstant(3)],
             ),
         );
         test(
             // This is actually not ambiguous with a cast, since the argument
             // list is not valid expression on its own.
             b" (f)(1, 2, 3)",
-            CExpr::FuncCall(
-                Box::new(CExpr::Variable("f".into())),
-                vec![
-                    CExpr::IntConstant(1),
-                    CExpr::IntConstant(2),
-                    CExpr::IntConstant(3),
-                ],
+            FuncCall(
+                Box::new(Variable("f".into())),
+                vec![IntConstant(1), IntConstant(2), IntConstant(3)],
             ),
         );
 
         // Subscript
         test(
             b"arr[1]",
-            CExpr::Subscript(
-                Box::new(CExpr::Variable("arr".into())),
-                Box::new(CExpr::IntConstant(1)),
-            ),
+            Subscript(Box::new(Variable("arr".into())), Box::new(IntConstant(1))),
         );
         test(
             b"arr[1][2]",
-            CExpr::Subscript(
-                Box::new(CExpr::Subscript(
-                    Box::new(CExpr::Variable("arr".into())),
-                    Box::new(CExpr::IntConstant(1)),
+            Subscript(
+                Box::new(Subscript(
+                    Box::new(Variable("arr".into())),
+                    Box::new(IntConstant(1)),
                 )),
-                Box::new(CExpr::IntConstant(2)),
+                Box::new(IntConstant(2)),
             ),
         );
 
         // Member access
         test(
             b"x.y",
-            CExpr::MemberAccess(Box::new(CExpr::Variable("x".into())), "y".into()),
+            MemberAccess(Box::new(Variable("x".into())), "y".into()),
         );
         test(
             b"x.y.z",
-            CExpr::MemberAccess(
-                Box::new(CExpr::MemberAccess(
-                    Box::new(CExpr::Variable("x".into())),
-                    "y".into(),
-                )),
+            MemberAccess(
+                Box::new(MemberAccess(Box::new(Variable("x".into())), "y".into())),
                 "z".into(),
             ),
         );
@@ -1547,28 +1494,28 @@ mod tests {
         // Compound literal
         test(
             b"(type){0}",
-            CExpr::CompoundLiteral(
+            CompoundLiteral(
                 CType::Typedef("type".into()),
-                vec![CExpr::ScalarInitializer(Box::new(CExpr::IntConstant(0)))],
+                vec![ScalarInitializer(Box::new(IntConstant(0)))],
             ),
         );
         test(
             b"(type){0, 1}",
-            CExpr::CompoundLiteral(
+            CompoundLiteral(
                 CType::Typedef("type".into()),
                 vec![
-                    CExpr::ScalarInitializer(Box::new(CExpr::IntConstant(0))),
-                    CExpr::ScalarInitializer(Box::new(CExpr::IntConstant(1))),
+                    ScalarInitializer(Box::new(IntConstant(0))),
+                    ScalarInitializer(Box::new(IntConstant(1))),
                 ],
             ),
         );
         test(
             b"(type){.x = 0}",
-            CExpr::CompoundLiteral(
+            CompoundLiteral(
                 CType::Typedef("type".into()),
-                vec![CExpr::DesignatedInitializer(
-                    Box::new(CExpr::MemberAccess(Box::new(CExpr::Uninit), "x".into())),
-                    Box::new(CExpr::ScalarInitializer(Box::new(CExpr::IntConstant(0)))),
+                vec![DesignatedInitializer(
+                    Box::new(MemberAccess(Box::new(Uninit), "x".into())),
+                    Box::new(ScalarInitializer(Box::new(IntConstant(0)))),
                 )],
             ),
         );
@@ -1580,35 +1527,31 @@ mod tests {
         // https://port70.net/~nsz/c/c11/n1570.html#6.4p4
         test(
             b" 1 +++ 2 ",
-            CExpr::Add(
-                Box::new(CExpr::PostInc(Box::new(CExpr::IntConstant(1)))),
-                Box::new(CExpr::IntConstant(2)),
+            Add(
+                Box::new(PostInc(Box::new(IntConstant(1)))),
+                Box::new(IntConstant(2)),
             ),
         );
         test(
             b" 1 +++++ 2 ",
-            CExpr::Add(
-                Box::new(CExpr::PostInc(Box::new(CExpr::PostInc(Box::new(
-                    CExpr::IntConstant(1),
-                ))))),
-                Box::new(CExpr::IntConstant(2)),
+            Add(
+                Box::new(PostInc(Box::new(PostInc(Box::new(IntConstant(1)))))),
+                Box::new(IntConstant(2)),
             ),
         );
 
         test(
             b" 1 --- 2 ",
-            CExpr::Sub(
-                Box::new(CExpr::PostDec(Box::new(CExpr::IntConstant(1)))),
-                Box::new(CExpr::IntConstant(2)),
+            Sub(
+                Box::new(PostDec(Box::new(IntConstant(1)))),
+                Box::new(IntConstant(2)),
             ),
         );
         test(
             b" 1 ----- 2 ",
-            CExpr::Sub(
-                Box::new(CExpr::PostDec(Box::new(CExpr::PostDec(Box::new(
-                    CExpr::IntConstant(1),
-                ))))),
-                Box::new(CExpr::IntConstant(2)),
+            Sub(
+                Box::new(PostDec(Box::new(PostDec(Box::new(IntConstant(1)))))),
+                Box::new(IntConstant(2)),
             ),
         );
 
@@ -1618,9 +1561,9 @@ mod tests {
         // contain one variable (REC).
         test(
             b" (type) + (2) ",
-            CExpr::Cast(
+            Cast(
                 CType::Typedef("type".into()),
-                Box::new(CExpr::Plus(Box::new(CExpr::IntConstant(2)))),
+                Box::new(Plus(Box::new(IntConstant(2)))),
             ),
         );
 
@@ -1629,10 +1572,7 @@ mod tests {
         // paren.
         test(
             b" (type)(2) ",
-            CExpr::Cast(
-                CType::Typedef("type".into()),
-                Box::new(CExpr::IntConstant(2)),
-            ),
+            Cast(CType::Typedef("type".into()), Box::new(IntConstant(2))),
         );
     }
 
