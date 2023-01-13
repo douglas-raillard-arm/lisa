@@ -212,31 +212,30 @@ grammar! {
 
         // https://port70.net/~nsz/c/c11/n1570.html#6.7.6
         rule declarator<'abi>(abi: &'abi Abi, abstract_declarator: bool) -> CDeclarator {
-            lexeme(pair(
-                context(
-                    "pointer",
-                    many0_count(pair(
-                        lexeme(char('*')),
-                        many0_count(Self::type_qualifier()),
-                    )),
-                ),
-                Self::direct_declarator(abi, abstract_declarator),
-            ))
-            .map(|(indirection_level, declarator)| {
-                let mut modify_typ: Box<dyn Fn(CType) -> CType> = Box::new(move |typ| typ);
-                for _ in 0..indirection_level {
-                    modify_typ = Box::new(move |typ| CType::Pointer(Box::new((modify_typ)(typ))))
-                }
+            lexeme(
+                alt((
+                    context(
+                        "pointer",
+                        preceded(
+                            pair(
+                                lexeme(char('*')),
+                                many0_count(Self::type_qualifier()),
+                            ),
+                            Self::direct_declarator(abi, abstract_declarator),
+                        ).map(|declarator| {
+                            // Apply the declarator's modification last, since they have the least
+                            // precedence (arrays)
+                            let modify_typ = Rc::new(move |typ| (declarator.modify_typ)(CType::Pointer(Box::new(typ))));
 
-                // Apply the declarator's modification last, since they have the least
-                // precedence (arrays)
-                let modify_typ = Rc::new(move |typ| (declarator.modify_typ)(modify_typ(typ)));
-
-                CDeclarator {
-                    modify_typ,
-                    ..declarator
-                }
-            })
+                            CDeclarator {
+                                modify_typ,
+                                ..declarator
+                            }
+                        })
+                    ),
+                    Self::direct_declarator(abi, abstract_declarator),
+                ))
+            )
         }
 
         // https://port70.net/~nsz/c/c11/n1570.html#6.7.6
