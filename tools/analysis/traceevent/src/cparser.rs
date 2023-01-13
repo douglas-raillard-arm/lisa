@@ -12,7 +12,7 @@ use nom::{
     character::complete::{alpha1, alphanumeric1, char, u64 as txt_u64},
     combinator::{fail, map_res, opt, recognize, success},
     error::{ErrorKind, FromExternalError},
-    multi::{many0, many0_count, many1, separated_list0},
+    multi::{fold_many1, many0, many0_count, many1, separated_list0, separated_list1},
     number::complete::u8,
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
     Parser,
@@ -79,6 +79,13 @@ pub struct CDeclaration {
 pub enum CExpr {
     EventField(Identifier),
     Variable(Identifier),
+
+    Uninit,
+
+    ScalarInitializer(Box<CExpr>),
+    ListInitializer(Vec<CExpr>),
+    DesignatedInitializer(Box<CExpr>, Box<CExpr>),
+    CompoundLiteral(CType, Vec<CExpr>),
 
     IntConstant(u64),
     StringLiteral(String),
@@ -649,6 +656,70 @@ grammar! {
             context("declaration", lexeme(parser))
         }
 
+        // https://port70.net/~nsz/c/c11/n1570.html#6.7.9p1
+        rule initializer<'abi>(abi: &'abi Abi) -> CExpr {
+            lexeme(
+                alt((
+                    delimited(
+                        lexeme(char('{')),
+                        Self::initializer_list(abi).map(CExpr::ListInitializer),
+                        preceded(
+                            lexeme(opt(char(','))),
+                            lexeme(char('}')),
+                        )
+                    ),
+                    Self::assignment_expr(abi).map(|expr| CExpr::ScalarInitializer(Box::new(expr))),
+                ))
+            )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.7.9p1
+        rule initializer_list<'abi>(abi: &'abi Abi) -> Vec<CExpr> {
+
+            enum DesignatorKind {
+                Subscript(CExpr),
+                Member(Identifier),
+            }
+            let designator = || {
+                lexeme(
+                    alt((
+                        delimited(
+                            lexeme(char('[')),
+                            Self::constant_expr(abi),
+                            lexeme(char(']')),
+                        ).map(DesignatorKind::Subscript),
+                        preceded(
+                            lexeme(char('.')),
+                            Self::identifier(),
+                        ).map(DesignatorKind::Member),
+                    )).map(|kind| {
+                        move |parent| match kind {
+                            DesignatorKind::Subscript(expr) => CExpr::Subscript(Box::new(parent), Box::new(expr)),
+                            DesignatorKind::Member(id) => CExpr::MemberAccess(Box::new(parent), id),
+                        }
+                    })
+                )
+            };
+            lexeme(
+                separated_list1(
+                    lexeme(char(',')),
+                    alt((
+                        separated_pair(
+                            fold_many1(
+                                designator(),
+                                || CExpr::Uninit,
+                                |parent, combine| combine(parent)
+                            ),
+                            lexeme(char('=')),
+                            Self::initializer(abi),
+                        ).map(|(designation, expr)| CExpr::DesignatedInitializer(Box::new(designation), Box::new(expr))),
+                        Self::initializer(abi)
+                    )),
+                )
+            )
+        }
+
+
         // TODO: finish this rule
         // https://port70.net/~nsz/c/c11/n1570.html#6.5.2p1
         rule postfix_expr<'abi>(abi: &'abi Abi) -> CExpr {
@@ -697,13 +768,30 @@ grammar! {
                         ).map(|(value, member)| CExpr::MemberAccess(Box::new(value), member))
                     ),
                     context("deref member access expr",
-                            separated_pair(
-                                Self::postfix_expr(abi),
-                                lexeme(tag("->")),
-                                Self::identifier(),
-                            ).map(|(value, member)| CExpr::MemberAccess(Box::new(CExpr::Deref(Box::new(value))), member))
+                        separated_pair(
+                            Self::postfix_expr(abi),
+                            lexeme(tag("->")),
+                            Self::identifier(),
+                        ).map(|(value, member)| CExpr::MemberAccess(Box::new(CExpr::Deref(Box::new(value))), member))
                     ),
-                    // TODO: add compound literal
+
+                    context("compound literal",
+                        tuple((
+                            delimited(
+                                lexeme(char('(')),
+                                Self::type_name(abi),
+                                lexeme(char(')')),
+                            ),
+                            delimited(
+                                lexeme(char('{')),
+                                Self::initializer_list(abi),
+                                preceded(
+                                    lexeme(opt(char(','))),
+                                    lexeme(char('}')),
+                                )
+                            ),
+                        )).map(|(typ, init)| CExpr::CompoundLiteral(typ, init))
+                    ),
                     Self::primary_expr(abi),
                 ))
             )
@@ -950,6 +1038,11 @@ grammar! {
                     Self::logical_or_expr(abi),
                 ))
             )
+        }
+
+        // https://port70.net/~nsz/c/c11/n1570.html#6.7.6
+        rule constant_expr<'abi>(abi: &'abi Abi) -> CExpr {
+            Self::conditional_expr(abi)
         }
 
         // https://port70.net/~nsz/c/c11/n1570.html#6.5.3p1
@@ -1502,8 +1595,9 @@ mod tests {
             ),
         );
 
-        // TODO: decide on how we want to parse that
-        // Another ambiguous case: could be a function call or a cast.
+        // Another ambiguous case: could be a function call or a cast. We decide
+        // to treat that as a cast, since you can make a call without the extra
+        // paren.
         test(
             b" (type)(2) ",
             CExpr::Cast(
