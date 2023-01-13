@@ -1547,7 +1547,7 @@ mod tests {
             ),
         );
         test(
-            b"(type){.x = {(type2){0}, (type3){1, 2}}, .y={3}}",
+            b"(type){.x = {(type2){0}, (type3){1, 2}}, .y={3}, .z=4}",
             CompoundLiteral(
                 CType::Typedef("type".into()),
                 vec![
@@ -1565,6 +1565,52 @@ mod tests {
                         Box::new(MemberAccess(Box::new(Uninit), "y".into())),
                         Box::new(ListInitializer(vec![IntConstant(3)])),
                     ),
+                    DesignatedInitializer(
+                        Box::new(MemberAccess(Box::new(Uninit), "z".into())),
+                        Box::new(IntConstant(4)),
+                    ),
+                ],
+            ),
+        );
+        test(
+            b"(type){.x[0] = 1}",
+            CompoundLiteral(
+                CType::Typedef("type".into()),
+                vec![DesignatedInitializer(
+                    Box::new(Subscript(
+                        Box::new(MemberAccess(Box::new(Uninit), "x".into())),
+                        Box::new(IntConstant(0)),
+                    )),
+                    Box::new(IntConstant(1)),
+                )],
+            ),
+        );
+        test(
+            b"(type){.x[0].y = 1}",
+            CompoundLiteral(
+                CType::Typedef("type".into()),
+                vec![DesignatedInitializer(
+                    Box::new(MemberAccess(
+                        Box::new(Subscript(
+                            Box::new(MemberAccess(Box::new(Uninit), "x".into())),
+                            Box::new(IntConstant(0)),
+                        )),
+                        "y".into(),
+                    )),
+                    Box::new(IntConstant(1)),
+                )],
+            ),
+        );
+        test(
+            b"(type){[0]= 1, 2}",
+            CompoundLiteral(
+                CType::Typedef("type".into()),
+                vec![
+                    DesignatedInitializer(
+                        Box::new(Subscript(Box::new(Uninit), Box::new(IntConstant(0)))),
+                        Box::new(IntConstant(1)),
+                    ),
+                    IntConstant(2),
                 ],
             ),
         );
