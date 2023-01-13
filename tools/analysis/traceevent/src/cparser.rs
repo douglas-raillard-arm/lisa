@@ -24,6 +24,7 @@ use crate::{
     parser::{lexeme, no_backtrack, parenthesized, success_with},
 };
 
+// TODO: merge CBasicType and CType
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CBasicType {
     Void,
@@ -96,22 +97,29 @@ pub enum CExpr {
     PostInc(Box<CExpr>),
     PostDec(Box<CExpr>),
 
+    MemberAccess(Box<CExpr>, Identifier),
+    FuncCall(Box<CExpr>, Vec<CExpr>),
+    Subscript(Box<CExpr>, Box<CExpr>),
     Assign(Box<CExpr>, Box<CExpr>),
+
     Mul(Box<CExpr>, Box<CExpr>),
     Div(Box<CExpr>, Box<CExpr>),
     Mod(Box<CExpr>, Box<CExpr>),
     Add(Box<CExpr>, Box<CExpr>),
     Sub(Box<CExpr>, Box<CExpr>),
-    LShift(Box<CExpr>, Box<CExpr>),
-    RShift(Box<CExpr>, Box<CExpr>),
+
+    Eq(Box<CExpr>, Box<CExpr>),
+    NEq(Box<CExpr>, Box<CExpr>),
     LoEq(Box<CExpr>, Box<CExpr>),
     HiEq(Box<CExpr>, Box<CExpr>),
     Hi(Box<CExpr>, Box<CExpr>),
     Lo(Box<CExpr>, Box<CExpr>),
-    Eq(Box<CExpr>, Box<CExpr>),
-    NEq(Box<CExpr>, Box<CExpr>),
+
     And(Box<CExpr>, Box<CExpr>),
     Or(Box<CExpr>, Box<CExpr>),
+
+    LShift(Box<CExpr>, Box<CExpr>),
+    RShift(Box<CExpr>, Box<CExpr>),
     BitAnd(Box<CExpr>, Box<CExpr>),
     BitOr(Box<CExpr>, Box<CExpr>),
     BitXor(Box<CExpr>, Box<CExpr>),
@@ -646,14 +654,55 @@ grammar! {
         rule postfix_expr<'abi>(abi: &'abi Abi) -> CExpr {
             lexeme(
                 alt((
-                    terminated(
-                        Self::postfix_expr(abi),
-                        lexeme(tag("++")),
-                    ).map(|expr| CExpr::PostInc(Box::new(expr))),
-                    terminated(
-                        Self::postfix_expr(abi),
-                        lexeme(tag("--")),
-                    ).map(|expr| CExpr::PostDec(Box::new(expr))),
+                    context("postinc expr",
+                        terminated(
+                            Self::postfix_expr(abi),
+                            lexeme(tag("++")),
+                        ).map(|expr| CExpr::PostInc(Box::new(expr)))
+                    ),
+                    context("postdec expr",
+                        terminated(
+                            Self::postfix_expr(abi),
+                            lexeme(tag("--")),
+                        ).map(|expr| CExpr::PostDec(Box::new(expr)))
+                    ),
+                    context("subscript expr",
+                        tuple((
+                            Self::postfix_expr(abi),
+                            delimited(
+                                lexeme(char('[')),
+                                Self::expr(abi),
+                                lexeme(char(']')),
+                            ),
+                        )).map(|(array, index)| CExpr::Subscript(Box::new(array), Box::new(index)))
+                    ),
+                    context("func call expr",
+                        tuple((
+                            Self::postfix_expr(abi),
+                            delimited(
+                                lexeme(char('(')),
+                                many0(
+                                    Self::assignment_expr(abi)
+                                ),
+                                lexeme(char(')')),
+                            ),
+                        )).map(|(func, args)| CExpr::FuncCall(Box::new(func), args))
+                    ),
+                    context("member access expr",
+                        separated_pair(
+                            Self::postfix_expr(abi),
+                            lexeme(char('.')),
+                            Self::identifier(),
+                        ).map(|(value, member)| CExpr::MemberAccess(Box::new(value), member))
+                    ),
+                    context("deref member access expr",
+                            separated_pair(
+                                Self::postfix_expr(abi),
+                                lexeme(tag("->")),
+                                Self::identifier(),
+                            ).map(|(value, member)| CExpr::MemberAccess(Box::new(CExpr::Deref(Box::new(value))), member))
+                    ),
+                    // TODO: add compound literal
                     Self::primary_expr(abi),
                 ))
             )
@@ -1381,6 +1430,16 @@ mod tests {
             CExpr::Cast(
                 CType::Typedef("type".into()),
                 Box::new(CExpr::Plus(Box::new(CExpr::IntConstant(2)))),
+            ),
+        );
+
+        // TODO: decide on how we want to parse that
+        // Another ambiguous case: could be a function call or a cast.
+        test(
+            b" (type)(2) ",
+            CExpr::Cast(
+                CType::Typedef("type".into()),
+                Box::new(CExpr::IntConstant(2)),
             ),
         );
     }
