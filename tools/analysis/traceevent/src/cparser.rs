@@ -175,8 +175,6 @@ fn interpret_c_numeric_expr<'a>(expr: CExpr) -> Option<u64> {
     }
 }
 
-// TODO: link to the ISO C spec URL for each rule
-
 // Grammar inspired by N1570 ISO C draft (latest C11 draft):
 // https://port70.net/~nsz/c/c11/n1570.html#A.2.1
 grammar! {
@@ -212,7 +210,6 @@ grammar! {
             ))).map(|_| ())
         }
 
-        // TODO: deal with array types etc
         // https://port70.net/~nsz/c/c11/n1570.html#6.7.6
         rule declarator<'abi>(abi: &'abi Abi, abstract_declarator: bool) -> CDeclarator {
             lexeme(pair(
