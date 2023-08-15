@@ -1882,6 +1882,10 @@ class LISATestStep(ShellStep):
         else:
             bisect_ret = BisectRet.GOOD
 
+        # Invalidate the internal cache of sys.meta_path in case the shell
+        # snippet executed by self._run_cmd() installed new packages with pip.
+        importlib.invalidate_caches()
+
         db_path = os.path.join(artifact_path, 'VALUE_DB.pickle.xz')
         try:
             db = ValueDB.from_path(db_path)
