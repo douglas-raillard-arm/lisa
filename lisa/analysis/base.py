@@ -1134,8 +1134,9 @@ class TraceAnalysisBase(AnalysisHelpers):
             }
         )
 
+    @optional_kwargs
     @classmethod
-    def df_method(cls, f):
+    def df_method(cls, f, index=None):
         """
         Dataframe function decorator.
 
@@ -1182,7 +1183,7 @@ class TraceAnalysisBase(AnalysisHelpers):
                 assert isinstance(data, (pd.DataFrame, pl.DataFrame, pl.LazyFrame))
 
                 df_fmt = df_fmt or 'pandas'
-                data = _df_to(data, fmt=df_fmt)
+                data = _df_to(data, fmt=df_fmt, index=index)
                 return data
 
         return wrapper
