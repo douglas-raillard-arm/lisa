@@ -1,5 +1,5 @@
 Sources of rt-app available at:
-Git commit: c5eece9b6762357d2103120d8e1506755e280980
+Git commit: 6e19df7c8f1824f2172a7764e562d52dabb14e1d
 Git repository: https://github.com/douglas-raillard-arm/rt-app.git
 
 
@@ -16,7 +16,7 @@ BUG_REPORT_URL="https://gitlab.alpinelinux.org/alpine/aports/-/issues"
 Build recipe:
 
 export ARCH=arm64
-export BUILD_DIR=/tmp/tmpcy6zpyik/arm64/source
+export BUILD_DIR=/tmp/tmp8x5319oo/arm64/source
 export LISA_ARCH_ASSETS=/lisa/_assets/binaries/arm64
 export LISA_HOME=''
 #! /bin/bash
@@ -66,7 +66,7 @@ download() {
 
     git clone https://github.com/douglas-raillard-arm/rt-app.git
     # Branch: lisa
-    git -C rt-app checkout c5eece9b6762357d2103120d8e1506755e280980
+    git -C rt-app checkout 6e19df7c8f1824f2172a7764e562d52dabb14e1d
 
 }
 
