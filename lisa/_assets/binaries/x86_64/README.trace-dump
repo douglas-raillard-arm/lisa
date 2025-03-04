@@ -7,8 +7,8 @@ Build host info:
 
 NAME="Alpine Linux"
 ID=alpine
-VERSION_ID=3.20.0
-PRETTY_NAME="Alpine Linux v3.20"
+VERSION_ID=3.21.0
+PRETTY_NAME="Alpine Linux v3.21"
 HOME_URL="https://alpinelinux.org/"
 BUG_REPORT_URL="https://gitlab.alpinelinux.org/alpine/aports/-/issues"
 
@@ -21,7 +21,7 @@ export LISA_BUILD_ENV=alpine
 export LISA_HOME=''
 #! /bin/bash
 
-ALPINE_VERSION=v3.20
+ALPINE_VERSION=v3.21
 ALPINE_BUILD_DEPENDENCIES=(bash git curl musl-dev clang lld)
 BROKEN_CROSS_COMPILATION=0
 
@@ -64,7 +64,7 @@ install_rust() {
 
 build_tracedump() {
     cd trace-parser/trace-tools &&
-    time RUSTFLAGS="$RUSTFLAGS -C target-feature=+crt-static" cargo build --profile release-lisa --target="$(make_triplet)"
+    time RUSTFLAGS="$RUSTFLAGS -C target-feature=+crt-static" cargo build --locked --profile release-lisa --target="$(make_triplet)"
 }
 
 download() {
@@ -373,6 +373,7 @@ Kylie McClain
 Leah Neukirchen
 Luca Barbato
 Luka Perkov
+Lynn Ochs
 M Farkas-Dyck (Strake)
 Mahesh Bodapati
 Markus Wichmann
@@ -402,7 +403,6 @@ Stefan O'Rear
 Szabolcs Nagy
 Timo Teräs
 Trutz Behn
-Valentin Ochs
 Will Dietz
 William Haddon
 William Pitcock
@@ -442,7 +442,7 @@ domain. The code also comes with a fallback permissive license for use
 in jurisdictions that may not recognize the public domain.
 
 The smoothsort implementation (src/stdlib/qsort.c) is Copyright © 2011
-Valentin Ochs and is licensed under an MIT-style license.
+Lynn Ochs and is licensed under an MIT-style license.
 
 The x86_64 port was written by Nicholas J. Kain and is licensed under
 the standard MIT terms.
