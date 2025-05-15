@@ -139,6 +139,7 @@ from enum import IntEnum
 import traceback
 import uuid
 import textwrap
+import json
 
 from elftools.elf.elffile import ELFFile
 
@@ -187,6 +188,13 @@ class KmodVersionError(Exception):
     Raised when the kernel module is not found with the expected version.
     """
     pass
+
+class KmodQueryError(Exception):
+    """
+    Raised when a query to the kernel module failed.
+    """
+    pass
+
 
 
 _ALPINE_DEFAULT_VERSION = '3.21.3'
@@ -3020,6 +3028,15 @@ class DynamicKmod(Loggable):
     def mod_name(self):
         return self.src.mod_name
 
+    @property
+    def is_loaded(self):
+        modules = self.target.read_value('/proc/modules')
+        loaded = {
+            line.split()[0]
+            for line in modules.splitlines()
+        }
+        return self.mod_name in loaded
+
     @classmethod
     def from_target(cls, target, **kwargs):
         """
@@ -3244,13 +3261,11 @@ class DynamicKmod(Loggable):
 
             except Exception as e:
                 log_dmesg(dmesg_coll, logger.error)
-
-                if isinstance(e, subprocess.CalledProcessError) and e.returncode == errno.EPROTO:
-                    raise KmodVersionError('In-tree module version does not match what LISA expects. If the module was pre-installed on the target, please contact the 3rd party that shared this setup to you as they took responsibility for maintaining it. This setup is available but unsupported (see online documenation)')
-                else:
-                    raise
+                raise
             else:
                 log_dmesg(dmesg_coll, logger.debug)
+
+        return self
 
     def uninstall(self):
         """
@@ -3463,8 +3478,40 @@ class LISADynamicKmod(FtraceDynamicKmod):
             for event in fnmatch.filter(all_events, pattern)
         )
 
-    def install(self, kmod_params=None):
+    def _query(self, queries):
+        target = self.target
+        logger = self.logger
+        busybox = quote(target.busybox)
+        name = self.mod_name
 
+        queries = [
+            *queries,
+            {'close-session': None}
+        ]
+        content = json.dumps(queries)
+        logger.debug(f'Queries: {content}')
+        content = quote(content)
+        root = f'/sys/module/{name}/queries'
+        cmd = f'session="$({busybox} cat {root}/new_session)" && {busybox} printf "%s" {content} > {root}/$session/query && cat {root}/$session/execute'
+        result = target.execute(cmd, as_root=True)
+        logger.debug(f'Queries result: {result}')
+        result = json.loads(result)
+
+        def unpack(result, ok):
+            try:
+                err = result['error']
+            except KeyError:
+                return result[ok]
+            else:
+                raise KmodQueryError(err)
+
+        results = unpack(result, ok='executed')
+        return [
+            unpack(res, ok='success')
+            for res in results
+        ]
+
+    def install(self, kmod_params=None, config=None, reset_config=False):
         target = self.target
         logger = self.logger
         busybox = quote(target.busybox)
@@ -3489,16 +3536,62 @@ class LISADynamicKmod(FtraceDynamicKmod):
 
 
         kmod_params = kmod_params or {}
-        kmod_params['version'] = self.src.checksum
+        kmod_params['___param_enable_all_features'] = 0
 
         base_path, kmod_filename = guess_kmod_path()
         logger.debug(f'Looking for pre-installed {kmod_filename} module in {base_path}')
 
         super_ = super()
+
+        def configure():
+            version = self._query([{'get-version': None}])
+            checksum = version[0]['get-version']['checksum']
+            if checksum != self.src.checksum:
+                raise KmodVersionError('In-tree module version does not match what LISA expects. If the module was pre-installed on the target, please contact the 3rd party that shared this setup to you as they took responsibility for maintaining it. This setup is available but unsupported (see online documenation)')
+            else:
+                queries = []
+                if reset_config:
+                    queries.append({
+                        'pop-config': {'n': 'all'}
+                    })
+
+                queries.append({
+                    'push-config': config or {}
+                })
+                queries.append({
+                    'start-features': None
+                })
+                self._query(queries)
+
+        def pristine_load(install):
+            install(kmod_params=kmod_params)
+            configure()
+
+        def load(install):
+            if self.is_loaded:
+                try:
+                    configure()
+                except KmodVersionError as e:
+                    # Only rmmod/insmod the module if we asked to reset the
+                    # config, otherwise we would be wiping existing config that
+                    # the user may want to preserve.
+                    if reset_config:
+                        logger.info(f'The currently loaded {self.mod_name} module is not matching the expected version, re-loading')
+                        super_.uninstall()
+                        pristine_load(install)
+                    else:
+                        raise e
+                else:
+                    logger.debug(f'The currently loaded {self.mod_name} module is matching the expected version so it was simply reconfigured')
+            else:
+                pristine_load(install)
+
+            return self
+
         def preinstalled_unsuitable(excep=None):
             if excep is not None:
                 logger.debug(f'Pre-installed {kmod_filename} is unsuitable, recompiling: {excep.__class__.__qualname__}: {excep}')
-            return super_.install(kmod_params=kmod_params)
+            return load(super_.install)
 
         try:
             kmod_path = target.execute(
@@ -3517,7 +3610,7 @@ class LISADynamicKmod(FtraceDynamicKmod):
                     # We found an installed module that could maybe be suitable, so
                     # we try to load it.
                     try:
-                        return self._install(nullcontext(kmod_path), kmod_params=kmod_params)
+                        return load(lambda *kwargs: self._install(nullcontext(kmod_path), **kwargs))
                     except (subprocess.CalledProcessError, KmodVersionError) as e:
                         # Turns out to not be suitable, so we build our own
                         return preinstalled_unsuitable(e)
@@ -3528,5 +3621,33 @@ class LISADynamicKmod(FtraceDynamicKmod):
             # rather than return with a non-zero exit status.
             else:
                 return preinstalled_unsuitable()
+
+    def uninstall(self):
+        logger = self.logger
+
+        res = self._query([
+            {
+                'pop-config': {'n': 1},
+            },
+        ])
+        # If there are some configs left on the stack, we simply restart the
+        # features now that we have popped our config.
+        if (remaining := res[0]['pop-config']['remaining']):
+            logger.debug(f'{remaining} configs in the stack, the module will not be removed')
+            self._query([
+                {
+                    'start-features': None,
+                },
+            ])
+        # If no config left on the stack, we are the last users of the module
+        # so we just shut it down and rmmod it.
+        else:
+            logger.debug(f'Config stack empty, removing the module')
+            self._query([
+                {
+                    'stop-features': None,
+                },
+            ])
+            super().uninstall()
 
 # vim :set tabstop=4 shiftwidth=4 expandtab textwidth=80

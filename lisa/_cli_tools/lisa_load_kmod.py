@@ -36,16 +36,24 @@ from lisa.utils import ignore_exceps
 
 def lisa_kmod(logger, target, args):
     features = args.feature
-
-    kmod_params = {}
-    if features is not None:
-        kmod_params['features'] = list(features)
+    if features is None:
+        config = {
+            'all': {
+                'best_effort': True,
+            },
+        }
+    else:
+        features = features or []
+        config = {
+            feature: None
+            for feature in features
+        }
 
     kmod = target.get_kmod(LISADynamicKmod)
     pretty_events = ', '.join(kmod.defined_events)
     logger.info(f'Kernel module provides the following ftrace events: {pretty_events}')
 
-    return kmod.run(kmod_params=kmod_params)
+    return kmod.run(config=config, reset_config=True)
 
 
 def main():
@@ -102,7 +110,8 @@ def _main(args, target):
         @contextlib.contextmanager
         def cm():
             logger.info('Loading kernel module ...')
-            yield kmod_cm.__enter__()
+            kmod = kmod_cm.__enter__()
+            yield
             logger.info(f'Loaded kernel module as "{kmod.mod_name}"')
     else:
         @contextlib.contextmanager

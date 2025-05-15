@@ -132,7 +132,7 @@ class LisaKmodInstrument(Instrument):
         self._ftrace_events = set(ftrace_events)
         self._kmod = None
         self._cm = None
-        self._features = set()
+        self._config = set()
 
         # Add a new attribute to the devlib target so we can find ourselves
         # from the monkey-patched methods.
@@ -219,12 +219,11 @@ class LisaKmodInstrument(Instrument):
         return set(trace_cmd_events) | set(self._ftrace_events)
 
     def _run(self):
-        features = sorted(self._features)
-        self.logger.info(f'Enabling LISA kmod features {", ".join(features)}')
+        config = self._config
+        self.logger.info(f'Enabling LISA kmod: {config}')
         return self._kmod.run(
-            kmod_params={
-                'features': features,
-            }
+            config=config,
+            reset_config=False,
         )
 
     @contextmanager
@@ -233,7 +232,13 @@ class LisaKmodInstrument(Instrument):
         # instrument, unlike the other methods ran in job context.
         events = self._all_ftrace_events(context)
         kmod = self._lisa_target.get_kmod(LISADynamicKmod)
-        self._features = set(kmod._event_features(events))
+
+        features = set(kmod._event_features(events))
+        self._config={
+            feature: None
+            for feature in sorted(features)
+        }
+
         self._kmod = kmod
 
         # Load the module while running the instrument's initialize so that the
