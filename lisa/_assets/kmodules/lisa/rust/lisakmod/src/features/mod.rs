@@ -5,6 +5,7 @@ pub mod events;
 pub mod legacy;
 pub mod pixel6;
 pub mod tests;
+pub mod thermal;
 pub mod tracepoint;
 pub mod wq;
 
